@@ -1,0 +1,68 @@
+*.head{
+	font-weight: bold;
+}
+body{
+	background-color: #FFFFFF;
+	color: #000000;
+}
+.inline{
+	display:inline-block;
+	vertical-align:top;
+	border-width:0px;
+	border-color: black;
+	border-style: solid;
+	margin-right: 1em;
+	margin-left: 1em;
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+.swaps{
+	font-family: Courier,monospace,'Courier New';
+	font-size: 90%;
+}
+h2{
+	text-align: center;
+	font-family: Arial,sans-serif;
+	margin-top: 2ex;
+	margin-bottom: 2ex;
+	font-size: 100%;
+}
+h3{
+	font-family: Arial,sans-serif;
+	margin-top: 2ex;
+	margin-bottom: 0ex;
+	font-size: 100%;
+}
+.time{
+	font-family: Arial,sans-serif;
+	margin-top: 0ex;
+	margin-bottom: 1ex;
+	font-size: 80%;
+}
+.classic{
+	color:blue;
+}
+.equi{
+	color:red;
+}
+.bi{
+	color:purple;
+}
+.instantbi{
+	color:green;
+}
+.classictd{
+	background-color:blue;
+}
+.equitd{
+	background-color:red;
+}
+.bitd{
+	background-color:purple;
+}
+.instantbitd{
+	background-color:green;
+}
+.classictd, .equitd, .bitd, .instantbitd{
+	width:1em
+}
