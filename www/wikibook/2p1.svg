@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.0"
+   width="744.09448"
+   height="1052.3622"
+   id="svg2">
+  <defs
+     id="defs4">
+    <marker
+       refX="0"
+       refY="0"
+       orient="auto"
+       style="overflow:visible"
+       id="Arrow1Mend">
+      <path
+         d="M 0,0 L 5,-5 L -12.5,0 L 5,5 L 0,0 z "
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         id="path3200" />
+    </marker>
+    <marker
+       refX="0"
+       refY="0"
+       orient="auto"
+       style="overflow:visible"
+       id="Arrow1Lend">
+      <path
+         d="M 0,0 L 5,-5 L -12.5,0 L 5,5 L 0,0 z "
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         id="path3194" />
+    </marker>
+  </defs>
+  <g
+     id="layer1">
+    <text
+       x="188.57143"
+       y="437.37418"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       id="text2160"
+       xml:space="preserve"><tspan
+         x="188.57143"
+         y="437.37418"
+         id="tspan2162">Original solo siteswap:</tspan></text>
+    <text
+       x="357.1077"
+       y="437.16324"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       id="text2164"
+       xml:space="preserve"><tspan
+         x="357.1077"
+         y="437.16324"
+         id="tspan2166">3</tspan></text>
+    <text
+       x="270.2511"
+       y="464.86218"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       id="text2168"
+       xml:space="preserve"><tspan
+         x="270.2511"
+         y="464.86218"
+         id="tspan2170">period/2:</tspan></text>
+    <text
+       x="341.78574"
+       y="464.86218"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       id="text2172"
+       xml:space="preserve"><tspan
+         x="341.78574"
+         y="464.86218"
+         id="tspan2174">-1</tspan></text>
+    <text
+       x="227.07924"
+       y="491.85883"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       id="text2176"
+       xml:space="preserve"><tspan
+         x="227.07924"
+         y="491.85883"
+         id="tspan2178">Passing pattern:</tspan></text>
+    <text
+       x="357.14285"
+       y="491.64789"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       id="text2180"
+       xml:space="preserve"><tspan
+         x="357.14285"
+         y="491.64789"
+         id="tspan2182">2p  </tspan></text>
+    <text
+       x="387.5"
+       y="437.00504"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       id="text2184"
+       xml:space="preserve"><tspan
+         x="387.5"
+         y="437.00504"
+         id="tspan2186">1</tspan></text>
+    <text
+       x="387.5"
+       y="491.48969"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       id="text2188"
+       xml:space="preserve"><tspan
+         x="387.5"
+         y="491.48969"
+         id="tspan2190">1</tspan></text>
+    <path
+       d="M 360.71429,440.93361 C 346.78571,461.29075 360.71429,478.79075 360.71429,478.79075"
+       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow1Mend);stroke-opacity:1"
+       id="path2214" />
+  </g>
+</svg>

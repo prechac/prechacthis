@@ -1,0 +1,9 @@
+buggy pattern examples
+
+
+info page:
+
+* 4 2.5p 1
+* 3.5p 3 1
+* 5 1.5p 2.5p
+* 6 3.3p1 1.6p2 1
