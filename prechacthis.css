@@ -1,0 +1,166 @@
+*.head{
+	font-weight: bold;
+}
+body{
+	background-color: #FFFFFF;
+	color: #000000;
+}
+#beta{
+	color: #000000;
+	font-weight: bold;
+	text-align: left;
+	font-family: Arial,sans-serif;
+	font-size: 105%;
+	margin-right: 1em;
+	margin-left: 1em;
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+.inline{
+	display:inline-block;
+	vertical-align:top;
+	border-width:0px;
+	border-color: black;
+	border-style: solid;
+	margin-right: 1em;
+	margin-left: 1em;
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+.swaps {
+	color: #000000;
+	font-family: 'Courier New', Courier, monospace !important;
+	font-weight: bold;
+	font-size: 90%;
+}
+.swaps a {
+	color: #000000;
+	font-weight: bold;
+	font-family: 'Courier New', Courier, monospace !important;
+}
+.swaps a:visited, .swaps a:link {
+	text-decoration: none;
+}
+.swaps a:hover {
+	text-decoration: underline;
+}
+h2{
+	text-align: center;
+	font-family: Arial,sans-serif;
+	margin-top: 2ex;
+	margin-bottom: 2ex;
+	font-size: 100%;
+}
+h3{
+	font-family: Arial,sans-serif;
+	margin-top: 2ex;
+	margin-bottom: 0ex;
+	font-size: 100%;
+}
+.time{
+	font-family: Arial,sans-serif;
+	margin-top: 0ex;
+	margin-bottom: 1ex;
+	font-size: 80%;
+}
+.classic{
+	color:blue;
+}
+.equi{
+	color:red;
+}
+.bi{
+	color:purple;
+}
+.instantbi{
+	color:green;
+}
+.classictd{
+	background-color:blue;
+}
+.equitd{
+	background-color:red;
+}
+.bitd{
+	background-color:purple;
+}
+.instantbitd{
+	background-color:green;
+}
+.classictd, .equitd, .bitd, .instantbitd{
+	width:1em
+}
+
+
+th {
+	padding-top: 2em;
+	font-family: Arial,sans-serif;
+	padding-bottom: 1ex;
+	font-size: 110%;
+}
+
+
+.info_juggler_table, .info_pattern_table {
+	padding: 4ex 2ex 2ex 2ex;
+}
+.info_juggler_table {
+	display: inline;
+}
+
+
+.info_lable, .info_lable_swap{
+	text-align: right !important;
+	font-family: Arial,sans-serif;
+	padding-right: 1ex;
+	padding-left: 1ex;
+	margin-right: 1ex;
+	margin-left: 1ex;
+	padding-bottom:.5ex;
+	border-width: 0px !important;
+	border-style: dotted;
+	font-size: 90%;
+}
+.info_lable {
+	width: 9em;
+}
+
+.info_left {
+	text-align: left !important;
+	padding-bottom: 2em;
+}
+.info_right {
+	text-align: right !important;
+	padding-bottom: 2em;
+}
+
+.big_swap {
+	text-align: center;
+	font-family: 'Courier New', Courier, monospace !important;
+	font-weight: bold;
+	font-size: 300%;
+	margin-top: 3ex;
+	margin-bottom: .2ex;
+	margin-right: 0ex;
+	margin-left: 0ex;
+	padding: 0ex;
+}
+
+.info_clubs,  .info_pointintime, .info_hand, .info_juggler {
+	text-align: center;
+	border-width: 0px;
+	border-style: dotted;
+	vertical-align: middle;
+	width: 2em;
+}
+.info_throw {
+	font-family: 'Courier New', Courier, monospace !important;
+	font-weight: bold;
+	vertical-align: top !important;
+	text-align: center;
+	border-width: 0px;
+	border-style: dotted;
+	width: 3em;
+}
+
+
+
