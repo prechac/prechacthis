@@ -8,10 +8,12 @@
 <body>
 
 <?php
+$debug = false;
 
 if ($_REQUEST){
+	if($_GET["debug"]=="on") $debug = true;
+	
 	$doku = doku($_GET["doku"]);
-
 	if($doku){
 ?>
 	<table align='center' cellpadding='0'>
@@ -66,7 +68,7 @@ if ($_REQUEST){
 			echo "<div class='inline'><div class='swaps'>";
 			echo "<h3>$object objects, ";
 			echo "period $length:</h3>";
-// 			echo "$plquery<br>\n";
+			if ($debug) echo "$plquery<br>\n";
 			echo `$plquery`;
 			readfile($errorlogfile);
 			unlink($errorlogfile);
@@ -93,6 +95,8 @@ $minPassSelected[$_GET["passesmin"]] = "selected='selected'";
 if (!$_GET["passesmax"] or !is_numeric($_GET["passesmax"])){$_GET["passesmax"] = 0;}
 $maxPassSelected[$_GET["passesmax"]] = "selected='selected'";
 
+$hidden_debug="";
+if ($debug) $hidden_debug = "<input type='hidden' name='debug' value='on'>";
 
 echo "<form action='./index.php' method='get'>
  <table align='center' cellpadding='10'>
@@ -220,6 +224,7 @@ echo "<form action='./index.php' method='get'>
    <td class='input'><a href='http://http://en.wikibooks.org/wiki/Symmetric_Passing_Patterns'>learn about symmetric passing</a></td>
   </tr>
  </table>
+ $hidden_debug
 </form>
 ";
 
@@ -246,14 +251,6 @@ function correctLength($length){
 }
 
 
-
-/*function correctMax($max){
-	if ("" == $max){
-		$_GET["max"] = $max = 4;
-	}
-	return $max;
-}
-*/
 function correctPasses($passes){
 	if (!is_numeric($passes)){
 		return "_"; //pass to prolog as unspecified
@@ -262,11 +259,7 @@ function correctPasses($passes){
 }
 
 function correctMultiplexes($seq){
-	//$seq_old = "";
-	//while ($seq_old != $seq){
-		//$seq_old = $seq;
-		$seq = ereg_replace('(\[[0-9pP_]+)(,|;)([0-9pP_]+\])', '\\1*\\3', $seq);
-	//}
+	$seq = ereg_replace('(\[[0-9pP_]+)(,|;)([0-9pP_]+\])', '\\1*\\3', $seq);
 	return $seq;
 }
 function correctSeqsSemicolon($seqs){

@@ -1,6 +1,6 @@
 :- [siteswap].
 	
-hardcodeSiteswaps(ObjectMax,PeriodMax,MaxHight) :-
+hardcodeSiteswaps(ObjectMax,PeriodMax,MaxHeight) :-
 	(exists_directory('siteswap_hc'); make_directory('siteswap_hc')),
 	working_directory(Old,'siteswap_hc'),
 	forall(
@@ -11,19 +11,19 @@ hardcodeSiteswaps(ObjectMax,PeriodMax,MaxHight) :-
 		(
 			sformat(FileName, 'siteswap_hc_~w-~w.pl', [Objects,Period]),
 			open(FileName,write,Stream),
-			format(Stream, '%% Siteswaps with ~w objects, length ~w and max. hight ~w\n', [Objects, PeriodMax, MaxHight]),
+			format(Stream, '%% Siteswaps with ~w objects, length ~w and max. height ~w\n', [Objects, PeriodMax, MaxHeight]),
 			close(Stream),
-			writeSiteswaps(Objects,Period,MaxHight,FileName)
+			writeSiteswaps(Objects,Period,MaxHeight,FileName)
 		)
 	),
 	working_directory(_,Old).
 
 
-writeSiteswaps(Objects,Period,MaxHight,FileName) :-
+writeSiteswaps(Objects,Period,MaxHeight,FileName) :-
 	open(FileName,append,Stream),
 	format('objects: ~w, period: ~w\n', [Objects,Period]), 
 	length(Siteswap,Period),
-	forall(siteswap(Objects,MaxHight,Siteswap), formatSwap(Stream,Objects,Siteswap)),
+	forall(siteswap(Objects,MaxHeight,Siteswap), formatSwap(Stream,Objects,Siteswap)),
 	close(Stream).
 
 
@@ -31,6 +31,6 @@ formatSwap(Stream,Objects,Swap) :-
 	format(Stream,'siteswap_hc(~w, ~w).\n', [Objects,Swap]).
 
 
-siteswap(Objects,MaxHight, Siteswap) :-
+siteswap(Objects,MaxHeight, Siteswap) :-
 	siteswap(Objects,Siteswap),
-	allHightsSmaller(Siteswap,MaxHight).
+	allHeightsSmaller(Siteswap,MaxHeight).

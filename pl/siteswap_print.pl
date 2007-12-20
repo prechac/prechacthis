@@ -28,9 +28,9 @@ rotateAll([Head|Tail],[HeadRotated|TailRotated]) :-
 
 addKeys([],[]).
 addKeys([Head|Swaps],[Key-Head|SwapsWithKeys]) :-
-	listOfHights(Head,Hights),
+	listOfHeights(Head,Heights),
 	amountOfPasses(Head,Number),
-	Key = [Number,Hights],
+	Key = [Number,Heights],
 	addKeys(Swaps,SwapsWithKeys).
 
 removeKeys([],[]).
@@ -48,7 +48,7 @@ convertP([p(FirstThrow,IndexDown,Origen) | RestThrows ], [  FirstThrowP| RestThr
 	);
 	(
 		Persons = 2,
-		sformat(FirstThrowP, "<span class='~w'>~wp</span>", [Style,FirstThrow])
+		sformat(FirstThrowP, "<span class='~w'>~wp</span>", [Style,FirstThrowShort])
 	)),
     convertP(RestThrows, RestThrowsP, Length, Persons).
 convertP([ FirstThrow | RestThrows ], [ FirstThrow | RestThrowsP], Length, Persons) :-
@@ -60,6 +60,16 @@ convertP([ FirstThrow | RestThrows ], [ FirstThrowP | RestThrowsP], Length, Pers
 	convertP(FirstThrow,FirstThrowP, Length, Persons),
     convertP(RestThrows, RestThrowsP, Length, Persons).
 
+%% single throw:
+convertP(p(Throw, IndexDown, Origen), ThrowP, Length, Persons) :-
+	convertP([p(Throw, IndexDown, Origen)], [ThrowP], Length, Persons).
+
+convertP(Throw, ThrowP, Length, Persons) :-
+	number(Throw),
+	convertP([Throw], [ThrowP], Length, Persons).
+
+
+%% single throw version needed!!!
 convertMultiplex([],[]).
 convertMultiplex([Multiplex | Rest], [MultiplexNew | RestNew]) :-
     is_list(Multiplex), !,
@@ -70,12 +80,13 @@ convertMultiplex([Multiplex | Rest], [MultiplexNew | RestNew]) :-
 convertMultiplex([Throw | Rest], [Throw | RestNew]) :-
 	convertMultiplex(Rest, RestNew).
 
-writeSwap(Throws) :-
-   concat_atom(Throws, ' ', Swap),
-   format('~w<br>\n', [Swap]),!.
+writeSwap(ThrowsPM, Throws, Persons) :-
+   concat_atom(ThrowsPM, ' ', Swap),
+   float_to_shortpass(Throws,ThrowsShort),
+   format("<a href='./info.php?pattern=~w&persons=~w'>~w</a><br>\n", [ThrowsShort,Persons,Swap]),!.
 
 writePassingSwap(Throws, Persons) :-
 	length(Throws,Length),
     convertP(Throws, ThrowsP, Length, Persons),
 	convertMultiplex(ThrowsP,ThrowsPM),
-    writeSwap(ThrowsPM).
+    writeSwap(ThrowsPM, Throws, Persons).

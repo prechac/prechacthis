@@ -25,9 +25,9 @@ passing_siteswap(PassingSiteswap, Persons, Objects, Max, NumberOfMultiplexes) :-
    %floor(MaxSoloFloat, MaxSolo),
    siteswap(ObjectsSolo, SoloSiteswap),
    multiplex(SoloSiteswap, SoloSiteswapWithM, NumberOfMultiplexes),
-   allHightsSmaller(SoloSiteswapWithM, MaxSolo),
+   allHeightsSmaller(SoloSiteswapWithM, MaxSolo),
    transform_start(SoloSiteswapWithM, Persons, IndexList, PassingSiteswap),
-   allHightsSmaller(PassingSiteswap, Max).
+   allHeightsSmaller(PassingSiteswap, Max).
 
 isIndexList(_, []).
 isIndexList(Persons, [Head|Tail]) :-
@@ -38,7 +38,7 @@ isIndexList(Persons, [Head|Tail]) :-
 
 transform_start(SoloSiteswap, Persons, IndexList, PassingSiteswap) :-
    length(SoloSiteswap, Length),
-   Minuend is Length / Persons,
+   Minuend is Length rdiv Persons,
    transform(SoloSiteswap, IndexList, Minuend, PassingSiteswap).
 transform([], [], _, []).
 transform([Orig_Head| Orig_Rest], IndexList, Minuend, [Trans_Head| Trans_Rest]) :-
@@ -56,11 +56,11 @@ prech([MultiplexHead| MultiplexRest], [TransformedHead| TransformedRest], Minuen
 	prech(MultiplexRest, TransformedRest, Minuend, IndexListAfterHead, NewIndexList).
 	
 
-allHightsSmaller([], _Max).
-allHightsSmaller([Throw| Siteswap], Max) :- 
-   hight(Throw, Hight),
-   Hight =< Max,
-   allHightsSmaller(Siteswap, Max).
+allHeightsSmaller([], _Max).
+allHeightsSmaller([Throw| Siteswap], Max) :- 
+   height(Throw, Height),
+   Height =< Max,
+   allHeightsSmaller(Siteswap, Max).
 
 passesMin(Throws, PassesMin) :-
    number(PassesMin),
@@ -86,22 +86,29 @@ amountOfPasses([FirstThrow|RestThrows], Passes) :-
 isPass(p(_,_,_),     1).
 isPass(  Throw,  0) :- number(Throw).
 isPass(Multiplex, NumberOfPasses) :- 
-	length(Multiplex, Length),
-	Length > 1,
+	is_list(Multiplex),
 	amountOfPasses(Multiplex, NumberOfPasses).
 
-hight(p(X,_,_), X) :- number(X).
-hight(  X,  X) :- number(X).
-hight( [],  0).
-hight([MultiplexHead|MultiplexRest], X) :-
-	hight(MultiplexRest, X),
-	hight(MultiplexHead, HightHead),
-	X >= HightHead.
-hight([MultiplexHead|MultiplexRest], X) :-
-	hight(MultiplexRest, HightRest),
-	hight(MultiplexHead, X),
-	X > HightRest.
+height(p(Throw,_,_), Height) :- rational_to_number(Throw,Height).
+height(  Throw,  Height) :- rational_to_number(Throw,Height).
+height( [],  0).
+height([MultiplexHead|MultiplexRest], X) :-
+	height(MultiplexRest, X),
+	height(MultiplexHead, HeightHead),
+	X >= HeightHead.
+height([MultiplexHead|MultiplexRest], X) :-
+	height(MultiplexRest, HeightRest),
+	height(MultiplexHead, X),
+	X > HeightRest.
 
+maxHeight([PatternHead|PatternRest], X) :-
+	height(PatternRest, X),
+	height(PatternHead, HeightHead),
+	X >= HeightHead.
+maxHeight([PatternHead|PatternRest], X) :-
+	height(PatternRest, HeightRest),
+	height(PatternHead, X),
+	X > HeightRest.
 
 containsAny(Pattern, [FirstSegment|RestSegments]) :-
    containsAll(Pattern, FirstSegment);
@@ -168,7 +175,7 @@ insertThrows([Throw | Rest], Site, Pattern, Delta) :-
    length(Pattern, Length),
    nth0(Site, Pattern, Throw),
    SitePlusDelta is Site + Delta,
-   %Test ob H�he OK!?! (react: 1 2 nicht sinnvoll)
+   %Test ob Hoehe OK!?! (react: 1 2 nicht sinnvoll)
    landingSite(SitePlusDelta, Throw, Length, NextSite),
    insertThrows(Rest, NextSite, Pattern, Delta).
 
@@ -187,20 +194,28 @@ landingSite(Site, Multiplex, Length, LandingSite) :- %multiplex
 
 
 float_to_shortpass(Throw,ShortPass) :-
+	(number(Throw);rational(Throw)),
 	ThrowTen is Throw * 10,
-	ShortPass is floor(ThrowTen)/10.
+	ShortPass is truncate(ThrowTen)/10.
+float_to_shortpass(p(Throw,Index,Original), p(ShortPass,Index,Original)) :-
+	float_to_shortpass(Throw, ShortPass).
 
-shortpass_to_float(ShortPass,_,_,_,ShortPass) :- var(ShortPass).
-shortpass_to_float(ShortPass,Length,Persons,MaxHight,Throw) :-
+float_to_shortpass([],[]).
+float_to_shortpass([Throw|Rest],[ShortPass|RestShort]) :-
+	float_to_shortpass(Throw,ShortPass),
+	float_to_shortpass(Rest, RestShort).
+
+shortpass_to_rational(ShortPass,_,_,_,ShortPass) :- var(ShortPass).
+shortpass_to_rational(ShortPass,Length,Persons,MaxHeight,Throw) :-
 	number(ShortPass),
-	Minuend is Length / Persons,
+	Minuend is Length rdiv Persons,
 	IndexMax is Persons - 1,
-	between(1, IndexMax, Index),
-	MaxHightSolo is MaxHight + Length,
-	between(1, MaxHightSolo, Origen),
-    Throw is Origen - Index * Minuend,
-	float_to_shortpass(ShortPass, ShortThrow),
-	float_to_shortpass(Throw, ShortThrow),!. 
+	MaxHeightSolo is MaxHeight + Length,
+	float_to_shortpass(ShortPass, ShortPassShortend),
+	between(1, IndexMax, IndexDown),
+	between(1, MaxHeightSolo, Origen),
+    Throw is Origen - IndexDown * Minuend,
+	float_to_shortpass(Throw, ShortPassShortend),!. 
 
 convertShortPasses(ShortPasses,Length,Persons,Max,FloatPasses) :-
 	convertShortPassesAny(ShortPasses,Length,Persons,Max,FloatPasses),
@@ -218,8 +233,8 @@ convertShortPassesAll([],_,_,_,[]).
 convertShortPassesAll([HeadShort|TailShort],Length,Persons,Max,[Head|Tail]) :-
 	convertShortPassesAll(HeadShort,Length,Persons,Max,Head),
 	convertShortPassesAll(TailShort,Length,Persons,Max,Tail).
-convertShortPassesAll(p(ShortPass,_,_),Length,Persons,Max,p(Throw,_,_)) :-
-	shortpass_to_float(ShortPass,Length,Persons,Max,Throw).
+convertShortPassesAll(p(ShortPass,Index,Original),Length,Persons,Max,p(Throw,Index,Original)) :-
+	shortpass_to_rational(ShortPass,Length,Persons,Max,Throw).
 convertShortPassesAll(Self,_,_,_,Self) :- number(Self).
 
 pStyle(Length, Origen, classic) :- 
