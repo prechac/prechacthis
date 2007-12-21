@@ -1,0 +1,7 @@
+- apache rewrite / to tags/0.09 (jj)
+- reuse listOfHeights of limiting patterns
+  in nextUpper und nextLower: give verySecond a list of heights
+- merge constraints (flo)
+- stateOfPattern (jj)
+- states and tree with passes
+- merge constraints first, fill in gap using states and tree.
