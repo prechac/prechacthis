@@ -155,4 +155,15 @@ th {
 }
 
 
+#path {
+	text-align: right;
+	font-family: Arial,sans-serif;
+	width: 100%;
+	font-size: 80%;
+	margin-top: 3em;
+	margin-right: 1em;
+	padding: 1ex;
+	border-width: 0px;
+	border-style: dotted;
+}
 
