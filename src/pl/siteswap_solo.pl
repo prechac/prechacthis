@@ -121,6 +121,11 @@ fillIn( [Orig_Head | Orig_Rest], [Copy_Head | Copy_Rest]) :-
    fillIn(Orig_Rest, Copy_Rest).
 
 
+stateOfPattern(Pattern, State) :-
+	State = Pattern.
+
+
+
 height( [],  0).
 height( Throw, Throw) :- number(Throw),!.
 height( Throw, Height) :- rational_to_number(Throw,Height).
@@ -153,7 +158,7 @@ allHeightsSmaller([Throw| Siteswap], Max) :-
    allHeightsSmaller(Siteswap, Max).
 
 
-listOfHeights([],[]).
+listOfHeights([],[]) :- !.
 listOfHeights([Throw|Siteswap],[Height|List]) :-
 	height(Throw,Height),
 	listOfHeights(Siteswap,List).
