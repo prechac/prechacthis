@@ -346,6 +346,7 @@ return $doku;
 }
 ?>
 
+<?php echo "<div id='path'>" . strstr($_SERVER["SCRIPT_FILENAME"], "/prechacthis/") ."</div>";?>
 </body>
 </html>
 
