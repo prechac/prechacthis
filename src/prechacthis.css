@@ -169,8 +169,9 @@ th {
 	width: 100%;
 	font-size: 80%;
 	margin-top: 3em;
-	padding: 0.5ex;
-	border-width: 0px !important;
+	margin-right: 1em;
+	padding: 1ex;
+	border-width: 0px;
 	border-style: dotted;
 }
 
