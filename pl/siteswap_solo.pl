@@ -124,16 +124,19 @@ fillIn( [Orig_Head | Orig_Rest], [Copy_Head | Copy_Rest]) :-
 stateOfPattern(Pattern, State) :-
 	swapToLandingSite(Pattern, 1, State).
 
-
 swapToLandingSite(Pattern, Position, Pattern) :-
 	length(Pattern, Period),
-	Position = Period.
+	Position > Period.
 	
 swapToLandingSite(Pattern, Position, NextPattern) :-
-	findThrowToThisSite(Pattern, Position, PositionNow),!,
+	findThrowToThisSite(Pattern, Position, PositionNow),!, %if no throw is found throw is a var. -> go on
 	swap(Pattern, Position, PositionNow, NewPattern),
 	NextPosition is Position + 1,
 	swapToLandingSite(NewPattern, NextPosition, NextPattern).
+swapToLandingSite(Pattern, Position, NextPattern) :-	
+	NextPosition is Position + 1,
+	swapToLandingSite(Pattern, NextPosition, NextPattern).
+	
 
 findThrowToThisSite(Pattern, LandingSite, Position) :-
 	length(Pattern, Period),

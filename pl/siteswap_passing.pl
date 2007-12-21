@@ -154,7 +154,7 @@ insertThrows([Throw | Rest], Site, Pattern, Delta) :-
 
 
 landingSite(Site, Throw, Length, LandingSite) :- %self
-   number(Throw),
+   number(Throw),!,
    LandingSite is (Site + Throw) mod Length.
 
 landingSite(Site, p(_,_,Origen), Length, LandingSite) :- %pass
@@ -169,6 +169,8 @@ landingSite1(Site1, Throw, Length, LandingSite1) :-
 	Site0 is Site1 - 1,
 	landingSite(Site0, Throw, Length, LandingSite0),
 	LandingSite1 is LandingSite0 + 1.
+
+
 
 
 float_to_shortpass(Throw,ShortPass) :-
