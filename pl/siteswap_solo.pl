@@ -122,8 +122,25 @@ fillIn( [Orig_Head | Orig_Rest], [Copy_Head | Copy_Rest]) :-
 
 
 stateOfPattern(Pattern, State) :-
-	State = Pattern.
+	swapToLandingSite(Pattern, 1, State).
 
+
+swapToLandingSite(Pattern, Position, Pattern) :-
+	length(Pattern, Period),
+	Position = Period.
+	
+swapToLandingSite(Pattern, Position, NextPattern) :-
+	findThrowToThisSite(Pattern, Position, PositionNow),!,
+	swap(Pattern, Position, PositionNow, NewPattern),
+	NextPosition is Position + 1,
+	swapToLandingSite(NewPattern, NextPosition, NextPattern).
+
+findThrowToThisSite(Pattern, LandingSite, Position) :-
+	length(Pattern, Period),
+	between(1, Period, Position),
+	nth1(Position, Pattern, Throw),
+	landingSite1(Position, Throw, Period, LandingSite),!.
+	
 
 
 height( [],  0).
