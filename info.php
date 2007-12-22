@@ -3,7 +3,7 @@
 <head>
 	<title>PrechacThis - Pattern Info</title>
 	<link rel="shortcut icon" href="./favicon.png">
-	<link rel="stylesheet" type="text/css" href="./prechacthis.css">
+	<link rel="stylesheet" type="text/css" href="./css/prechacthis.css">
 </head>
 <body>
 <div id="beta">this page is still beta!</div>
