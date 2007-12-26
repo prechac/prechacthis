@@ -9,10 +9,6 @@ allPassingSiteswaps(Persons, Objects, Lengths, Max, NumberOfMultiplexes, PassesM
    format("<p class='time'>(~w seconds)</p>\n", [Time]),
    forall(member(T, Swaps),  writePassingSwap(T, Persons)).
 
-atom_throws(ThrowsAtom, Throws) :-
-    concat_atom(List, ' ', ThrowsAtom),
-    numerizeList(List, Throws).
-
 
 cleanListOfSiteswaps(List,CleanList) :-
    cleanEquals(List, Swaps),
