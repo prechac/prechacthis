@@ -116,6 +116,7 @@ th {
 	padding-bottom:.5ex;
 	border-width: 0px !important;
 	font-size: 90%;
+	white-space: nowrap;
 }
 
 .info_left {
