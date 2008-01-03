@@ -119,9 +119,7 @@ th {
 	border-width: 0px !important;
 	border-style: dotted;
 	font-size: 90%;
-}
-.info_lable {
-	width: 9em;
+	white-space: nowrap;
 }
 
 .info_left {
