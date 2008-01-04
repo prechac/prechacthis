@@ -1,3 +1,6 @@
+
+- ! code documentation !
+
 - apache rewrite / to tags/0.09 (jj)
 - reuse listOfHeights of limiting patterns
   in nextUpper und nextLower: give verySecond a list of heights
