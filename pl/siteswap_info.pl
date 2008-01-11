@@ -1,3 +1,5 @@
+%:- ensure_loaded([helpers, siteswap_helpers, siteswap_multiplex, siteswap_constraints, siteswap_print, siteswap_tree]).
+
 
 shift_by_minuend(OldPosition, Times, NewPosition, NumberOfJugglers, Period) :-
 	Minuend is Period rdiv NumberOfJugglers,
@@ -103,12 +105,12 @@ writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period) :-
 writeJugglerInfo(Juggler, ActionList, NumberOfJugglers, Period) :-
 	ColspanLong is Period + 1,
 	ColspanShort is Period - 1,
-	JugglerShown is Juggler + 1,
+	jugglerShown(Juggler, JugglerShown),
 	clubsInHand(Juggler, a, Period, ActionList, ClubsHandA),
 	clubsInHand(Juggler, b, Period, ActionList, ClubsHandB),
 	format("<table class='info_juggler_table'>"),
 	format("<tr>\n"),
-	format("<th class='info_title' colspan=~w>juggler ~w</th>\n", [ColspanLong, JugglerShown]),
+	format("<th class='info_title' colspan=~w>juggler ~s</th>\n", [ColspanLong, JugglerShown]),
 	format("</tr>\n"),
 	format("<tr>\n"),
 	format("<td class='info_lable'>clubs in hand a:</td>\n"),	
@@ -177,8 +179,8 @@ writeRotatedLinks(Pattern, NumberOfJugglers) :-
 	
 print_jugglers_throws(Juggler, ActionList, PointsInTime, NumberOfJugglers, Period) :-
 	format("<tr>\n"),
-	JugglerShown is Juggler + 1,
-	format("<td class='info_lable_swap'>juggler ~w:</td>\n", [JugglerShown]),
+	jugglerShown(Juggler, JugglerShown),
+	format("<td class='info_lable_swap'>juggler ~s:</td>\n", [JugglerShown]),
 	forall(member(Point, PointsInTime), print_jugglers_point_in_time(Juggler, Point, ActionList, NumberOfJugglers, Period)),
 	format("</tr>\n").
 
@@ -226,8 +228,8 @@ print_throwing_hand(_, _).
 print_catching_juggler(ThrowingJuggler, Action) :-
 	nth1(2, Action, ThrowingJuggler),!,
 	nth1(6, Action, CatchingJuggler),
-	JugglerShown is CatchingJuggler + 1,
-	format("<td class='info_juggler'>~w</td>\n", [JugglerShown]).
+	jugglerShown(CatchingJuggler, JugglerShown),
+	format("<td class='info_juggler'>~s</td>\n", [JugglerShown]).
 print_catching_juggler(_, _).
 	
 print_catching_hand(ThrowingJuggler, Action) :-
@@ -291,4 +293,8 @@ firstCatch(Juggler, Hand, Period, ActionList, FirstCatch) :-
 	listOfCatches(Juggler, Hand, Period, ActionList, ListOfCatches),
 	min_of_list(FirstCatch, ListOfCatches).
 	
+
+jugglerShown(Juggler, JugglerShown) :-
+	JugglerList = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"],
+	nth0(Juggler, JugglerList, JugglerShown).
 	

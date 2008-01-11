@@ -1,3 +1,5 @@
+%:- ensure_loaded([helpers, siteswap_helpers]).
+
 
 multiplex(OldPattern, NewPattern) :-
 	length(OldPattern, Length),
