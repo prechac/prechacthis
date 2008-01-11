@@ -1,41 +1,83 @@
-:- ensure_loaded([helpers, siteswap_helpers]).
+%:- ensure_loaded([helpers, siteswap_helpers, siteswap_multiplex]).
 
-siteswap(Objects, Pattern, MaxHeight) :-
-	siteswap(Objects, Pattern, MaxHeight, _). 
-
-siteswap(Objects, Pattern, MaxHeight, ConstraintsPattern) :-
+siteswap_tree(Objects, Length, NumberOfJugglers, MaxHeight, ListOfConstraints, Pattern) :-
+   (var(ListOfConstraints); ListOfConstraints = []),
    length(Pattern, Length),
    length(ConstraintsPattern, Length),
-%   addKey(Pattern, Key-Pattern),
-   stateOfPattern(ConstraintsPattern, StatePattern),
-   state(Objects, Length, StatePattern),
+   siteswap_tree(Objects, Length, NumberOfJugglers, MaxHeight, [ConstraintsPattern], Pattern).
+siteswap_tree(Objects, Length, NumberOfJugglers, MaxHeight, ListOfConstraints, Pattern) :-
+   length(Pattern, Length),
+   addKey(Pattern, Key-Pattern),
+   allPossibleStates(ListOfConstraints, ListOfStates),
+   member(StatePattern, ListOfStates),
+   state(Objects, Length, NumberOfJugglers, StatePattern),
    MaxStateHeight is Length + MaxHeight - 1,
    allHeightsSmaller(StatePattern, MaxStateHeight),
-%   addKey(StatePattern, StateKey-StatePattern),
-%   variations(StateKey-StatePattern, Variations),
-%   member(Key-Pattern, Variations),
+   addKey(StatePattern, StateKey-StatePattern),
+   variations(StateKey-StatePattern, Variations),
+   member(Key-Pattern, Variations),
+   checkConstraints(Pattern, ListOfConstraints),
+   allHeightsSmaller(Key-Pattern, MaxHeight).
+
+
+siteswap(Objects, Length, NumberOfJugglers, MaxHeight, ListOfConstraints, Pattern) :-
+   (var(ListOfConstraints); ListOfConstraints = []),
+   length(Pattern, Length),
+   length(ConstraintsPattern, Length),
+   siteswap(Objects, Length, NumberOfJugglers, MaxHeight, [ConstraintsPattern], Pattern).
+siteswap(Objects, Length, NumberOfJugglers, MaxHeight, ListOfConstraints, Pattern) :-
+   length(Pattern, Length),
+   allPossibleStates(ListOfConstraints, ListOfPossibleStates),
+   member(StatePattern, ListOfPossibleStates),
+   state(Objects, Length, NumberOfJugglers, StatePattern),
+%   findall(S, state(Objects, Length, NumberOfJugglers, S), ListOfStates),
+%   cleanEquals(ListOfStates, SetOfStates),
+%   member(StatePattern, SetOfStates),
+   MaxStateHeight is Length + MaxHeight - 1,
+   allHeightsSmaller(StatePattern, MaxStateHeight),
    vary(StatePattern, [], Variations),
    member(Pattern, Variations),
-   checkConstrains(Pattern, ConstraintsPattern),
-%   allHeightsSmaller(Key-Pattern, MaxHeight).
-   allHeightsSmaller(Pattern, MaxHeight).
+   allHeightsSmaller(Pattern, MaxHeight),
+   checkConstraints(Pattern, ListOfConstraints).
 
+checkConstraints(Pattern, ListOfConstraints) :-
+   member(ConstraintsPattern, ListOfConstraints),
+   checkConstraintsPattern(Pattern, ConstraintsPattern),!.
 
-checkConstrains([],[]).
-checkConstrains([_Throw|Pattern], [Constraint|ConstraintsPattern]) :-
+checkConstraintsPattern([],[]).
+checkConstraintsPattern([_Throw|Pattern], [Constraint|ConstraintsPattern]) :-
    var(Constraint),!,
-   checkConstrains(Pattern, ConstraintsPattern).
-checkConstrains([Throw|Pattern], [Constraint|ConstraintsPattern]) :-
+   checkConstraintsPattern(Pattern, ConstraintsPattern).
+checkConstraintsPattern([Throw|Pattern], [Constraint|ConstraintsPattern]) :-
    nonvar(Constraint),!,
    Throw = Constraint,
-   checkConstrains(Pattern, ConstraintsPattern).
+   checkConstraintsPattern(Pattern, ConstraintsPattern).
 	
 
-state(Objects, Length, Pattern) :- 
-   length(TempPattern, Length),
-   distribute(TempPattern, Objects),
-   multiply(TempPattern, Length, Pattern).
+state(Objects, Length, NumberOfJugglers, StatePattern) :- 
+   length(State, Length),
+   distribute(State, Objects),
+   stateToStatePattern(State, Length, NumberOfJugglers, StatePattern).
 
+stateToStatePattern([], _Length, _NumberOfJugglers, []) :- !.
+stateToStatePattern([StateHead|State], Length, NumberOfJugglers, [Throw|StatePattern]) :-
+   stateIndexToThrow(StateHead, Length, NumberOfJugglers, Throw),
+   stateToStatePattern(State, Length, NumberOfJugglers, StatePattern).
+
+
+stateIndexToThrow(Index, _Length, _NumberOfJugglers, Throw) :-
+   Index is 0,!,
+   Throw is 0.
+stateIndexToThrow(Index, Length, NumberOfJugglers, Throw) :-
+   0 is Index mod NumberOfJugglers, !, %% Throw is a Self
+   Throw is (Index * Length)/NumberOfJugglers.
+stateIndexToThrow(Index, Length, NumberOfJugglers, Throw) :-  %% Throw is a pass
+   Minuend is Length rdiv NumberOfJugglers,
+   Pass is  Index * Minuend,
+   Origen is Length * (1 + (Index // NumberOfJugglers)),
+   PassIndex is Index mod NumberOfJugglers,
+   Throw = p(Pass, PassIndex, Origen).
+   
 
 distribute([], 0).
 distribute([Head | Tail],Amount) :-
@@ -51,15 +93,16 @@ vary(Pattern, Old, New) :-
    Second_Lower is First + 1,
    between(Second_Lower, Length, Second),
    swap(Pattern, First, Second, NewPattern),
-   allHeightsHeigher(NewPattern, 0),
-   not(member(NewPattern, Old)),!,
+   allHeightsHeigherOr0(NewPattern, 1),
+   not((rotate(NewPattern, Rotation), member(Rotation, Old))),!,
+%   not(member(NewPattern, Old)),!,
    vary(NewPattern, [NewPattern | Old], New).
 
 vary(_, All, All).
 
 
 variations(Key-Pattern, Variations) :-
-  sumlist(Pattern, Max),
+  sumlist(Key, Max),
   length(Pattern, Length),
   OneShorter is Length-1,
   zeros(OneShorter, Zeros),
@@ -111,7 +154,7 @@ varySecond(Key-Pattern, Limit, First, NewKey-NewPattern) :-
   between(FirstPlus1, Length, Second),
   swap(Pattern, First, Second, NewPattern),
   addKey(NewPattern, NewKey-NewPattern),
-  allHeightsHeigher(NewKey-NewPattern, 0),
+  allHeightsHeigherOr0(NewPattern, 1),
   withinLimits(Key-Pattern, Limit, NewKey-NewPattern).
 
 withinLimits(Pattern, Limit, NewPattern) :-
@@ -126,40 +169,46 @@ swap(OldPattern, FirstIndex, SecondIndex, NewPattern) :-
    length(NewPattern, Length),
 
    Delta is SecondIndex - FirstIndex,
+   MinusDelta is 0 - Delta,
 
    nth1(FirstIndex,  OldPattern, OldFirstThrow),
    nth1(SecondIndex, OldPattern, OldSecondThrow),
 
-   (var(OldSecondThrow) ->
-      NewFirstThrow = _OldSecondThrow;
-      NewFirstThrow  is OldSecondThrow + Delta
-   ),
-   (var(OldFirstThrow) ->
-      NewSecondThrow = _OldFirstThrow;
-      NewSecondThrow is OldFirstThrow - Delta
-   ),
-
+   moveThrow(OldSecondThrow, Delta, NewFirstThrow),
+   moveThrow(OldFirstThrow, MinusDelta, NewSecondThrow),
+   
    nth1(FirstIndex,  NewPattern, NewFirstThrow),
    nth1(SecondIndex, NewPattern, NewSecondThrow),
 
    fillIn(OldPattern, NewPattern, 1, [FirstIndex, SecondIndex]),!.
 
 
-fillIn([],[], _, _).
+moveThrow(OldThrow, _Delta, _NewThrow) :-
+   var(OldThrow),!.
+moveThrow(OldThrow, Delta, NewThrow) :-
+   number(OldThrow),!,
+   NewThrow  is OldThrow + Delta.
+moveThrow(OldThrow, Delta, NewThrow) :-
+   rational(OldThrow),!,
+   NewThrow  is OldThrow + Delta.
+moveThrow(p(OldPass, OldIndex, OldOrigen), Delta, p(NewPass, NewIndex, NewOrigen)) :-
+   moveThrow(OldPass, Delta, NewPass),
+   moveThrow(OldOrigen, Delta, NewOrigen),
+   (var(OldIndex) -> NewIndex = _NewVar; NewIndex = OldIndex).
+   
 
+fillIn([],[], _, _) :- !.
 fillIn( [_Orig_Head | Orig_Rest], [_Copy_Head | Copy_Rest], Position, DontChange) :-
    member(Position, DontChange),!,
    NextPosition is Position + 1,
    fillIn(Orig_Rest, Copy_Rest, NextPosition, DontChange).
-
 fillIn( [Orig_Head | Orig_Rest], [Copy_Head | Copy_Rest], Position, DontChange) :-
-   nonvar(Orig_Head),
+   nonvar(Orig_Head),!,
    Copy_Head = Orig_Head,
    NextPosition is Position + 1,
    fillIn(Orig_Rest, Copy_Rest, NextPosition, DontChange).
-
 fillIn( [Orig_Head | Orig_Rest], [_ | Copy_Rest], Position, DontChange) :-
-   var(Orig_Head),
+   var(Orig_Head),!,
    NextPosition is Position + 1,
    fillIn(Orig_Rest, Copy_Rest, NextPosition, DontChange).
 
@@ -187,4 +236,12 @@ findThrowToThisSite(Pattern, LandingSite, Position) :-
 	between(1, Period, Position),
 	nth1(Position, Pattern, Throw),
 	landingSite1(Position, Throw, Period, LandingSite),!.
+
 	
+allPossibleStates([], []) :- !.
+allPossibleStates([Pattern|ListOfPatterns], [State|ListOfStates]) :-
+	allPossibleStates(ListOfPatterns, ListOfStates),
+	stateOfPattern(Pattern, State),
+	not(member(Rotation, ListOfStates)),!. %% rotate ????????
+allPossibleStates([_Pattern|ListOfPatterns], ListOfStates) :-
+	allPossibleStates(ListOfPatterns, ListOfStates).

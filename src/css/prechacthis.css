@@ -63,6 +63,12 @@ h3{
 	margin-bottom: 1ex;
 	font-size: 80%;
 }
+.some, .all{
+	font-family: Arial,sans-serif;
+	margin-top: 0.1ex;
+	margin-bottom: 0.1ex;
+	font-size: 90%;
+}
 .classic{
 	color:blue;
 }
@@ -119,7 +125,9 @@ th {
 	border-width: 0px !important;
 	border-style: dotted;
 	font-size: 90%;
-	white-space: nowrap;
+}
+.info_lable {
+	width: 9em;
 }
 
 .info_left {

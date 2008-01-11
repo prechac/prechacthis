@@ -40,6 +40,8 @@ if ($_REQUEST){
 	
 	if ($_GET["persons"]){echo "<h2>" . $_GET["persons"] . " persons</h2>";}
 
+	if (!$_GET["multiplex"]){$_GET["multiplex"] = "0";}
+	
 	foreach($objects as $object){
 		foreach($lengths as $length){
 			$errorlogfile = tempnam("/tmp", "siteswap");
@@ -53,7 +55,7 @@ if ($_REQUEST){
 			          . "-g \"allPassingSiteswaps("
 			          . $_GET["persons"] . ", "
 			          . "$object, "
-			          . correctLength($length) . ", "
+			          . "$length, "
 			          . $_GET["max"] . ", "
 			          . $_GET["multiplex"] . ", "
 			          . correctPasses($_GET["passesmin"]) . ", "
@@ -109,6 +111,7 @@ echo "<form action='./index.php' method='get'>
    <td class='lable'>Jugglers:</td>
    <td class='input'>
     <select name='persons' size='1'>
+     <option $personsSelected[1]>1</option>
      <option $personsSelected[2]>2</option>
      <option $personsSelected[3]>3</option>
      <option $personsSelected[4]>4</option>
@@ -150,6 +153,7 @@ echo "<form action='./index.php' method='get'>
    <td class='input'>
     min:
     <select name='passesmin' size='1'>
+     <option $minPassSelected[0]>0</option>
      <option $minPassSelected[1]>1</option>
      <option $minPassSelected[2]>2</option>
      <option $minPassSelected[3]>3</option>
@@ -172,8 +176,8 @@ echo "<form action='./index.php' method='get'>
      <option $maxPassSelected[0]>&nbsp;</option>
     </select>
    </td>
-  </tr>
-  <tr>
+  </tr>".
+/*  <tr>
    <td class='lable'>Multiplexes:</td>
    <td class='input'>
     <select name='multiplex' size='1'>
@@ -185,8 +189,8 @@ echo "<form action='./index.php' method='get'>
     </select>
    </td>
    $doku[multiplex]
-  </tr>
-  <tr>
+  </tr>*/
+  "<tr>
    <td class='lable'>Contain:</td>
    <td class='input'><input type='text' name='jugglerdoes' value='$_GET[jugglerdoes]'></td>
    $doku[contain]
@@ -241,14 +245,7 @@ echo "<form action='./index.php' method='get'>
 	$outstring .= "]";
 	return $outstring;
 }*/
-function correctLength($length){
-	if ($length > 8){
-		echo "period length $length is too high. max is 7";
-		return "3"; //default :-)
-	}else{
-		return $length;
-	}
-}
+
 
 
 function correctPasses($passes){
@@ -322,10 +319,10 @@ $outstring .= "]";
 
 function convert_throw($throw){
 	$throw = trim($throw);
-	if (is_numeric($throw) || $throw == "_") {
+	if (is_numeric($throw) || $throw == "_" || substr($throw, 0, 2) == "p(") {
 		return $throw;
 	}else{  //3p -> p(3,_,_)
-		return "p(" . substr($throw, 0, strlen($throw)-1) . ",_,_)";
+		return "p(" . substr($throw, 0, strlen($throw)-1) . ")";
 	}
 }
 
