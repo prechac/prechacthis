@@ -52,7 +52,7 @@ if ($_REQUEST){
 					  . "-T10M " // trail stack size to 10 MB
 					  . "-A5M " // argutment stack size to 5 MB
 			          . "-f " . dirname($_SERVER["SCRIPT_FILENAME"]) . "/pl/siteswap.pl "
-			          . "-g \"allPassingSiteswaps("
+			          . "-g \"allSiteswaps("
 			          . $_GET["persons"] . ", "
 			          . "$object, "
 			          . "$length, "

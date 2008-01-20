@@ -1,7 +1,7 @@
 %:- ensure_loaded([helpers, siteswap_helpers, siteswap_multiplex, siteswap_tree, siteswap_constraints]).
 
 
-allPassingSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React) :-
+allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React) :-
    get_time(Start),
    findAtMostNUnique(Throws, 
          siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React),
