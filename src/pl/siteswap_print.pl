@@ -32,9 +32,9 @@ sortListOfSiteswaps(Swaps, SwapsSorted) :-
 
 addKeys([],[]).
 addKeys([Head|Swaps],[Key-Head|SwapsWithKeys]) :-
-	listOfHeights(Head,Heights),
+	%%listOfHeights(Head,Heights),
 	amountOfPasses(Head,Number),
-	Key = [Number,Heights],
+	Key = [Number,Head],
 	addKeys(Swaps,SwapsWithKeys).
 
 removeKeys([],[]).
