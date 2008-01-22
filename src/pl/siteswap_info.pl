@@ -1,5 +1,3 @@
-%:- ensure_loaded([helpers, siteswap_helpers, siteswap_multiplex, siteswap_constraints, siteswap_print, siteswap_tree]).
-
 
 shift_by_minuend(OldPosition, Times, NewPosition, NumberOfJugglers, Period) :-
 	Minuend is Period rdiv NumberOfJugglers,
@@ -21,10 +19,10 @@ pass_to_juggler(PassingJuggler, Index, CatchingJuggler, NumberOfJugglers) :-  %%
 	CatchingJuggler is (PassingJuggler + Index) mod NumberOfJugglers.
 	
 
-pass_to(PassingJuggler, Position, Pass, Index, LandingSiteswapPosition, NumberOfJugglers, Period) :-
-	pass_to(PassingJuggler, Position, Pass, Index, _, _, _, LandingSiteswapPosition, NumberOfJugglers, Period).
+pass_to(PassingJuggler, Position, Pass, LandingSiteswapPosition, NumberOfJugglers, Period) :-
+	pass_to(PassingJuggler, Position, Pass, _, _, _, LandingSiteswapPosition, NumberOfJugglers, Period).
 
-pass_to(PassingJuggler, Position, Pass, Index, ThrowingTime, LandingTime, CatchingJuggler, LandingSiteswapPosition, NumberOfJugglers, Period) :-
+pass_to(PassingJuggler, Position, p(Pass,Index,_), ThrowingTime, LandingTime, CatchingJuggler, LandingSiteswapPosition, NumberOfJugglers, Period) :-
 	%% PassingJuggler = 0,1,2,3,...
 	throw_time(PassingJuggler, Position, ThrowingTime, NumberOfJugglers, Period),
 	LandingTime is ThrowingTime + Pass,
@@ -33,18 +31,9 @@ pass_to(PassingJuggler, Position, Pass, Index, ThrowingTime, LandingTime, Catchi
 	siteswap_position(CatchingJuggler, LandingPosition, LandingSiteswapPosition, NumberOfJugglers, Period).
 
 
-pass_info(PassingJuggler, Position, Pass, Index, ThrowingTime, ThrowingSiteswapPosition, LandingTime, CatchingJuggler, LandingSiteswapPosition, NumberOfJugglers, Period) :-
-	pass_to(PassingJuggler, Position, Pass, Index, ThrowingTime, LandingTime, CatchingJuggler, LandingSiteswapPosition, NumberOfJugglers, Period),
+pass_info(PassingJuggler, Position, Pass, ThrowingTime, ThrowingSiteswapPosition, LandingTime, CatchingJuggler, LandingSiteswapPosition, NumberOfJugglers, Period) :-
+	pass_to(PassingJuggler, Position, Pass, ThrowingTime, LandingTime, CatchingJuggler, LandingSiteswapPosition, NumberOfJugglers, Period),
 	siteswap_position(PassingJuggler, Position, ThrowingSiteswapPosition, NumberOfJugglers, Period).
-	
-	
-throw_info(PassingJuggler, Position, p(Pass, IndexDown, _), ThrowingTime, ThrowingSiteswapPosition, LandingTime, CatchingJuggler, LandingSiteswapPosition, NumberOfJugglers, Period) :-
-	Index is NumberOfJugglers - IndexDown,
-	pass_info(PassingJuggler, Position, Pass, Index, ThrowingTime, ThrowingSiteswapPosition, LandingTime, CatchingJuggler, LandingSiteswapPosition, NumberOfJugglers, Period).
-
-throw_info(PassingJuggler, Position, Throw, ThrowingTime, ThrowingSiteswapPosition, LandingTime, CatchingJuggler, LandingSiteswapPosition, NumberOfJugglers, Period) :-
-	number(Throw),
-	pass_info(PassingJuggler, Position, Throw, 0, ThrowingTime, ThrowingSiteswapPosition, LandingTime, CatchingJuggler, LandingSiteswapPosition, NumberOfJugglers, Period).
 	
 %% Multiplex
 
@@ -56,7 +45,7 @@ what_happens_at_point_in_time(PointInTime, Pattern, NumberOfJugglers, Action) :-
 	siteswap_position(ThrowingJuggler, Position, ThrowingSiteswapPosition, NumberOfJugglers, Period),
 	ThrowingPositionInPattern is (ThrowingSiteswapPosition mod Period),
 	nth0(ThrowingPositionInPattern, Pattern, Throw),
-	throw_info(ThrowingJuggler, Position, Throw, PointInTime, ThrowingSiteswapPosition, LandingTime, CatchingJuggler, LandingSiteswapPosition, NumberOfJugglers, Period),
+	pass_info(ThrowingJuggler, Position, Throw, PointInTime, ThrowingSiteswapPosition, LandingTime, CatchingJuggler, LandingSiteswapPosition, NumberOfJugglers, Period),
 	Action = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition].
 
 
@@ -83,27 +72,19 @@ what_happens([Point|PointsInTime], Pattern, NumberOfJugglers, Action) :-
 shortPointInTime(PointInTime, ShortPointInTime) :-
 	ShortPointInTime is truncate(PointInTime*10)/10.
 
-hand(Position, a) :- even(Position).
-hand(Position, b) :- odd(Position).
+hand(Position, a) :- even(Position),!.
+hand(Position, b) :- odd(Position),!.
 
 
 clubsInHand(Juggler, Hand, Period, ActionList, ClubsInHand) :-
-	firstCatch(Juggler, Hand, Period, ActionList, FirstCatch),
-	firstCatchToNumberOfClubs(FirstCatch, ClubsInHand).
+	member(Hand, [a,b]),
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, NumberOfThrows, _FirstCatch),
+	ClubsInHand = NumberOfThrows.
 
-firstCatchToNumberOfClubs(FirstCatch, ClubsInHand) :- % Bug: Juggler doesn't need a club to throw a 0!!!
-	FirstCatchTrunc is truncate(FirstCatch),
-	even(FirstCatchTrunc),!,
-	ClubsInHand is FirstCatchTrunc/2.
-
-firstCatchToNumberOfClubs(FirstCatch, ClubsInHand) :-
-	FirstCatchTrunc is truncate(FirstCatch),
-	odd(FirstCatchTrunc),
-	ClubsInHand is (FirstCatchTrunc - 1)/2.
 
 listOfCatches(_,_,_,[],[]).
 listOfCatches(CatchingJuggler, Hand, Period, [Action|ActionList], [Catch|ListOfCatches]) :-	
-	not(nth1(4, Action, 0)), % Throw not 0
+	not(nth1(4, Action, p(0,_,_))), % Throw not 0
 	nth1(6, Action, CatchingJuggler),
 	((		
 		nth1(7, Action, CatchingSiteswapPosition),
@@ -121,11 +102,85 @@ listOfCatches(CatchingJuggler, Hand, Period, [_|ActionList], ListOfCatches) :-
 
 
 firstCatch(Juggler, Hand, Period, ActionList, FirstCatch) :-
+	member(Hand, [a,b]),
 	listOfCatches(Juggler, Hand, Period, ActionList, ListOfCatches),
 	min_of_list(FirstCatch, ListOfCatches).
 
+%%% 	Action = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition].
 
+numberOfThrowsUntilFirstCatch(_, _, _, [], 0, _) :- !. 
+numberOfThrowsUntilFirstCatch(Juggler, Hand, _, [Action|_ActionList], 0, FirstCatch) :- 
+	nonvar(FirstCatch),
+	nth1(1, Action, FirstCatch), % point of time is this of the first catch
+	nth1(2, Action, Juggler), % Juggler is throwing
+	nth1(3, Action, ThrowingSiteswapPosition),
+	hand(ThrowingSiteswapPosition, Hand), % Juggler is throwing with this hand
+	!. 
+numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], NumberOfThrows, FirstCatch) :-	
+	nth1(4, Action, p(0,_,_)), % throw is a 0
+	!,
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, NumberOfThrows, FirstCatch).
+numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], NewNumberOfThrows, OldFirstCatch) :-	
+	nth1(2, Action, Juggler),   % Juggler is throwing
+	nth1(3, Action, ThrowingSiteswapPosition),
+	hand(ThrowingSiteswapPosition, Hand), % Juggler is throwing with this hand
+	nth1(6, Action, Juggler),   % Juggler is catching
+	not(nth1(4, Action, p(0,_,_))),
+	((	
+		nth1(7, Action, CatchingSiteswapPosition),
+		hand(CatchingSiteswapPosition, Hand),
+		nth1(5, Action, Catch)
+	);(
+		odd(Period),
+		nth1(5, Action, FirstCatch),
+		Catch is FirstCatch + Period		
+	)), % Juggler is catching with this hand
+	!,
+	earlierCatch(OldFirstCatch, Catch, NewFirstCatch),
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OldNumberOfThrows, NewFirstCatch),	
+	NewNumberOfThrows is OldNumberOfThrows + 1.
+numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], NewNumberOfThrows, FirstCatch) :-	
+	nth1(2, Action, Juggler),   % Juggler is throwing
+	nth1(3, Action, ThrowingSiteswapPosition),
+	hand(ThrowingSiteswapPosition, Hand), % Juggler is throwing with this hand
+	!,
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OldNumberOfThrows, FirstCatch),	
+	NewNumberOfThrows is OldNumberOfThrows + 1.
+numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], NumberOfThrows, OldFirstCatch) :-	
+	nth1(6, Action, Juggler),   % Juggler is catching
+	not(nth1(4, Action, p(0,_,_))),
+	((	
+		nth1(7, Action, CatchingSiteswapPosition),
+		hand(CatchingSiteswapPosition, Hand),
+		nth1(5, Action, Catch)
+	);(
+		odd(Period),
+		nth1(5, Action, FirstCatch),
+		Catch is FirstCatch + Period		
+	)), % Juggler is catching with this hand
+	!,
+	earlierCatch(OldFirstCatch, Catch, NewFirstCatch),
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, NumberOfThrows, NewFirstCatch).
+numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [_Action|ActionList], NumberOfThrows, FirstCatch) :-	
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, NumberOfThrows, FirstCatch).
+	
 
+	
+earlierCatch(Catch1, Catch2, Catch1) :-
+	nonvar(Catch1),
+	nonvar(Catch2),
+	Catch1 < Catch2,!.
+earlierCatch(Catch1, Catch2, Catch2) :-
+	nonvar(Catch1),
+	nonvar(Catch2),
+	Catch1 > Catch2,!.
+earlierCatch(Catch1, Catch2, Catch2) :-
+	var(Catch1),
+	nonvar(Catch2),!.
+earlierCatch(Catch1, Catch2, Catch1) :-
+	nonvar(Catch1),
+	var(Catch2),!.
+	
 
 %%% --- print ---
 
@@ -134,7 +189,7 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers) :-
 	length(PatternWithShortPasses, Period),
 	maxHeight(PatternWithShortPasses, ShortMaxHeight),
 	MaxHeight is truncate(ShortMaxHeight) + 1,
-	convertShortPassesAll(PatternWithShortPasses,Period,NumberOfJugglers,MaxHeight,Pattern),
+	convertShortPasses(PatternWithShortPasses,Period,NumberOfJugglers,MaxHeight,Pattern),
 	all_points_in_time(PointsInTime, NumberOfJugglers, Period),
 	what_happens(PointsInTime, Pattern, NumberOfJugglers, ActionList),
 	writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers),
