@@ -79,6 +79,57 @@ what_happens([Point|PointsInTime], Pattern, NumberOfJugglers, Action) :-
 	append(ActionBag,RestAction,Action).
 
 
+
+shortPointInTime(PointInTime, ShortPointInTime) :-
+	ShortPointInTime is truncate(PointInTime*10)/10.
+
+hand(Position, a) :- even(Position).
+hand(Position, b) :- odd(Position).
+
+
+clubsInHand(Juggler, Hand, Period, ActionList, ClubsInHand) :-
+	firstCatch(Juggler, Hand, Period, ActionList, FirstCatch),
+	firstCatchToNumberOfClubs(FirstCatch, ClubsInHand).
+
+firstCatchToNumberOfClubs(FirstCatch, ClubsInHand) :- % Bug: Juggler doesn't need a club to throw a 0!!!
+	FirstCatchTrunc is truncate(FirstCatch),
+	even(FirstCatchTrunc),!,
+	ClubsInHand is FirstCatchTrunc/2.
+
+firstCatchToNumberOfClubs(FirstCatch, ClubsInHand) :-
+	FirstCatchTrunc is truncate(FirstCatch),
+	odd(FirstCatchTrunc),
+	ClubsInHand is (FirstCatchTrunc - 1)/2.
+
+listOfCatches(_,_,_,[],[]).
+listOfCatches(CatchingJuggler, Hand, Period, [Action|ActionList], [Catch|ListOfCatches]) :-	
+	not(nth1(4, Action, 0)), % Throw not 0
+	nth1(6, Action, CatchingJuggler),
+	((		
+		nth1(7, Action, CatchingSiteswapPosition),
+		hand(CatchingSiteswapPosition, Hand),
+		nth1(5, Action, Catch)
+	);(
+		odd(Period),
+		nth1(5, Action, FirstCatch),
+		Catch is FirstCatch + Period		
+	)),
+	!,
+	listOfCatches(CatchingJuggler, Hand, Period, ActionList, ListOfCatches).
+listOfCatches(CatchingJuggler, Hand, Period, [_|ActionList], ListOfCatches) :-	
+	listOfCatches(CatchingJuggler, Hand, Period, ActionList, ListOfCatches).
+
+
+firstCatch(Juggler, Hand, Period, ActionList, FirstCatch) :-
+	listOfCatches(Juggler, Hand, Period, ActionList, ListOfCatches),
+	min_of_list(FirstCatch, ListOfCatches).
+
+
+
+
+%%% --- print ---
+
+
 print_pattern_info(PatternWithShortPasses, NumberOfJugglers) :-
 	length(PatternWithShortPasses, Period),
 	maxHeight(PatternWithShortPasses, ShortMaxHeight),
@@ -246,52 +297,6 @@ print_landing_time(ThrowingJuggler, Action) :-
 	shortPointInTime(Time, ShortTime),
 	format("<td class='info_pointintime'>~w</td>\n", [ShortTime]).
 print_landing_time(_, _).
-	
-	
-	
-shortPointInTime(PointInTime, ShortPointInTime) :-
-	ShortPointInTime is truncate(PointInTime*10)/10.
-	
-hand(Position, a) :- even(Position).
-hand(Position, b) :- odd(Position).
-
-
-clubsInHand(Juggler, Hand, Period, ActionList, ClubsInHand) :-
-	firstCatch(Juggler, Hand, Period, ActionList, FirstCatch),
-	firstCatchToNumberOfClubs(FirstCatch, ClubsInHand).
-	
-firstCatchToNumberOfClubs(FirstCatch, ClubsInHand) :- % Bug: Juggler doesn't need a club to throw a 0!!!
-	FirstCatchTrunc is truncate(FirstCatch),
-	even(FirstCatchTrunc),!,
-	ClubsInHand is FirstCatchTrunc/2.
-
-firstCatchToNumberOfClubs(FirstCatch, ClubsInHand) :-
-	FirstCatchTrunc is truncate(FirstCatch),
-	odd(FirstCatchTrunc),
-	ClubsInHand is (FirstCatchTrunc - 1)/2.
-	
-listOfCatches(_,_,_,[],[]).
-listOfCatches(CatchingJuggler, Hand, Period, [Action|ActionList], [Catch|ListOfCatches]) :-	
-	not(nth1(4, Action, 0)), % Throw not 0
-	nth1(6, Action, CatchingJuggler),
-	((		
-		nth1(7, Action, CatchingSiteswapPosition),
-		hand(CatchingSiteswapPosition, Hand),
-		nth1(5, Action, Catch)
-	);(
-		odd(Period),
-		nth1(5, Action, FirstCatch),
-		Catch is FirstCatch + Period		
-	)),
-	!,
-	listOfCatches(CatchingJuggler, Hand, Period, ActionList, ListOfCatches).
-listOfCatches(CatchingJuggler, Hand, Period, [_|ActionList], ListOfCatches) :-	
-	listOfCatches(CatchingJuggler, Hand, Period, ActionList, ListOfCatches).
-	
-	
-firstCatch(Juggler, Hand, Period, ActionList, FirstCatch) :-
-	listOfCatches(Juggler, Hand, Period, ActionList, ListOfCatches),
-	min_of_list(FirstCatch, ListOfCatches).
 	
 
 jugglerShown(Juggler, JugglerShown) :-
