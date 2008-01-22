@@ -11,6 +11,7 @@ lengthK(Pattern, Length) :-
 	length(Pattern, Length).
 
 
+%%% --- landing sites ---
 
 landingSite(_, Throw, _, _) :-
 	var(Throw), !,
@@ -45,6 +46,12 @@ landingSites1([Throw|Pattern], Period, [Site|LandingSites]) :-
 	landingSites1(Pattern, Period, LandingSites).
 	
 
+uniqueLandingSites(Pattern) :-
+	landingSites1(Pattern, Sites),
+	allMembersUnique(Sites).
+
+
+%%% --- heigts ---
 	
 height(Var, _) :- var(Var),!.
 height( [],  0) :- !.
@@ -154,7 +161,6 @@ is_smaller_than_list([Head|Tail], Siteswap) :-
 	Order \= >,
 	is_smaller_than_list(Tail, Siteswap).
 
-
 cleanEquals([],[]) :- !.
 cleanEquals([Head|Tail], CleanBag) :-
 	containsEqual(Tail, Head),!,
@@ -184,7 +190,6 @@ isTheSame([T1|P1], [T2|P2]) :-
    isTheSame(P1, P2).
 
 
-
 rotateAll([],[]) :- !.
 rotateAll([Head|Tail],[HeadRotated|TailRotated]) :-
 	rotateHighestFirst(Head,HeadRotated),
@@ -197,7 +202,9 @@ rotateHighestFirst(Siteswap, Rotated) :-
 %succeeds if there is a pattern Merged that unifies P1 and a rotation of P2
 merge2(P1, P2, Merged) :-
   rotate(P2, Merged),
-  Merged = P1.
+  Merged = P1, 
+  uniqueLandingSites(Merged).
+
 
 %mergeN(List, Pattern).
 %succeeds if all Patterns in List can be unified with Pattern

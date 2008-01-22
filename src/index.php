@@ -47,10 +47,10 @@ if ($_REQUEST){
 			$errorlogfile = tempnam("/tmp", "siteswap");
 	
 			$plquery  = "swipl -q "
-					  . "-L10M " // local stack size to 10 MB
-					  . "-G10M " // global stack size to 10 MB
-					  . "-T10M " // trail stack size to 10 MB
-					  . "-A5M " // argutment stack size to 5 MB
+					  . "-L5M " // local stack size to 10 MB
+					  . "-G12M " // global stack size to 10 MB
+					  . "-T5M " // trail stack size to 10 MB
+					  . "-A2M " // argutment stack size to 5 MB
 			          . "-f " . dirname($_SERVER["SCRIPT_FILENAME"]) . "/pl/siteswap.pl "
 			          . "-g \"allSiteswaps("
 			          . $_GET["persons"] . ", "
@@ -119,6 +119,8 @@ echo "<form action='./index.php' method='get'>
      <option $personsSelected[6]>6</option>
      <option $personsSelected[7]>7</option>
      <option $personsSelected[8]>8</option>
+     <option $personsSelected[9]>9</option>
+     <option $personsSelected[10]>10</option>
     </select>
    </td>
    $doku[persons]
@@ -137,6 +139,7 @@ echo "<form action='./index.php' method='get'>
    <td class='lable'>Max height:</td>
    <td class='input'>
     <select name='max' size='1'>
+     <option $maxSelected[1]>1</option>
      <option $maxSelected[2]>2</option>
      <option $maxSelected[3]>3</option>
      <option $maxSelected[4]>4</option>

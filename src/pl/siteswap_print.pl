@@ -10,7 +10,7 @@ allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, Pass
          Flag),!,
    sortListOfSiteswaps(Bag,Swaps),
    (Flag = some -> 
-      format("<p class='some'>Just a slection of patterns is shown!</p>");
+      format("<p class='some'>Just a selection of patterns is shown!</p>");
       format("<p class='all'>All patterns have been found!</p>")
    ),
    get_time(End),
@@ -99,4 +99,20 @@ writeCompletedSiteswap(Pattern, Persons, Objects, Length, Max, NumberOfMultiplex
    siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React),
    rotateHighestFirst(Throws, Pattern),
    writePassingSwap(Pattern, Persons).
+
+
+
+
+pStyle(Length, Origen, classic) :- 
+	even(Length),
+	odd(Origen).
+pStyle(Length, Origen, equi) :-
+	even(Length),
+	even(Origen).
+pStyle(Length, Origen, bi) :-
+	odd(Length),
+	odd(Origen).
+pStyle(Length, Origen, instantbi) :-
+	odd(Length),
+	even(Origen).
 
