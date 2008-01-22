@@ -1,5 +1,16 @@
 %%%  --- list operations ---
 
+
+allMembersUnique([]) :- !.
+allMembersUnique([Head | Tail]) :-
+   var(Head),!,
+   allMembersUnique(Tail).
+allMembersUnique([Head | Tail]) :-
+   nonvar(Head),
+   forall(member(X, Tail), (var(X);(nonvar(X),Head\=X))),
+   allMembersUnique(Tail).
+
+
 %% fillIn(Original, Copy, StartingPosition, ListOfNotChangingPositions)
 fillIn([],[], _, _) :- !.
 fillIn( [_Orig_Head | Orig_Rest], [_Copy_Head | Copy_Rest], Position, DontChange) :-
@@ -155,7 +166,15 @@ initFindAtMostNUnique :-
 	retractall(counterNumberOfResults(_)),
 	retractall(dataResult(_)),
 	asserta(counterNumberOfResults(0)),!.
+
+findAllUnique(X, Goal, Bag) :- 
+	initFindAllUnique,
+	post_it_unique(X, Goal),
+	gather([], Bag). 
 	
+initFindAllUnique :-
+	retractall(dataResult(_)),!.
+		
 post_it_unique(X, Goal, MaxNumberOfResults, some) :- 
 	call(Goal),
 	not(dataResult(X)),
@@ -174,10 +193,18 @@ post_it_unique(X, Goal, MaxNumberOfResults, some) :-
 	).
 post_it_unique(_, _, _, all).
 
+
+post_it_unique(X, Goal) :- 
+	call(Goal),
+	not(dataResult(X)),
+	asserta(dataResult(X)),
+	fail.  % force backtrack if not enough results
+post_it_unique(_, _).
+
+
 gather(B,Bag) :-  
 	dataResult(X),
 	retract(dataResult(X)),
 	gather([X|B],Bag),
 	!.
 gather(S,S).
-
