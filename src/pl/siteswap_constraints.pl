@@ -16,6 +16,13 @@ siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, _NumberOfM
 
 listOfConstraints(SetOfConstraints, Length, Persons, Max, Contain, ClubDoes, React) :-
 	findall(Throws, mergeConstraints(Throws, Length, Persons, Max, Contain, ClubDoes, React), ListOfConstraints),
+	(ListOfConstraints = [] ->
+		(
+			Contain = [[]], 
+			ClubDoes = [[]],
+			React = [[]]
+		);true
+	),
 	cleanEqualConstraints(ListOfConstraints, SetOfConstraints).
 	
 mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainShortBag, ClubDoesShortBag, ReactShortBag) :-
