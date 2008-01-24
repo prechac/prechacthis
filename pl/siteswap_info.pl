@@ -82,6 +82,7 @@ clubsInHand(Juggler, Hand, Period, ActionList, ClubsInHand) :-
 	ClubsInHand = NumberOfThrows.
 
 
+
 listOfCatches(_,_,_,[],[]).
 listOfCatches(CatchingJuggler, Hand, Period, [Action|ActionList], [Catch|ListOfCatches]) :-	
 	not(nth1(4, Action, p(0,_,_))), % Throw not 0
