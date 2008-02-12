@@ -11,6 +11,17 @@ lengthK(Pattern, Length) :-
 	length(Pattern, Length).
 
 
+averageNumberOfClubs(Pattern, Clubs) :- 
+	length(Pattern, Period),
+	listOfThrows(Pattern, Throws),
+	sumlist(Throws, SumThrows),
+	Clubs is SumThrows rdiv Period.
+	
+listOfThrows([], []) :- !.
+listOfThrows([p(Throw,_Index,_Origen)|Pattern], [Throw|Throws]) :-
+	listOfThrows(Pattern, Throws).
+
+
 %%% --- landing sites ---
 
 landingSite(_, Throw, _, _) :-

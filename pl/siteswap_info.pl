@@ -182,6 +182,21 @@ earlierCatch(Catch1, Catch2, Catch1) :-
 	nonvar(Catch1),
 	var(Catch2),!.
 	
+	
+testClubDistribution(ActionList, NumberOfJugglers, Period, ClubsInPattern) :-
+	JugglerMax is NumberOfJugglers - 1,
+	findall(
+		ClubsInHand, 
+		(
+			between(0, JugglerMax, Juggler),
+			member(Hand, [a,b]),
+			clubsInHand(Juggler, Hand, Period, ActionList, ClubsInHand)
+		),
+		ListOfClubs
+	),
+	sumlist(ListOfClubs, ClubsInPattern).
+	
+
 
 %%% --- print ---
 
@@ -196,6 +211,12 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers) :-
 	writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers),
 	writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period),
 	JugglerMax is NumberOfJugglers - 1,
+	averageNumberOfClubs(Pattern, AverageNumberOfClubs),
+	NumberOfClubs is AverageNumberOfClubs * NumberOfJugglers,
+	(testClubDistribution(ActionList, NumberOfJugglers, Period, NumberOfClubs) ->
+		true;
+		format("<p class='clubdistri'>Atention - Not a possible starting point.<br>Try turning pattern.</p>\n\n")
+	),
 	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, NumberOfJugglers, Period)).
 	
 	
