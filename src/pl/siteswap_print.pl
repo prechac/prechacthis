@@ -88,7 +88,7 @@ convertMultiplex([Throw | Rest], [Throw | RestNew]) :-
 writeSwap(ThrowsPM, Throws, Persons, BackURL) :-
    concat_atom(ThrowsPM, ' ', Swap),
    float_to_shortpass(Throws,ThrowsShort),
-   format("<a href='./info.php?pattern=~w&persons=~w&back=~w'>~w</a><br>\n", [ThrowsShort,Persons,Swap,BackURL]),!.
+   format("<a href='./info.php?pattern=~w&persons=~w&back=~w'>~w</a><br>\n", [ThrowsShort,Persons,BackURL,Swap]),!.
 
 writePassingSwap(Throws, Persons, BackURL) :-
 	length(Throws,Length),
