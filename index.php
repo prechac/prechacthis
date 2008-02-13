@@ -42,7 +42,7 @@ if ($_REQUEST){
 
 	if (!$_GET["multiplex"]){$_GET["multiplex"] = "0";}
 	
-	$back_url = rawurlencode($_SERVER["REQUEST_URI"]);
+	$back_url = rawurlencode($_SERVER["QUERY_STRING"]);
 	
 	foreach($objects as $object){
 		foreach($lengths as $length){
