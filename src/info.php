@@ -13,7 +13,7 @@ if ($_REQUEST){
 	if($_GET["debug"]=="on") $debug = true;
 
 	if($_GET["back"]) {
-		$back_url = ".". rawurldecode($_GET["back"]);
+		$back_url = "./?". rawurldecode($_GET["back"]);
 		echo "<p class='back'><a href='".$back_url."'>back to results</a></p>";
 	}
 	
