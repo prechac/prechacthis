@@ -214,7 +214,7 @@ rotateHighestFirst(Siteswap, Rotated) :-
 compare_swaps(Order, P1, P2) :-
 	rat2float(P1, P1F),
 	rat2float(P2, P2F),
-	compare(Order, P2F, P2F).
+	compare(Order, P1F, P2F).
 
 rat2float([],[]) :- !.
 rat2float([p(Rational,Index,Origen)|PRat], [p(Float,Index,Origen)|PFloat]) :-
