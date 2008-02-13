@@ -134,19 +134,19 @@ compare_heights(Order,P1,P2) :-
 	is_list(P2),
 	listOfHeights(P1,H1),
 	listOfHeights(P2,H2),
-	compare(Order,H1,H2),!.
+	compare_swaps(Order,H1,H2),!.
 
 compare_heights(Order,K1-_P1,K2-_P2) :-
-	compare(Order,K1,K2).
+	compare_swaps(Order,K1,K2).
 
 is_biggest([Pattern], Pattern) :- !.
 is_biggest([Pattern|ListOfPatterns], Biggest) :-
 	is_biggest(ListOfPatterns, Biggest),
-	compare(Order, Biggest, Pattern),
+	compare_swaps(Order, Biggest, Pattern),
 	Order \= <, !.
 is_biggest([Biggest|ListOfPatterns], Biggest) :-
 	is_biggest(ListOfPatterns, Pattern),
-	compare(Order, Biggest, Pattern),
+	compare_swaps(Order, Biggest, Pattern),
 	Order = >, !.
 
 is_bigger_than_list([], _Siteswap) :- !.
@@ -159,16 +159,16 @@ is_bigger_than_list([Head|Tail], Siteswap) :-
 is_smallest([Pattern], Pattern) :- !.
 is_smallest([Pattern|ListOfPatterns], Smallest) :-
 	is_smallest(ListOfPatterns, Smallest),
-	compare(Order, Smallest, Pattern),
+	compare_swaps(Order, Smallest, Pattern),
 	Order \= >, !.
 is_smallest([Smallest|ListOfPatterns], Smallest) :-
 	is_smallest(ListOfPatterns, Pattern),
-	compare(Order, Smallest, Pattern),
+	compare_swaps(Order, Smallest, Pattern),
 	Order = <, !.
 
 is_smaller_than_list([], _Siteswap).
 is_smaller_than_list([Head|Tail], Siteswap) :-
-	compare(Order,Siteswap,Head),
+	compare_swaps(Order,Siteswap,Head),
 	Order \= >,
 	is_smaller_than_list(Tail, Siteswap).
 
@@ -210,10 +210,26 @@ rotateHighestFirst(Siteswap, Rotated) :-
 	findall(R,rotate(Siteswap,R), ListOfRotations),
 	is_biggest(ListOfRotations, Rotated).
 
+
+compare_swaps(Order, P1, P2) :-
+	rat2float(P1, P1F),
+	rat2float(P2, P2F),
+	compare(Order, P2F, P2F).
+
+rat2float([],[]) :- !.
+rat2float([p(Rational,Index,Origen)|PRat], [p(Float,Index,Origen)|PFloat]) :-
+	Float is float(Rational),!,
+	rat2float(PRat, PFloat).
+rat2float([ListOfRational|PRat], [ListOfFloat|PFloat]) :-
+	is_list(ListOfRational),
+	rat2float(ListOfRational, ListOfFloat),
+	rat2float(PRat, PFloat).
+
+
 %succeeds if there is a pattern Merged that unifies P1 and a rotation of P2
 merge2(P1, P2, Merged) :-
   rotate(P2, Merged),
-  Merged = P1, 
+  Merged = P1,
   uniqueLandingSites(Merged).
 
 

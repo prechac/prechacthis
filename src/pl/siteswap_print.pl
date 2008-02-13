@@ -34,7 +34,8 @@ addKeys([],[]).
 addKeys([Head|Swaps],[Key-Head|SwapsWithKeys]) :-
 	%%listOfHeights(Head,Heights),
 	amountOfPasses(Head,Number),
-	Key = [Number,Head],
+	rat2float(Head,HeadFloat),
+	Key = [Number,HeadFloat],
 	addKeys(Swaps,SwapsWithKeys).
 
 removeKeys([],[]).
