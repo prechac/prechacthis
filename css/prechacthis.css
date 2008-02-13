@@ -167,7 +167,14 @@ th {
 	border-style: dotted;
 	width: 3em;
 }
-
+.info_clubdistri {
+	text-align: center;
+	font-family: Arial,sans-serif;
+	color: red;
+	margin-top: 2ex;
+	margin-bottom: 2ex;
+	font-size: 100%;
+}
 
 #path {
 	text-align: right;
