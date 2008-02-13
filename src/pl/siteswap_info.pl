@@ -215,7 +215,7 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers) :-
 	NumberOfClubs is AverageNumberOfClubs * NumberOfJugglers,
 	(testClubDistribution(ActionList, NumberOfJugglers, Period, NumberOfClubs) ->
 		true;
-		format("<p class='clubdistri'>Atention - Not a possible starting point.<br>Try turning pattern.</p>\n\n")
+		format("<p class='info_clubdistri'>Not a possible starting point without extra throws ahead.<br>Try to turn pattern.</p>\n\n")
 	),
 	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, NumberOfJugglers, Period)).
 	
