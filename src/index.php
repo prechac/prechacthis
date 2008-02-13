@@ -66,7 +66,7 @@ if ($_REQUEST){
 			          . correctSeqsSemicolon($_GET["exclude"]) . ", "
 			          . correctSeqsSemicolon($_GET["clubdoes"]) . ", "
 			          . correctSeqsSemicolon($_GET["react"]) . ", "
-			          . $back_url
+			          . "'". $back_url ."'"
 			          . "), halt.\" "
 			          . "2> $errorlogfile";
 	
