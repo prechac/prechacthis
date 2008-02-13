@@ -42,6 +42,8 @@ if ($_REQUEST){
 
 	if (!$_GET["multiplex"]){$_GET["multiplex"] = "0";}
 	
+	$back_url = rawurlencode($_SERVER["REQUEST_URI"]);
+	
 	foreach($objects as $object){
 		foreach($lengths as $length){
 			$errorlogfile = tempnam("/tmp", "siteswap");
@@ -63,7 +65,8 @@ if ($_REQUEST){
 			          . correctSeqsSemicolon($_GET["jugglerdoes"]) . ", "
 			          . correctSeqsSemicolon($_GET["exclude"]) . ", "
 			          . correctSeqsSemicolon($_GET["clubdoes"]) . ", "
-			          . correctSeqsSemicolon($_GET["react"])
+			          . correctSeqsSemicolon($_GET["react"]) . ", "
+			          . $back_url
 			          . "), halt.\" "
 			          . "2> $errorlogfile";
 	

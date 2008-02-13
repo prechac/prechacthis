@@ -1,7 +1,7 @@
 %:- ensure_loaded([helpers, siteswap_helpers, siteswap_multiplex, siteswap_tree, siteswap_constraints]).
 
 
-allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React) :-
+allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, BackURL) :-
    get_time(Start),
    findAtMostNUnique(Throws, 
          siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React),
@@ -16,7 +16,7 @@ allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, Pass
    get_time(End),
    Time is End - Start,
    format("<p class='time'>(~w seconds)</p>\n", [Time]),
-   forall(member(T, Swaps),  writePassingSwap(T, Persons)).
+   forall(member(T, Swaps),  writePassingSwap(T, Persons, BackURL)).
 
 
 cleanListOfSiteswaps(List,CleanList) :-
@@ -85,21 +85,21 @@ convertMultiplex([Multiplex | Rest], [MultiplexNew | RestNew]) :-
 convertMultiplex([Throw | Rest], [Throw | RestNew]) :-
 	convertMultiplex(Rest, RestNew).
 
-writeSwap(ThrowsPM, Throws, Persons) :-
+writeSwap(ThrowsPM, Throws, Persons, BackURL) :-
    concat_atom(ThrowsPM, ' ', Swap),
    float_to_shortpass(Throws,ThrowsShort),
-   format("<a href='./info.php?pattern=~w&persons=~w'>~w</a><br>\n", [ThrowsShort,Persons,Swap]),!.
+   format("<a href='./info.php?pattern=~w&persons=~w&back=~w'>~w</a><br>\n", [ThrowsShort,Persons,Swap,BackURL]),!.
 
-writePassingSwap(Throws, Persons) :-
+writePassingSwap(Throws, Persons, BackURL) :-
 	length(Throws,Length),
     convertP(Throws, ThrowsP, Length, Persons),
 	convertMultiplex(ThrowsP,ThrowsPM),
-    writeSwap(ThrowsPM, Throws, Persons).
+    writeSwap(ThrowsPM, Throws, Persons, BackURL).
 
-writeCompletedSiteswap(Pattern, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React) :-
+writeCompletedSiteswap(Pattern, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, BackURL) :-
    siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React),
    rotateHighestFirst(Throws, Pattern),
-   writePassingSwap(Pattern, Persons).
+   writePassingSwap(Pattern, Persons, BackURL).
 
 
 
