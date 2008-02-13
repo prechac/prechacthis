@@ -42,7 +42,7 @@ if ($_REQUEST){
 	}
 	
 	if($_GET["back"]) {
-		echo "<p class="back"><a href='".$back_url."'>back to results</a></p>";
+		echo "<p class='back'><a href='".$back_url."'>back to results</a></p>";
 	}
 }
 ?>
