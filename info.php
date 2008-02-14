@@ -27,7 +27,7 @@ if ($_REQUEST){
 		          . "-g \"print_pattern_info("
 		          . $_GET["pattern"] . ", "
 		          . $_GET["persons"] . ", "
-		          . "'". $_GET["back"] ."'"
+		          . "'". rawurlencode($_GET["back"]) ."'"
 		          . "), halt.\" "
 		          . "2> $errorlogfile";
 
