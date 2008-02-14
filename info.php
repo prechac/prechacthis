@@ -25,9 +25,9 @@ if ($_REQUEST){
 		$plquery  = "swipl -q "
 		          . "-f " . dirname($_SERVER["SCRIPT_FILENAME"]) . "/pl/siteswap.pl "
 		          . "-g \"print_pattern_info("
-		          . $_GET["pattern"] 
-				  . ", "
-		          . $_GET["persons"]
+		          . $_GET["pattern"] . ", "
+		          . $_GET["persons"] . ", "
+		          . $_GET["back"]
 		          . "), halt.\" "
 		          . "2> $errorlogfile";
 

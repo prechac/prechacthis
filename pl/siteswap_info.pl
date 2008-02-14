@@ -201,14 +201,14 @@ testClubDistribution(ActionList, NumberOfJugglers, Period, ClubsInPattern) :-
 %%% --- print ---
 
 
-print_pattern_info(PatternWithShortPasses, NumberOfJugglers) :-
+print_pattern_info(PatternWithShortPasses, NumberOfJugglers, BackURL) :-
 	length(PatternWithShortPasses, Period),
 	maxHeight(PatternWithShortPasses, ShortMaxHeight),
 	MaxHeight is truncate(ShortMaxHeight) + 1,
 	convertShortPasses(PatternWithShortPasses,Period,NumberOfJugglers,MaxHeight,Pattern),
 	all_points_in_time(PointsInTime, NumberOfJugglers, Period),
 	what_happens(PointsInTime, Pattern, NumberOfJugglers, ActionList),
-	writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers),
+	writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
 	averageNumberOfClubs(Pattern, AverageNumberOfClubs),
 	NumberOfClubs is AverageNumberOfClubs * NumberOfJugglers,
 	(testClubDistribution(ActionList, NumberOfJugglers, Period, NumberOfClubs) ->
@@ -277,12 +277,12 @@ writeJugglerInfo(Juggler, ActionList, NumberOfJugglers, Period) :-
 	format("</table>\n\n").
 
 
-writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers) :-
+writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
 	format("<table align='center'>\n"),
 	format("<tr><td colspan=2>"),
 	writeBigSwap(Pattern, NumberOfJugglers),
 	format("</td></tr>\n"),
-	writeRotatedLinks(PatternWithShortPasses, NumberOfJugglers),
+	writeRotatedLinks(PatternWithShortPasses, NumberOfJugglers, BackURL),
 	format("</table>\n\n").
 	
 writeBigSwap(Throws) :-
@@ -295,14 +295,14 @@ writeBigSwap(Throws, Persons) :-
 	convertMultiplex(ThrowsP,ThrowsPM),
     writeBigSwap(ThrowsPM).
 	
-writeRotatedLinks(Pattern, NumberOfJugglers) :-
+writeRotatedLinks(Pattern, NumberOfJugglers, BackURL) :-
 	rotate_left(Pattern, PatternRotatedLeft),
 	rotate_right(Pattern, PatternRotatedRight),
 	sformat(ArrowLeft, "<img src='./images/left_arrow.png' alt='rotate left' border=0>", []),
 	sformat(ArrowRight, "<img src='./images/right_arrow.png' alt='rotate right' border=0>", []),
 	format("<tr>\n"),
-	format("<td class='info_left'><a href='./info.php?pattern=~w&persons=~w'>~w</a></td>\n", [PatternRotatedLeft,NumberOfJugglers,ArrowLeft]),
-	format("<td class='info_right'><a href='./info.php?pattern=~w&persons=~w'>~w</a></td>\n", [PatternRotatedRight,NumberOfJugglers,ArrowRight]),
+	format("<td class='info_left'><a href='./info.php?pattern=~w&persons=~w&back=~w'>~w</a></td>\n", [PatternRotatedLeft,NumberOfJugglers,BackURL,ArrowLeft]),
+	format("<td class='info_right'><a href='./info.php?pattern=~w&persons=~w&back=~w'>~w</a></td>\n", [PatternRotatedRight,NumberOfJugglers,BackURL,ArrowRight]),
 	format("</tr>\n").	
 	
 print_jugglers_throws(Juggler, ActionList, PointsInTime, NumberOfJugglers, Period) :-
