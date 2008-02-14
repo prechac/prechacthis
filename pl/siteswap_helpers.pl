@@ -216,9 +216,16 @@ compare_swaps(Order, P1, P2) :-
 	rat2float(P2, P2F),
 	compare(Order, P1F, P2F).
 
-rat2float([],[]) :- !.
+rat2float([],[]) :- !.	
+rat2float([Var|PRat], [Var|PFloat]) :-
+	var(Var),!,
+	rat2float(PRat, PFloat).
+rat2float([p(Var,Index,Origen)|PRat], [p(Var,Index,Origen)|PFloat]) :-
+	var(Var),!,
+	rat2float(PRat, PFloat).
 rat2float([p(Rational,Index,Origen)|PRat], [p(Float,Index,Origen)|PFloat]) :-
-	Float is float(Rational),!,
+	(number(Rational); rational(Rational)),!,
+	Float is float(Rational),
 	rat2float(PRat, PFloat).
 rat2float([ListOfRational|PRat], [ListOfFloat|PFloat]) :-
 	is_list(ListOfRational),
