@@ -16,6 +16,27 @@ body{
 	margin-top: 1em;
 	margin-bottom: 1em;
 }
+
+.back {
+	text-align: left;
+	font-family: Arial,sans-serif;
+	width: 100%;
+	font-size: 80%;
+	margin-top: 0.5em;
+	margin-left: 0.5em;
+	border-width: 0px;
+	border-style: dotted;
+}
+.back a {
+	color: blue;
+}
+.back a:visited, .back a:link {
+	text-decoration: underline;
+}
+.back a:hover {
+	text-decoration: underline;
+}
+
 .inline{
 	display:inline-block;
 	vertical-align:top;
@@ -169,9 +190,9 @@ th {
 	text-align: center;
 	font-family: Arial,sans-serif;
 	color: red;
-	margin-top: 2ex;
-	margin-bottom: 2ex;
-	font-size: 100%;
+	margin-top: 3ex;
+	margin-bottom: 0ex;
+	font-size: 80%;
 }
 
 #path {

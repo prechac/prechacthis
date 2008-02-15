@@ -209,13 +209,13 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers, BackURL) :-
 	all_points_in_time(PointsInTime, NumberOfJugglers, Period),
 	what_happens(PointsInTime, Pattern, NumberOfJugglers, ActionList),
 	writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
+	writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period),
 	averageNumberOfClubs(Pattern, AverageNumberOfClubs),
 	NumberOfClubs is AverageNumberOfClubs * NumberOfJugglers,
 	(testClubDistribution(ActionList, NumberOfJugglers, Period, NumberOfClubs) ->
 		true;
 		format("<p class='info_clubdistri'>Not a possible starting point without extra throws ahead.<br>Try to turn pattern.</p>\n\n")
 	),
-	writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period),
 	JugglerMax is NumberOfJugglers - 1,
 	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, NumberOfJugglers, Period)).
 	
