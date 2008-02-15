@@ -253,6 +253,11 @@ echo "<form action='./index.php' method='get'>
 }*/
 
 
+function correctLongPasses($seq){
+	$seq = ereg_replace('(p\([0-9_]+)(,)([0-9_]+\))', '\\1*\\3', $seq);
+	$seq = ereg_replace('(p\([0-9_]+)(,)([0-9_]+)(,)([0-9_]+\))', '\\1*\\3*\\5', $seq);
+	return $seq;
+}
 
 function correctPasses($passes){
 	if (!is_numeric($passes)){
@@ -267,6 +272,7 @@ function correctMultiplexes($seq){
 }
 function correctSeqsSemicolon($seqs){
     $seqs = correctMultiplexes($seqs);
+	$seqs = correctLongPasses($seqs);
 	$outstring = "[";
 	$seqs = explode(";", $seqs);
 	foreach ($seqs as $seq) {
@@ -306,7 +312,7 @@ function correctSeq($seq){
 	}
 	$outstring = substr($outstring, 0, strlen($outstring) -1); //take off last comma
 	$outstring .= "]";
-return $outstring;
+	return $outstring;
 }
 
 
@@ -319,17 +325,17 @@ function convert_multiplex($throw){
 		$outstring .= ",";
 	}
 	$outstring = substr($outstring, 0, strlen($outstring) -1); //take off last comma
-$outstring .= "]";
+	$outstring .= "]";
 	return $outstring;
 }
 
 function convert_throw($throw){
 	$throw = trim($throw);
-	if (is_numeric($throw) || $throw == "_" || substr($throw, 0, 2) == "p(") {
-		return $throw;
-	}else{  //3p -> p(3,_,_)
-		return "p(" . substr($throw, 0, strlen($throw)-1) . ")";
+	$throw = strtr($throw, '*', ',' );
+	if (!(is_numeric($throw) || $throw == "_" || substr($throw, 0, 2) == "p(")) {
+		$throw = "p(" . substr($throw, 0, strlen($throw)-1) . ")";
 	}
+	return $throw;
 }
 
 function doku($doku_flag){
