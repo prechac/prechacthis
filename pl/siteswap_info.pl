@@ -76,11 +76,28 @@ hand(Position, a) :- even(Position),!.
 hand(Position, b) :- odd(Position),!.
 
 
+realActionList(ActionList, Period, ActionList) :-
+	even(Period),!.
+realActionList(FirstPeriod, Period, RealActionList) :-
+	secondPeriodActionList(FirstPeriod, Period, SecondPeriod),
+	append(FirstPeriod, SecondPeriod, RealActionList).
+	
+secondPeriodActionList([], _Period, []) :- !.
+secondPeriodActionList([FirstAction|FirstPeriod], Period, [SecondAction|SecondPeriod]) :-
+	FirstAction = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition],
+	SecondPointInTime is PointInTime + Period,
+	SecondThrowingSiteswapPosition is ThrowingSiteswapPosition + Period,
+	SecondLandingTime is LandingTime + Period,
+	SecondLandingSiteswapPosition is LandingSiteswapPosition + Period,
+	SecondAction = [SecondPointInTime, ThrowingJuggler, SecondThrowingSiteswapPosition, Throw, SecondLandingTime, CatchingJuggler, SecondLandingSiteswapPosition],
+	secondPeriodActionList(FirstPeriod, Period, SecondPeriod).
+	
+
 clubsInHand(Juggler, Hand, Period, ActionList, ClubsInHand) :-
 	member(Hand, [a,b]),
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, NumberOfThrows, _FirstCatch),
+	realActionList(ActionList, Period, RealActionList),
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, RealActionList, NumberOfThrows, _FirstCatch),
 	ClubsInHand = NumberOfThrows.
-
 
 
 listOfCatches(_,_,_,[],[]).
@@ -107,7 +124,7 @@ firstCatch(Juggler, Hand, Period, ActionList, FirstCatch) :-
 	listOfCatches(Juggler, Hand, Period, ActionList, ListOfCatches),
 	min_of_list(FirstCatch, ListOfCatches).
 
-%%% 	Action = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition].
+%%%  Action = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition].
 
 numberOfThrowsUntilFirstCatch(_, _, _, [], 0, _) :- !. 
 numberOfThrowsUntilFirstCatch(Juggler, Hand, _, [Action|_ActionList], 0, FirstCatch) :- 
@@ -127,15 +144,9 @@ numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], NewNum
 	hand(ThrowingSiteswapPosition, Hand), % Juggler is throwing with this hand
 	nth1(6, Action, Juggler),   % Juggler is catching
 	not(nth1(4, Action, p(0,_,_))),
-	((	
-		nth1(7, Action, CatchingSiteswapPosition),
-		hand(CatchingSiteswapPosition, Hand),
-		nth1(5, Action, Catch)
-	);(
-		odd(Period),
-		nth1(5, Action, FirstCatch),
-		Catch is FirstCatch + Period		
-	)), % Juggler is catching with this hand
+	nth1(7, Action, CatchingSiteswapPosition),
+	hand(CatchingSiteswapPosition, Hand),
+	nth1(5, Action, Catch), % Juggler is catching with this hand
 	!,
 	earlierCatch(OldFirstCatch, Catch, NewFirstCatch),
 	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OldNumberOfThrows, NewFirstCatch),	
@@ -150,15 +161,9 @@ numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], NewNum
 numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], NumberOfThrows, OldFirstCatch) :-	
 	nth1(6, Action, Juggler),   % Juggler is catching
 	not(nth1(4, Action, p(0,_,_))),
-	((	
-		nth1(7, Action, CatchingSiteswapPosition),
-		hand(CatchingSiteswapPosition, Hand),
-		nth1(5, Action, Catch)
-	);(
-		odd(Period),
-		nth1(5, Action, FirstCatch),
-		Catch is FirstCatch + Period		
-	)), % Juggler is catching with this hand
+	nth1(7, Action, CatchingSiteswapPosition),
+	hand(CatchingSiteswapPosition, Hand),
+	nth1(5, Action, Catch), % Juggler is catching with this hand
 	!,
 	earlierCatch(OldFirstCatch, Catch, NewFirstCatch),
 	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, NumberOfThrows, NewFirstCatch).
@@ -200,7 +205,8 @@ testClubDistribution(ActionList, NumberOfJugglers, Period, ClubsInPattern) :-
 
 %%% --- print ---
 
-
+print_pattern_info(Pattern, NumberOfJugglers) :-
+	print_pattern_info(Pattern, NumberOfJugglers, '').
 print_pattern_info(PatternWithShortPasses, NumberOfJugglers, BackURL) :-
 	length(PatternWithShortPasses, Period),
 	maxHeight(PatternWithShortPasses, ShortMaxHeight),
