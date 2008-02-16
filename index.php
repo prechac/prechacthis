@@ -231,7 +231,7 @@ echo "<form action='./index.php' method='get'>
   </tr>
   <tr>
    <td class='lable'>&nbsp;</td>
-   <td class='input'><a href='http://http://en.wikibooks.org/wiki/Symmetric_Passing_Patterns'>learn about symmetric passing</a></td>
+   <td class='input'><a href='http://en.wikibooks.org/wiki/Symmetric_Passing_Patterns'>learn about symmetric passing</a></td>
   </tr>
  </table>
  $hidden_debug
