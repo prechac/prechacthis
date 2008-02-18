@@ -76,9 +76,9 @@ hand(Position, a) :- even(Position),!.
 hand(Position, b) :- odd(Position),!.
 
 
-realActionList(ActionList, Period, ActionList) :-
-	even(Period),!.
-realActionList(FirstPeriod, Period, RealActionList) :-
+%realActionList(ActionList, Period, ActionList) :-
+%	even(Period),!.
+realActionList(FirstPeriod, Period, RealActionList) :- 
 	secondPeriodActionList(FirstPeriod, Period, SecondPeriod),
 	append(FirstPeriod, SecondPeriod, RealActionList).
 	
@@ -95,7 +95,7 @@ secondPeriodActionList([FirstAction|FirstPeriod], Period, [SecondAction|SecondPe
 
 clubsInHand(Juggler, Hand, Period, ActionList, ClubsInHand) :-
 	member(Hand, [a,b]),
-	realActionList(ActionList, Period, RealActionList),
+	realActionList(ActionList, Period, RealActionList),  % bug: loop until first catch is really reached !!!!!!!!!!
 	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, RealActionList, NumberOfThrows, _FirstCatch),
 	ClubsInHand = NumberOfThrows.
 
