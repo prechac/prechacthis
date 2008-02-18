@@ -41,6 +41,8 @@ if ($_REQUEST){
 	if ($_GET["persons"]){echo "<h2>" . $_GET["persons"] . " persons</h2>";}
 
 	if (!$_GET["multiplex"]){$_GET["multiplex"] = "0";}
+
+	if (!$_GET["results"]){$_GET["results"] = 42;}
 	
 	$back_url = rawurlencode($_SERVER["QUERY_STRING"]);
 	
@@ -66,6 +68,7 @@ if ($_REQUEST){
 			          . correctSeqsSemicolon($_GET["exclude"]) . ", "
 			          . correctSeqsSemicolon($_GET["clubdoes"]) . ", "
 			          . correctSeqsSemicolon($_GET["react"]) . ", "
+					  . $_GET["results"] . ", "
 			          . "'". $back_url ."'"
 			          . "), halt.\" "
 			          . "2> $errorlogfile";
@@ -216,6 +219,11 @@ echo "<form action='./index.php' method='get'>
    <td class='input'><input type='text' name='react' value='$_GET[react]'></td>
    $doku[react]
   </tr>
+  <tr>
+   <td class='lable'>Max results:</td>
+   <td class='input'><input type='text' name='results' value='$_GET[results]'></td>
+   $doku[results]
+  </tr>
 
   <tr>
    <td class='lable'>&nbsp;</td>
@@ -254,8 +262,8 @@ echo "<form action='./index.php' method='get'>
 
 
 function correctLongPasses($seq){
-	$seq = ereg_replace('(p\([0-9_]+)(,)([0-9_]+\))', '\\1*\\3', $seq);
-	$seq = ereg_replace('(p\([0-9_]+)(,)([0-9_]+)(,)([0-9_]+\))', '\\1*\\3*\\5', $seq);
+	$seq = ereg_replace('(p\([0-9_.]+)(,)([0-9_.]+\))', '\\1*\\3', $seq);
+	$seq = ereg_replace('(p\([0-9_.]+)(,)([0-9_.]+)(,)([0-9_.]+\))', '\\1*\\3*\\5', $seq);
 	return $seq;
 }
 
