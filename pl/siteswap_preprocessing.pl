@@ -1,12 +1,8 @@
-preprocessConstraint(_ConstraintString, _Constraint) :- !.
+preprocessConstraint(ConstraintString, Constraint) :-
+	dcg_constraint(Constraint, ConstraintString, []).
 
-	
-	
-tokenizeConstraint(_, []) :- !.
-tokenizeConstraint(ConstraintString, [Token|ConstraintTokens]) :-
-	phrase(isThrow(Token), ConstraintString, Rest),
-	tokenizeConstraint(Rest, ConstraintTokens).
-	
+
+
 %%% Siteswap Constraints Grammar rules %%%
 
 % Bedingung -> Pattern [and Pattern]*
@@ -17,132 +13,171 @@ tokenizeConstraint(ConstraintString, [Token|ConstraintTokens]) :-
 % (4 4 and 1 (1p or 2p)) or 4 4 1
 % ==> [[[4,4],[1,p(1)]],[[4,4],[1,p(2)]],[[4 4 1]]]
 
-% or(A,B)
+% [] --> [[[p(1)]]]
+% [[[p(1)]]] --> [[[p(1)]],[[p(2)]]]
+% [[[p(1)]],[[p(2)]]] --> [[[1,p(1)]],[[1,p(2)]]]
+% [[[1,p(1)]],[[1,p(2)]]] --> [[[4,4],[1,p(1)]],[[4,4],[1,p(2)]]]
+% [[[4,4],[1,p(1)]],[[4,4],[1,p(2)]]] --> [[[4,4],[1,p(1)]],[[4,4],[1,p(2)]],[[4 4 1]]]
 
-g_constraint -->
-	g_pattern,
-	(g_and_patterns; g_or_patterns).
 
-g_pattern -->
-	g_whitespaces,
-	g_throw_or_constraint,
-	g_whitespaces,
-	g_throws_or_constraints,
-	g_whitespaces.
+% (1 and 2) (3 or 4): [] --> [[[3]],[[4]]] --> [[[1,3],[2,3]],[[1,4],[2,4]]]
+
+
+
+%%% DCG Grammar %%%
+
+dcg_constraint(Constraint) -->
+	dcg_pattern(Pattern),
+	dcg_and_patterns(Patterns),
+	{
+		dcgh_merge_constraints(Pattern, Patterns, Constraint, and)
+	}.
+dcg_constraint(Constraint) -->
+	dcg_pattern(Pattern),
+	dcg_or_patterns(Patterns),
+	{
+		dcgh_merge_constraints(Pattern, Patterns, Constraint, or)
+	}.
+
+dcg_pattern(Constraint) -->
+	dcg_whitespaces,
+	dcg_throw_or_constraint(Throw),
+	dcg_whitespaces,
+	dcg_throws_or_constraints(Pattern),
+	dcg_whitespaces,
+	{
+		dcgh_merge_constraints(Throw, Pattern, Constraint, concat)
+	}.
 	
-g_and_patterns -->
-	g_and,
-	g_pattern,
-	g_and_patterns.
-g_and_patterns -->
+dcg_and_patterns(NewConstraint) -->
+	dcg_and,
+	dcg_pattern(Pattern),
+	dcg_and_patterns(Patterns),
+	{
+		dcgh_merge_constraints(Pattern, Patterns, NewConstraint, and)
+	}.
+dcg_and_patterns([]) -->
 	[].
 	
-g_or_patterns -->
-	g_or,
-	g_pattern,
-	g_or_patterns.
-g_or_patterns -->
+dcg_or_patterns(NewConstraint) -->
+	dcg_or,
+	dcg_pattern(Pattern),
+	dcg_or_patterns(Patterns),
+	{
+		dcgh_merge_constraints(Pattern, Patterns, NewConstraint, or)
+	}.
+dcg_or_patterns([]) -->
 	[].
 
-g_throw_or_constraint -->
-	g_throw.
-g_throw_or_constraint -->
-	g_bracket_open,
-	g_constraint,
-	g_bracket_close.
+dcg_throw_or_constraint([[[Throw]]]) -->
+	dcg_throw(Throw).
+dcg_throw_or_constraint(Constraint) -->
+	dcg_bracket_open,
+	dcg_constraint(Constraint),
+	dcg_bracket_close.
 	
-g_throws_or_constraints -->
-	g_whitespace,
-	g_throw_or_constraint,
-	g_throws_or_constraints.
-g_throws_or_constraints -->
+dcg_throws_or_constraints(NewConstraint) -->
+	dcg_whitespace,
+	dcg_throw_or_constraint(Constraint),
+	dcg_throws_or_constraints(Constraints),
+	{
+		dcgh_merge_constraints(Constraint, Constraints, NewConstraint, concat)
+	}.
+dcg_throws_or_constraints([]) -->
 	[].
 	
-g_throw -->
-	g_self.
-g_throw -->
-	g_pass.
+dcg_throw(T) -->
+	dcg_self(T).
+dcg_throw(T) -->
+	dcg_pass(T).
 	
-g_self -->
-	g_integer.
-g_self -->
-	g_underscore.
+dcg_self(S) -->
+	dcg_integer(S).
+dcg_self(_) -->
+	dcg_underscore.
 
-g_pass -->
-	g_rational,
-	g_p,
-	g_integer.
-g_pass  -->
-	g_rational,
-	g_p.
-g_pass -->
-	g_underscore.
+dcg_pass(p(F,I)) -->
+	dcg_float(F),
+	dcg_p,
+	dcg_integer(I).
+dcg_pass(p(F))  -->
+	dcg_float(F),
+	dcg_p.
+dcg_pass(_) -->
+	dcg_underscore.
 
-g_rational -->
-	g_integer,
-	g_dot,
-	g_integer.
-g_rational -->
-	g_integer.
+dcg_float(R) -->
+	dcg_integer(I),
+	dcg_dot,
+	dcg_integer(F),
+	{
+		R is I + F/10
+	}.
+dcg_float(I) -->
+	dcg_integer(I).
 
-g_and -->
+dcg_and -->
 	"and".
-g_and -->
+dcg_and -->
 	"AND".
-g_and -->
+dcg_and -->
 	",".
 	
-g_or -->
+dcg_or -->
 	"or".
-g_or -->
+dcg_or -->
 	"OR".
-g_or -->
+dcg_or -->
 	";".
 	
-g_bracket_open -->
+dcg_bracket_open -->
 	"(".
-g_bracket_open -->
+dcg_bracket_open -->
 	"[".
 	
-g_bracket_close -->
+dcg_bracket_close -->
 	")".
-g_bracket_close -->
+dcg_bracket_close -->
 	"]".
 
-g_underscore -->
+dcg_underscore -->
 	"_".
 
-g_p -->
+dcg_p -->
 	"p".
-g_p -->
+dcg_p -->
 	"P".
 
-g_dot -->
+dcg_dot -->
 	".".
 	
-g_whitespaces -->
-	g_whitespace,
-	g_whitespaces.
-g_whitespaces -->
+dcg_whitespaces -->
+	dcg_whitespace,
+	dcg_whitespaces.
+dcg_whitespaces -->
 	[].
 	
-g_whitespace -->
+dcg_whitespace -->
 	[W],
 	{
 		code_type(W, white)
 	}.
 
-g_integer -->
-	g_digit,
-	g_digits.
 
-g_digits -->
-	g_digit, !,
-	g_digits.
-g_digits -->
+dcg_integer(I) -->
+	dcg_digit(D0),
+	dcg_digits(D),
+    { 
+		number_chars(I, [D0|D])
+    }.
+
+dcg_digits([D0|D]) -->
+	dcg_digit(D0), !,
+	dcg_digits(D).
+dcg_digits([]) -->
 	[].
 
-g_digit -->
+dcg_digit(D) -->
 	[D],
 	{ 
 		code_type(D, digit)
@@ -150,44 +185,50 @@ g_digit -->
 
 
 
+%%% DCG Helpers %%%
 
 
+%% Constraints in Normal Form!!!
+%% Constraint = [[[a,b,c],[d]],[[g,h],[i,j,k]],[[l,m]]] = (a b c and d) or (g h and i j k) or l m
+%% merge_Or( [[[a,b],[c]],[[d]]] , [[[e]],[[f,g],[h]]] ) = [[[a, b], [c]], [[d]], [[e]], [[f, g], [h]]]
+%% merge_And( [[[a,b],[c]],[[d]]] , [[[e]],[[f,g],[h]]] ) = [[[a, b], [c], [e]], [[a, b], [c], [f, g], [h]], [[d], [e]], [[d], [f, g], [h]]]
+%% merge_Concat( [[[a,b],[c]],[[d]]] , [[[e]],[[f,g],[h]]] ) = [[[a, b, e], [c, e]], [[a, b, f, g], [a, b, h], [c, f, g], [c, h]], [[d, e]], [[d, f, g], [d, h]]]
 
+dcgh_merge_constraints([], C, C, _) :- !.
+dcgh_merge_constraints(C, [], C, _) :- !.
 
+dcgh_merge_constraints(ConstraintA, ConstraintB, NewConstraint, or) :- 
+	append(ConstraintA, ConstraintB, NewConstraint), !.
 
+dcgh_merge_constraints(ConstraintA, ConstraintB, NewConstraint, and) :-
+	findall(
+		NewOr,
+		(
+			member(OrA, ConstraintA),
+			member(OrB, ConstraintB),
+			append(OrA, OrB, NewOr)
+		),
+		NewConstraint
+	), !.
 
-
-
-ag_self(S) -->
-		g_integer(S).
-
-ag_rational(R) -->
-		g_integer(I),
-		g_dot(D),
-		g_integer(F),
-		{
-			append(I,[D|F],R)
-		}.
-
-ag_integer(I) -->
-        g_digit(D0),
-        g_digits(D),
-        { 
-			number_chars(I, [D0|D])
-        }.
-
-ag_digits([D|T]) -->
-        g_digit(D), !,
-        g_digits(T).
-ag_digits([]) -->
-        [].
-
-ag_digit(D) -->
-        [D],
-        { 
-			code_type(D, digit)
-        }.
-
+dcgh_merge_constraints(ConstraintA, ConstraintB, NewConstraint, concat) :-
+	findall(
+		NewOr,
+		(
+			member(OrA, ConstraintA),
+			member(OrB, ConstraintB),
+			findall(
+				NewAnd,
+				(
+					member(AndA, OrA),
+					member(AndB, OrB),
+					append(AndA, AndB, NewAnd)
+				),
+				NewOr
+			)
+		),
+		NewConstraint
+	), !.
 
 
 
