@@ -73,6 +73,11 @@ shortpass_to_pass_dont(p(ShortThrow, Index, Origen), Length, Jugglers, MaxHeight
     Throw is Origen - (Jugglers - Index) * Prechator,
 	float_to_shortpass(Throw, ShortThrowShortend), !.
 
+	
+convertShortPasses(ShortPass,Length,Persons,Max,Pass) :-
+	convertShortPasses(ShortPass,positiv,Length,Persons,Max,Pass).
+convertShortPassesDont(ShortPass,Length,Persons,Max,Pass) :-
+	convertShortPasses(ShortPass,negativ,Length,Persons,Max,Pass).
 
 convertShortPasses(Var,positiv,_,_,_,Var) :- var(Var), !.
 convertShortPasses([],_,_,_,_,[]) :- !.
