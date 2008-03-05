@@ -1,9 +1,14 @@
 preprocessConstraint(ConstraintString, Period, NumberOfJugglers, MaxHeight, Constraint) :-
-	dcg_constraint(ConstraintBagShort, ConstraintString, []),
+	preprocessConstraint(ConstraintString, positiv, Period, NumberOfJugglers, MaxHeight, Constraint).
+	
+preprocessConstraint(ConstraintString, ConstraintType, Period, NumberOfJugglers, MaxHeight, Constraint) :-
+	string2Constraint(ConstraintString, ConstraintBagShort),
 	member(ConstraintShort, ConstraintBagShort),
-	convertShortPasses(ConstraintShort, Period, NumberOfJugglers, MaxHeight, Constraint).
+	convertShortPasses(ConstraintShort, ConstraintType, Period, NumberOfJugglers, MaxHeight, Constraint).
 
 
+string2Constraint(ConstraintString, Constraint) :-
+	dcg_constraint(Constraint, ConstraintString, []), !.
 
 
 
@@ -68,21 +73,16 @@ shortpass_to_pass_dont(p(ShortThrow, Index, Origen), Length, Jugglers, MaxHeight
     Throw is Origen - (Jugglers - Index) * Prechator,
 	float_to_shortpass(Throw, ShortThrowShortend), !.
 
-convertShortPasses(Var,_,_,_,Var) :- var(Var), !.
-convertShortPasses([],_,_,_,[]) :- !.
-convertShortPasses([HeadShort|TailShort],Length,Persons,Max,[Head|Tail]) :-
-	convertShortPasses(HeadShort,Length,Persons,Max,Head),
-	convertShortPasses(TailShort,Length,Persons,Max,Tail).
-convertShortPasses(ShortPass,Length,Persons,Max,Pass) :-
+
+convertShortPasses(Var,positiv,_,_,_,Var) :- var(Var), !.
+convertShortPasses([],_,_,_,_,[]) :- !.
+convertShortPasses([HeadShort|TailShort],ConstraintType,Length,Persons,Max,[Head|Tail]) :-
+	convertShortPasses(HeadShort,ConstraintType,Length,Persons,Max,Head),
+	convertShortPasses(TailShort,ConstraintType,Length,Persons,Max,Tail).
+convertShortPasses(ShortPass,positiv,Length,Persons,Max,Pass) :-
 	not(is_list(ShortPass)),
 	shortpass_to_pass(ShortPass,Length,Persons,Max,Pass).
-
-
-convertShortPassesDont([],_,_,_,[]) :- !.
-convertShortPassesDont([HeadShort|TailShort],Length,Persons,Max,[Head|Tail]) :-
-	convertShortPassesDont(HeadShort,Length,Persons,Max,Head),
-	convertShortPassesDont(TailShort,Length,Persons,Max,Tail).
-convertShortPassesDont(ShortPass,Length,Persons,Max,Pass) :-
+convertShortPasses(ShortPass,negativ,Length,Persons,Max,Pass) :-
 	not(is_list(ShortPass)),!,
 	shortpass_to_pass_dont(ShortPass,Length,Persons,Max,Pass).
 
@@ -191,6 +191,21 @@ dcg_pass(p(F,I)) -->
 dcg_pass(p(F))  -->
 	dcg_float(F),
 	dcg_p.
+dcg_pass(p(F))  -->
+	dcg_float(F),
+	dcg_p,
+	dcg_underscore.
+dcg_pass(p(_))  -->
+	dcg_underscore,
+	dcg_p.
+dcg_pass(p(_))  -->
+	dcg_underscore,
+	dcg_p,
+	dcg_underscore.
+dcg_pass(p(_,I))  -->
+	dcg_underscore,
+	dcg_p,
+	dcg_integer(I).
 dcg_pass(_) -->
 	dcg_underscore.
 
@@ -230,6 +245,10 @@ dcg_bracket_close -->
 
 dcg_underscore -->
 	"_".
+dcg_underscore -->
+	"?".
+dcg_underscore -->
+	"*".
 
 dcg_p -->
 	"p".
