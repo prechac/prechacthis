@@ -75,28 +75,21 @@ shortPointInTime(PointInTime, ShortPointInTime) :-
 hand(Position, a) :- even(Position),!.
 hand(Position, b) :- odd(Position),!.
 
-
-%realActionList(ActionList, Period, ActionList) :-
-%	even(Period),!.
-realActionList(FirstPeriod, Period, RealActionList) :- 
-	secondPeriodActionList(FirstPeriod, Period, SecondPeriod),
-	append(FirstPeriod, SecondPeriod, RealActionList).
 	
-secondPeriodActionList([], _Period, []) :- !.
-secondPeriodActionList([FirstAction|FirstPeriod], Period, [SecondAction|SecondPeriod]) :-
+nextPeriodActionList([], _Period, []) :- !.
+nextPeriodActionList([FirstAction|FirstPeriod], Period, [SecondAction|SecondPeriod]) :-
 	FirstAction = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition],
 	SecondPointInTime is PointInTime + Period,
 	SecondThrowingSiteswapPosition is ThrowingSiteswapPosition + Period,
 	SecondLandingTime is LandingTime + Period,
 	SecondLandingSiteswapPosition is LandingSiteswapPosition + Period,
 	SecondAction = [SecondPointInTime, ThrowingJuggler, SecondThrowingSiteswapPosition, Throw, SecondLandingTime, CatchingJuggler, SecondLandingSiteswapPosition],
-	secondPeriodActionList(FirstPeriod, Period, SecondPeriod).
+	nextPeriodActionList(FirstPeriod, Period, SecondPeriod).
 	
 
 clubsInHand(Juggler, Hand, Period, ActionList, ClubsInHand) :-
 	member(Hand, [a,b]),
-	realActionList(ActionList, Period, RealActionList),  % bug: loop until first catch is really reached !!!!!!!!!!
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, RealActionList, NumberOfThrows, _FirstCatch),
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, ActionList, NumberOfThrows, _FirstCatch),
 	ClubsInHand = NumberOfThrows.
 
 
@@ -126,19 +119,22 @@ firstCatch(Juggler, Hand, Period, ActionList, FirstCatch) :-
 
 %%%  Action = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition].
 
-numberOfThrowsUntilFirstCatch(_, _, _, [], 0, _) :- !. 
-numberOfThrowsUntilFirstCatch(Juggler, Hand, _, [Action|_ActionList], 0, FirstCatch) :- 
+numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [], OldActionList, NumberOfThrows, FirstCatch) :- 
+	nextPeriodActionList(OldActionList, Period, NewActionList),
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, NewActionList, NewActionList, NumberOfThrows, FirstCatch),
+	!.
+numberOfThrowsUntilFirstCatch(Juggler, Hand, _, [Action|_ActionList], _OriginalAction, 0, FirstCatch) :- 
 	nonvar(FirstCatch),
-	nth1(1, Action, FirstCatch), % point of time is this of the first catch
+	nth1(1, Action, FirstCatch), % point of time is time of first catch
 	nth1(2, Action, Juggler), % Juggler is throwing
 	nth1(3, Action, ThrowingSiteswapPosition),
 	hand(ThrowingSiteswapPosition, Hand), % Juggler is throwing with this hand
 	!. 
-numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], NumberOfThrows, FirstCatch) :-	
+numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], OriginalAction, NumberOfThrows, FirstCatch) :-	
 	nth1(4, Action, p(0,_,_)), % throw is a 0
 	!,
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, NumberOfThrows, FirstCatch).
-numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], NewNumberOfThrows, OldFirstCatch) :-	
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OriginalAction, NumberOfThrows, FirstCatch).
+numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], OriginalAction, NewNumberOfThrows, OldFirstCatch) :-	
 	nth1(2, Action, Juggler),   % Juggler is throwing
 	nth1(3, Action, ThrowingSiteswapPosition),
 	hand(ThrowingSiteswapPosition, Hand), % Juggler is throwing with this hand
@@ -149,16 +145,16 @@ numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], NewNum
 	nth1(5, Action, Catch), % Juggler is catching with this hand
 	!,
 	earlierCatch(OldFirstCatch, Catch, NewFirstCatch),
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OldNumberOfThrows, NewFirstCatch),	
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OriginalAction, OldNumberOfThrows, NewFirstCatch),	
 	NewNumberOfThrows is OldNumberOfThrows + 1.
-numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], NewNumberOfThrows, FirstCatch) :-	
+numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], OriginalAction, NewNumberOfThrows, FirstCatch) :-	
 	nth1(2, Action, Juggler),   % Juggler is throwing
 	nth1(3, Action, ThrowingSiteswapPosition),
 	hand(ThrowingSiteswapPosition, Hand), % Juggler is throwing with this hand
 	!,
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OldNumberOfThrows, FirstCatch),	
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OriginalAction, OldNumberOfThrows, FirstCatch),	
 	NewNumberOfThrows is OldNumberOfThrows + 1.
-numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], NumberOfThrows, OldFirstCatch) :-	
+numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], OriginalAction, NumberOfThrows, OldFirstCatch) :-	
 	nth1(6, Action, Juggler),   % Juggler is catching
 	not(nth1(4, Action, p(0,_,_))),
 	nth1(7, Action, CatchingSiteswapPosition),
@@ -166,9 +162,9 @@ numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], Number
 	nth1(5, Action, Catch), % Juggler is catching with this hand
 	!,
 	earlierCatch(OldFirstCatch, Catch, NewFirstCatch),
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, NumberOfThrows, NewFirstCatch).
-numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [_Action|ActionList], NumberOfThrows, FirstCatch) :-	
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, NumberOfThrows, FirstCatch).
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OriginalAction, NumberOfThrows, NewFirstCatch).
+numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [_Action|ActionList], OriginalAction, NumberOfThrows, FirstCatch) :-	
+	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OriginalAction, NumberOfThrows, FirstCatch).
 	
 
 	

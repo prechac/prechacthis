@@ -9,9 +9,13 @@ allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, Pass
          Bag,
          Flag),!,
    sortListOfSiteswaps(Bag,Swaps),
+   length(Swaps, NumberOfResults),
    (Flag = some -> 
       format("<p class='some'>Just a selection of patterns is shown!</p>");
-      format("<p class='all'>All patterns have been found!</p>")
+      (NumberOfResults is 1 ->	
+         format("<p class='all'>The only possible pattern has been found!</p>");
+         format("<p class='all'>All ~w patterns have been found!</p>", [NumberOfResults])
+      )		
    ),
    get_time(End),
    Time is End - Start,

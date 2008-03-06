@@ -1,11 +1,8 @@
 
 
 siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, _NumberOfMultiplexes, PassesMin, PassesMax, ContainShortBag, DontContainShortBag, ClubDoesShortBag, ReactShortBag) :-
-	listOfConstraints(ListOfConstraints, Length, NumberOfJugglers, MaxHeight, ContainShortBag, ClubDoesShortBag, ReactShortBag),
-	(ListOfConstraints = [] -> 
-		length(Pattern, Length);
-		member(Pattern, ListOfConstraints)
-	),
+	initConstraintCheck,
+	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainShortBag, ClubDoesShortBag, ReactShortBag),
 	siteswap(NumberOfJugglers, Objects, MaxHeight, Pattern),
 	(passesMin(Pattern, PassesMin); NumberOfJugglers=1),
 	passesMax(Pattern, PassesMax),            
@@ -14,16 +11,21 @@ siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, _NumberOfM
 	forall(member(DontContainPattern, DontContain), dontContainRotation(Pattern, DontContainPattern)),
 	rotateHighestFirst(Pattern, OutputPattern).
 
-listOfConstraints(SetOfConstraints, Length, Persons, Max, Contain, ClubDoes, React) :-
-	findall(Throws, mergeConstraints(Throws, Length, Persons, Max, Contain, ClubDoes, React), ListOfConstraints),
-	(ListOfConstraints = [] ->
-		(
-			Contain = [[]], 
-			ClubDoes = [[]],
-			React = [[]]
-		);true
-	),
-	cleanEqualConstraints(ListOfConstraints, SetOfConstraints).
+initConstraintCheck :- 
+	retractall(constraintChecked(_)),!.
+
+constraint(Constraint, Length, _Persons, _Max, [[]], [[]], [[]]) :-
+	length(Constraint, Length),!.
+constraint(Constraint, Length, Persons, Max, Contain, ClubDoes, React) :-
+	mergeConstraints(Constraint, Length, Persons, Max, Contain, ClubDoes, React),
+	not(supConstraintChecked(Constraint)),
+	asserta(constraintChecked(Constraint)).
+	
+supConstraintChecked(Constraint) :-
+	constraintChecked(SupConstraint),
+	isRotatedSubConstraint(Constraint, SupConstraint).
+	
+%	cleanEqualConstraints(ListOfConstraints, SetOfConstraints).
 	
 mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainShortBag, ClubDoesShortBag, ReactShortBag) :-
 	member(ContainShort, ContainShortBag),
@@ -56,16 +58,16 @@ cleanEqualConstraintsForward([Constraint|BagOfConstrains], [Constraint|CleanBagO
 	
 isRotatedSubConstraint(SubConstraint, Constraint) :-
 	rotate(Constraint, ConstraintRotated),
-	isSubConstaint(SubConstraint, ConstraintRotated).
+	isSubConstraint(SubConstraint, ConstraintRotated),!.
 
-isSubConstaint([], []) :- !.
-isSubConstaint([SubThrow|SubConstraint], [Throw|Constraint]) :-
+isSubConstraint([], []) :- !.
+isSubConstraint([SubThrow|SubConstraint], [Throw|Constraint]) :-
 	nonvar(SubThrow), nonvar(Throw), !,
 	SubThrow = Throw,
-	isSubConstaint(SubConstraint, Constraint).
-isSubConstaint([_SubThrow|SubConstraint], [Throw|Constraint]) :-
+	isSubConstraint(SubConstraint, Constraint).
+isSubConstraint([_SubThrow|SubConstraint], [Throw|Constraint]) :-
 	var(Throw), !,
-	isSubConstaint(SubConstraint, Constraint).
+	isSubConstraint(SubConstraint, Constraint).
 
 
 %% --- Constraints Passes ---
