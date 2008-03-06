@@ -1,20 +1,19 @@
 
 
-siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, _NumberOfMultiplexes, PassesMin, PassesMax, ContainShortBag, DontContainShortBag, ClubDoesShortBag, ReactShortBag) :-
+siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, _NumberOfMultiplexes, PassesMin, PassesMax, ContainString, DontContainString, ClubDoesString, ReactString) :-
 	initConstraintCheck,
-	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainShortBag, ClubDoesShortBag, ReactShortBag),
+	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainString, ClubDoesString, ReactString),
 	siteswap(NumberOfJugglers, Objects, MaxHeight, Pattern),
 	(passesMin(Pattern, PassesMin); NumberOfJugglers=1),
-	passesMax(Pattern, PassesMax),            
-	member(DontContainShort, DontContainShortBag),
-	convertShortPassesDont(DontContainShort,Length,NumberOfJugglers,MaxHeight,DontContain),  %% !!! doesn't convert Index and Original !!!!
+	passesMax(Pattern, PassesMax),
+	preprocessConstraint(DontContainString, negativ, Length, NumberOfJugglers, MaxHeight, DontContain),
 	forall(member(DontContainPattern, DontContain), dontContainRotation(Pattern, DontContainPattern)),
 	rotateHighestFirst(Pattern, OutputPattern).
 
 initConstraintCheck :- 
 	retractall(constraintChecked(_)),!.
 
-constraint(Constraint, Length, _Persons, _Max, [[]], [[]], [[]]) :-
+constraint(Constraint, Length, _Persons, _Max, "", "", "") :-
 	length(Constraint, Length),!.
 constraint(Constraint, Length, Persons, Max, Contain, ClubDoes, React) :-
 	mergeConstraints(Constraint, Length, Persons, Max, Contain, ClubDoes, React),
@@ -27,21 +26,22 @@ supConstraintChecked(Constraint) :-
 	
 %	cleanEqualConstraints(ListOfConstraints, SetOfConstraints).
 	
-mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainShortBag, ClubDoesShortBag, ReactShortBag) :-
-	member(ContainShort, ContainShortBag),
-	member(ClubDoesShort, ClubDoesShortBag),
-	member(ReactShort, ReactShortBag),
-	convertShortPasses(ContainShort,Length,Persons,Max,Contain), %  p(1.3,_,_) -> p(4 rdiv 3, I, O)
-	convertShortPasses(ClubDoesShort,Length,Persons,Max,ClubDoes),
-	convertShortPasses(ReactShort,Length,Persons,Max,React),
-	findall(Pattern, (length(Pattern, Length), member(ContainThrows,  Contain ), contains(Pattern, ContainThrows )), BagContains),
-	findall(Pattern, (length(Pattern, Length), member(ClubDoesThrows, ClubDoes), clubDoes(Pattern, ClubDoesThrows)), BagClubDoes),
-	findall(Pattern, (length(Pattern, Length), member(ReactThrows,    React   ), react(   Pattern, ReactThrows   )), BagReact   ),
+mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainString, ClubDoesString, ReactString) :-
+	preprocessConstraint(ContainString, positiv, Length, Persons, Max, ContainConstraints),
+	preprocessConstraint(ClubDoesString, positiv, Length, Persons, Max, ClubDoesConstraints),
+	preprocessConstraint(ReactString, positiv, Length, Persons, Max, ReactConstraints),
+	findall(Pattern, (length(Pattern, Length), member(Contain,  ContainConstraints ), contains(Pattern, Contain )), BagContains),
+	findall(Pattern, (length(Pattern, Length), member(ClubDoes, ClubDoesConstraints), clubDoes(Pattern, ClubDoes)), BagClubDoes),
+	findall(Pattern, (length(Pattern, Length), member(React,    ReactConstraints   ), react(   Pattern, React   )), BagReact   ),
 	append(BagContains, BagClubDoes, BagTmp),
-	append(BagTmp, BagReact, BagOfCostraints),
-	mergeN(BagOfCostraints, Constraint),
-	rotateHighestFirst(Constraint, ConstraintRotated).
-
+	append(BagTmp, BagReact, BagOfConstraints),
+	(BagOfConstraints = [] ->
+			length(ConstraintRotated, Length);
+			(
+				mergeN(BagOfConstraints, Constraint),
+				rotateHighestFirst(Constraint, ConstraintRotated)
+			)
+	).
 
 cleanEqualConstraints(BagOfConstraints, CleanBagOfConstraints) :-
 	cleanEqualConstraintsForward(BagOfConstraints, HalfCleanedBag),
