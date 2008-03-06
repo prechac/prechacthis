@@ -136,6 +136,8 @@ convertShortPasses(ShortPass,negativ,Length,Persons,Max,Pass) :-
 
 %%% DCG Grammar %%%
 
+dcg_constraint([[]]) -->
+	dcg_whitespaces.
 dcg_constraint(Constraint) -->
 	dcg_pattern(Pattern),
 	dcg_and_patterns(Patterns),
