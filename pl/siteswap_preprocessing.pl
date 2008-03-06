@@ -103,7 +103,10 @@ convertShortPasses(ShortPass,positiv,Length,Persons,Max,Pass) :-
 	shortpass_to_pass(ShortPass,Length,Persons,Max,Pass).
 convertShortPasses(ShortPass,negativ,Length,Persons,Max,Pass) :-
 	not(is_list(ShortPass)),!,
-	shortpass_to_pass_dont(ShortPass,Length,Persons,Max,Pass).
+	(
+		shortpass_to_pass_dont(ShortPass,Length,Persons,Max,Pass);
+		Pass is -1 %% unconvertable
+	),!.
 
 
 
