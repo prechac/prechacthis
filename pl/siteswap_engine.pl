@@ -48,4 +48,12 @@ landingSites2Pattern(LandingSites, BasePattern) :-
    length(LandingSites, Period),
    length(BasePattern, Period),
    oneToN(Period, OneToN),
-   maplist(substract, LandingSites, OneToN, BasePattern).
+   landingSites2Pattern(LandingSites, OneToN, Period, BasePattern).
+
+
+landingSites2Pattern([], [], _Period, []) :- !.
+landingSites2Pattern([Site|LandingSites], [Pos|OneToN], Period, [BaseThrow|BasePattern]) :-
+	TmpThrow is Site - Pos,
+	substractUntilNonPositiv(TmpThrow, Period, BaseThrow),
+	landingSites2Pattern(LandingSites, OneToN, Period, BasePattern).
+	
