@@ -10,8 +10,8 @@
 siteswap(Jugglers, Objects, MaxHeight, Pattern) :-
    length(Pattern, Period),
    landingSites1(Pattern, LandingSites),
-   oneToN(Period, OneToN), % OnetoN = [1,2,3,4,...,Period]
-   permutation(OneToN, LandingSites),
+   numlist(1,Period, OneToN), % OnetoN = [1,2,3,4,...,Period]
+   fillSetPermutation(OneToN, LandingSites),
    landingSites2Pattern(LandingSites, BasePattern),
    fillInAndCopy(Pattern, BasePattern, ObjectsPattern),  % Pattern to calculate the Objects of the Constraints 
    objects(ObjectsPattern, Jugglers, ObjectsFromConstraints),

@@ -262,6 +262,7 @@ echo "<form action='./index.php' method='get'>
 
 
 function correctLongPasses($seq){
+	$seq = ereg_replace('([0-9_.]+)(p)([0-9_.]+)', 'p(\\1*\\3)', $seq);
 	$seq = ereg_replace('(p\([0-9_.]+)(,)([0-9_.]+\))', '\\1*\\3', $seq);
 	$seq = ereg_replace('(p\([0-9_.]+)(,)([0-9_.]+)(,)([0-9_.]+\))', '\\1*\\3*\\5', $seq);
 	return $seq;
@@ -282,6 +283,7 @@ function correctSeqsSemicolon($seqs){
     $seqs = correctMultiplexes($seqs);
 	$seqs = correctLongPasses($seqs);
 	$outstring = "[";
+	$seqs = str_replace('or', ';', $seqs);
 	$seqs = explode(";", $seqs);
 	foreach ($seqs as $seq) {
 		$outstring .= correctSeqs($seq) . ",";
@@ -297,6 +299,7 @@ function correctSeqs($seqs){
 	}
 	
 	$outstring = "[";
+	$seqs = str_replace('and', ',', $seqs);
 	$seqs = explode(",", $seqs);
 	foreach ($seqs as $seq) {
 		$outstring .= correctSeq($seq) . ",";

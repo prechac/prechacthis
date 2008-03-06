@@ -129,11 +129,11 @@ rational_to_number(Rational, Number) :-
 	rational(Rational),
 	Number is float(Rational).
 		
-substract(_Minuend, Subtrahend, _Difference) :-
+substract_var(_Minuend, Subtrahend, _Difference) :-
 	var(Subtrahend),!.
-substract(Minuend, _Subtrahend, _Difference) :-
+substract_var(Minuend, _Subtrahend, _Difference) :-
 	var(Minuend),!.
-substract(Minuend, Subtrahend, Difference) :- 
+substract_var(Minuend, Subtrahend, Difference) :- 
 	Difference is Minuend - Subtrahend.
 	
 substractUntilNonPositiv(Minuend, _Subtrahend, Minuend) :-
@@ -161,7 +161,29 @@ permutationRandom([Head | Rest], Shuffled) :-
    append(FirstPart, SecondPart, RestShuffled),
    append(FirstPart, [Head|SecondPart], Shuffled).
 
+fillSetPermutation(Set, Permutation) :-
+	is_set(Set),
+	removeVars(Permutation, DontPermutate),
+	subtract(Set, DontPermutate, DoPermutate),
+	permutation(DoPermutate, PermutatedGaps),
+	fillInVars(Permutation, PermutatedGaps).
+	
+removeVars([],[]) :- !.
+removeVars([Var|ListWithVars], ListWithoutVars) :-
+	var(Var), !,
+	removeVars(ListWithVars, ListWithoutVars).
+removeVars([NonVar|ListWithVars], [NonVar|ListWithoutVars]) :-
+	nonvar(NonVar), !,
+	removeVars(ListWithVars, ListWithoutVars).
 
+fillInVars(_, []) :- !.
+fillInVars([NonVar|ListWithVars], ListOfGaps) :-
+	nonvar(NonVar), !,
+	fillInVars(ListWithVars, ListOfGaps).
+fillInVars([Var|ListWithVars], [Gap|ListOfGaps]) :-
+	var(Var), !,
+	Var = Gap,
+	fillInVars(ListWithVars, ListOfGaps).
 
 findAtMostNUnique(X, Goal, MaxNumberOfResults, Bag, Flag) :- 
 	initFindAtMostNUnique,
