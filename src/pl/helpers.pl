@@ -135,6 +135,12 @@ substract(Minuend, _Subtrahend, _Difference) :-
 	var(Minuend),!.
 substract(Minuend, Subtrahend, Difference) :- 
 	Difference is Minuend - Subtrahend.
+	
+substractUntilNonPositiv(Minuend, _Subtrahend, Minuend) :-
+	Minuend =< 0, !.
+substractUntilNonPositiv(Minuend, Subtrahend, Difference) :-
+	TempDifference is Minuend - Subtrahend,
+	substractUntilNonPositiv(TempDifference, Subtrahend, Difference).
 
 
 betweenRandom(Lower, Upper, X) :-
