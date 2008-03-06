@@ -36,6 +36,7 @@ shortpass_to_pass(p(ShortThrow), Length, Jugglers, MaxHeight, p(Throw, Index, Or
 	shortpass_to_pass(p(ShortThrow, _, _), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)),
 	Index > 0.
 shortpass_to_pass(p(ShortThrow, Index), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)) :-
+	integer(Index),
 	shortpass_to_pass(p(ShortThrow, Index, _), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)).
 shortpass_to_pass(p(ShortThrow, Index, Origen), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)) :-
 	number(ShortThrow),
@@ -47,6 +48,19 @@ shortpass_to_pass(p(ShortThrow, Index, Origen), Length, Jugglers, MaxHeight, p(T
 	between(1, MaxHeightSolo, Origen),
     Throw is Origen - (Jugglers - Index) * Prechator,
 	float_to_shortpass(Throw, ShortThrowShortend). 
+shortpass_to_pass(p(Var), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)) :-
+	var(Var),
+	shortpass_to_pass(p(Var, Index), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)).
+shortpass_to_pass(p(Var, Index), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)) :-
+	var(Var),
+	Prechator is Length rdiv Jugglers,
+	IndexMax is Jugglers - 1,
+	MaxHeightSolo is MaxHeight + Length,
+	between(1, IndexMax, Index),
+	between(0, MaxHeightSolo, Origen),
+    Throw is Origen - (Jugglers - Index) * Prechator,
+	Throw >= 1,
+	Throw =< MaxHeight.
 
 
 shortpass_to_pass_dont(ShortPass,_,_,_,ShortPass) :- var(ShortPass), !.
