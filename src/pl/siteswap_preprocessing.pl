@@ -1,3 +1,4 @@
+
 preprocessConstraint(ConstraintString, Period, NumberOfJugglers, MaxHeight, Constraint) :-
 	preprocessConstraint(ConstraintString, positiv, Period, NumberOfJugglers, MaxHeight, Constraint).
 	
@@ -110,9 +111,6 @@ convertShortPasses(ShortPass,negativ,Length,Persons,Max,Pass) :-
 
 
 
-
-
-
 %%% Siteswap Constraints Grammar rules %%%
 
 % Bedingung -> Pattern [and Pattern]*
@@ -131,7 +129,6 @@ convertShortPasses(ShortPass,negativ,Length,Persons,Max,Pass) :-
 
 
 % (1 and 2) (3 or 4): [] --> [[[3]],[[4]]] --> [[[1,3],[2,3]],[[1,4],[2,4]]]
-
 
 
 %%% DCG Grammar %%%

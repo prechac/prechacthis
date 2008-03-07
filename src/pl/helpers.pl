@@ -1,5 +1,5 @@
-%%%  --- list operations ---
 
+%%%  --- list operations ---
 
 allMembersUnique([]) :- !.
 allMembersUnique([Head | Tail]) :-
