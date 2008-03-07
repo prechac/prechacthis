@@ -1,5 +1,3 @@
-%:- ensure_loaded([helpers, siteswap_helpers, siteswap_multiplex, siteswap_tree, siteswap_constraints]).
-
 
 allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, MaxNumberOfResults, BackURL) :-
    get_time(Start),
