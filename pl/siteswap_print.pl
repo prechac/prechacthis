@@ -114,8 +114,8 @@ pStyle(Length, Origen, equi) :-
 	even(Origen).
 pStyle(Length, Origen, bi) :-
 	odd(Length),
-	odd(Origen).
+	even(Origen).
 pStyle(Length, Origen, instantbi) :-
 	odd(Length),
-	even(Origen).
+	odd(Origen).
 
