@@ -1,5 +1,3 @@
-%:- ensure_loaded([helpers, siteswap_helpers, siteswap_multiplex, siteswap_passing, siteswap_solo]).
-
 
 db_open :- odbc_connect('prechacthis', _, [alias(db)]).
 db_close :- odbc_disconnect(db).
