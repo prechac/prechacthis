@@ -1,7 +1,6 @@
 
 allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, MaxNumberOfResults, BackURL) :-
    get_time(Start),
-   initErrorHandling,
    findAtMostNUnique(Throws, 
          siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React),
          MaxNumberOfResults,
@@ -16,7 +15,6 @@ allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, Pass
          format("<p class='all'>All ~w patterns have been found!</p>", [NumberOfResults])
       )		
    ),
-   write_errors("<p class='error'>~w</p>"),
    get_time(End),
    Time is End - Start,
    format("<p class='time'>(~w seconds)</p>\n", [Time]),
