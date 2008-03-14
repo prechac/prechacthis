@@ -3,7 +3,10 @@ preprocessConstraint(ConstraintString, Period, NumberOfJugglers, MaxHeight, Cons
 	preprocessConstraint(ConstraintString, positiv, Period, NumberOfJugglers, MaxHeight, Constraint).
 	
 preprocessConstraint(ConstraintString, ConstraintType, Period, NumberOfJugglers, MaxHeight, Constraint) :-
-	string2Constraint(ConstraintString, ConstraintBagShort),
+	(
+		string2Constraint(ConstraintString, ConstraintBagShort);
+		raise_error('Sorry, given constraints are are not clear!')
+	),
 	member(ConstraintShort, ConstraintBagShort),
 	convertShortPasses(ConstraintShort, ConstraintType, Period, NumberOfJugglers, MaxHeight, Constraint).
 
