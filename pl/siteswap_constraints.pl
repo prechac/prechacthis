@@ -5,7 +5,11 @@ siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, _NumberOfM
 	siteswap(NumberOfJugglers, Objects, MaxHeight, Pattern),
 	(passesMin(Pattern, PassesMin); NumberOfJugglers=1),
 	passesMax(Pattern, PassesMax),
-	preprocessConstraint(DontContainString, negativ, Length, NumberOfJugglers, MaxHeight, DontContain),
+	catch(
+		preprocessConstraint(DontContainString, negativ, Length, NumberOfJugglers, MaxHeight, DontContain),
+		constraint_unclear,
+		throw(constraint_unclear('"Exclude"'))
+	),
 	forall(member(DontContainPattern, DontContain), dontContainRotation(Pattern, DontContainPattern)),
 	rotateHighestFirst(Pattern, OutputPattern).
 
@@ -26,9 +30,21 @@ supConstraintChecked(Constraint) :-
 %	cleanEqualConstraints(ListOfConstraints, SetOfConstraints).
 	
 mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainString, ClubDoesString, ReactString) :-
-	preprocessConstraint(ContainString, positiv, Length, Persons, Max, ContainConstraints),
-	preprocessConstraint(ClubDoesString, positiv, Length, Persons, Max, ClubDoesConstraints),
-	preprocessConstraint(ReactString, positiv, Length, Persons, Max, ReactConstraints),
+	catch(
+		preprocessConstraint(ContainString, positiv, Length, Persons, Max, ContainConstraints),
+		constraint_unclear,
+		throw(constraint_unclear('"Contain"'))
+	),
+	catch(
+		preprocessConstraint(ClubDoesString, positiv, Length, Persons, Max, ClubDoesConstraints),
+		constraint_unclear,
+		throw(constraint_unclear('"Club does"'))
+	),
+	catch(
+		preprocessConstraint(ReactString, positiv, Length, Persons, Max, ReactConstraints),
+		constraint_unclear,
+		throw(constraint_unclear('"React"'))
+	),
 	findall(Pattern, (length(Pattern, Length), member(Contain,  ContainConstraints ), contains(Pattern, Contain )), BagContains),
 	findall(Pattern, (length(Pattern, Length), member(ClubDoes, ClubDoesConstraints), clubDoes(Pattern, ClubDoes)), BagClubDoes),
 	findall(Pattern, (length(Pattern, Length), member(React,    ReactConstraints   ), react(   Pattern, React   )), BagReact   ),
