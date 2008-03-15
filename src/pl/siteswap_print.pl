@@ -1,30 +1,44 @@
 
 allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, MaxNumberOfResults, BackURL) :-
-   get_time(Start),
    catch(
+   (
+      get_time(Start),
       findAtMostNUnique(Throws, 
          siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React),
          MaxNumberOfResults, 
          Bag,
-         Flag),
-      constraint_unclear,
-	  (format("<p class='exception'>Sorry, your constraints are unclear.</p>"),!,fail)
+         Flag
+      ),
+      !,
+      sortListOfSiteswaps(Bag,Swaps),
+      length(Swaps, NumberOfResults),
+      (Flag = some -> 
+         format("<p class='some'>Just a selection of patterns is shown!</p>");
+         (NumberOfResults is 1 ->	
+            format("<p class='all'>The only possible pattern has been found!</p>");
+            format("<p class='all'>All ~w patterns have been found!</p>", [NumberOfResults])
+         )		
+      ),
+      get_time(End),
+      Time is End - Start,
+      format("<p class='time'>(~w seconds)</p>\n", [Time]),
+      forall(member(T, Swaps),  writePassingSwap(T, Persons, BackURL))
    ),
-   !,
-   sortListOfSiteswaps(Bag,Swaps),
-   length(Swaps, NumberOfResults),
-   (Flag = some -> 
-      format("<p class='some'>Just a selection of patterns is shown!</p>");
-      (NumberOfResults is 1 ->	
-         format("<p class='all'>The only possible pattern has been found!</p>");
-         format("<p class='all'>All ~w patterns have been found!</p>", [NumberOfResults])
-      )		
-   ),
-   get_time(End),
-   Time is End - Start,
-   format("<p class='time'>(~w seconds)</p>\n", [Time]),
-   forall(member(T, Swaps),  writePassingSwap(T, Persons, BackURL)).
+   Exception,
+   print_exception(Exception)
+   ).
 
+print_exception(constraint_unclear(Constraint)) :-
+  format("<p class='exception'>Sorry, your constraint ~w is unclear.</p>", [Constraint]),
+  !,fail.
+
+print_exception(constraint_unclear) :-
+  format("<p class='exception'>Sorry, your constraints are unclear.</p>"),
+  !,fail.
+
+print_exception(Exception) :-
+	format(Exception),
+	!,fail.
 
 cleanListOfSiteswaps(List,CleanList) :-
    cleanEquals(List, Swaps),
