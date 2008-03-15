@@ -5,5 +5,4 @@
    [siteswap_print],
    [siteswap_info],
    [siteswap_helpers],
-   [helpers],
-   [error_handling].
+   [helpers].

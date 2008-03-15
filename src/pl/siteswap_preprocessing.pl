@@ -9,7 +9,10 @@ preprocessConstraint(ConstraintString, ConstraintType, Period, NumberOfJugglers,
 
 
 string2Constraint(ConstraintString, Constraint) :-
-	dcg_constraint(Constraint, ConstraintString, []), !.
+	(
+		dcg_constraint(Constraint, ConstraintString, []);
+		throw(constraint_unclear)
+	),!.
 
 
 

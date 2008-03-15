@@ -1,11 +1,16 @@
 
 allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, MaxNumberOfResults, BackURL) :-
    get_time(Start),
-   findAtMostNUnique(Throws, 
+   catch(
+      findAtMostNUnique(Throws, 
          siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React),
-         MaxNumberOfResults,
+         MaxNumberOfResults, 
          Bag,
-         Flag),!,
+         Flag),
+      constraint_unclear,
+	  (format("<p class='exception'>Sorry, your constraints are unclear.</p>"),!,fail)
+   ),
+   !,
    sortListOfSiteswaps(Bag,Swaps),
    length(Swaps, NumberOfResults),
    (Flag = some -> 
