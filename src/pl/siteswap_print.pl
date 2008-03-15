@@ -31,11 +31,9 @@ allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, Pass
 print_exception(constraint_unclear(Constraint)) :-
   format("<p class='exception'>Sorry, your constraint ~w is unclear.</p>", [Constraint]),
   !,fail.
-
 print_exception(constraint_unclear) :-
   format("<p class='exception'>Sorry, your constraints are unclear.</p>"),
   !,fail.
-
 print_exception(Exception) :-
 	format(Exception),
 	!,fail.
