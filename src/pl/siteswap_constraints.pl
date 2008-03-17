@@ -143,7 +143,6 @@ not_this_throw(p(Throw, Index, Origen), p(SegThrow, SegIndex, SegOrigen)) :-
 	),!.
 not_this_throw(p(Throw, Index, Origen), p(SegThrow, SegIndex, SegOrigen)) :-
 	var(SegIndex),
-	Index > 0,
 	(		
 			Throw \= SegThrow;
 			Origen \= SegOrigen;
