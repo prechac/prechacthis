@@ -2,6 +2,26 @@
 db_open :- odbc_connect('prechacthis', _, [alias(db)]).
 db_close :- odbc_disconnect(db).
 
+db_create_tables :-
+	odbc_query(db,
+		'CREATE TABLE ...\
+		) ENGINE = innodb;'
+	).
+
+
+db_siteswap_exists(Siteswap) :-   %should return stars
+	format(string(SQL),
+			'SELECT `siteswap` \
+			FROM `siteswaps` \
+			WHERE `siteswap` LIKE "~w" \
+			LIMIT 1',
+			[Siteswap]
+		),
+		odbc_query(db, SQL, row(_)).
+
+
+%%% old %%%
+
 db_create_table :-
 	odbc_query(db,
 		'CREATE TABLE `siteswaps` ( \
