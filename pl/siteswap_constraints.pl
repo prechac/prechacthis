@@ -125,8 +125,31 @@ dontcontain([PatternHead|Pattern], [SegmentHead|Segment]) :-
    ((var(PatternHead); var(SegmentHead));
    dontcontain(Pattern, Segment)),!.
 dontcontain([PatternHead|Pattern], [SegmentHead|Segment]) :-
-   (PatternHead \= SegmentHead;
-   dontcontain(Pattern, Segment)),!.
+	(
+		not_this_throw(PatternHead, SegmentHead);
+		dontcontain(Pattern, Segment)
+	),!.
+
+	
+not_this_throw(p(_Throw, Index, _Origen), p(_SegThrow, SegIndex, _SegOrigen)) :-
+	var(SegIndex),
+	Index = 0,!.
+not_this_throw(p(Throw, Index, Origen), p(SegThrow, SegIndex, SegOrigen)) :-
+	nonvar(SegIndex),
+	(
+		Throw \= SegThrow;
+		Index \= SegIndex;
+		Origen \= SegOrigen
+	),!.
+not_this_throw(p(Throw, Index, Origen), p(SegThrow, SegIndex, SegOrigen)) :-
+	var(SegIndex),
+	Index > 0,
+	(		
+			Throw \= SegThrow;
+			Origen \= SegOrigen;
+			Index \= SegIndex
+	),!.
+
 
 dontContainRotation(Pattern, Segment) :-
 	forall(rotate(Pattern, Rotation), dontcontain(Rotation, Segment)).
