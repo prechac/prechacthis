@@ -208,14 +208,14 @@ dcg_self(_) -->
 	dcg_underscore.
 
 dcg_pass(p(F,I)) -->
-	dcg_float(F),
+	dcg_number(F),
 	dcg_p,
 	dcg_integer(I).
 dcg_pass(p(F))  -->
-	dcg_float(F),
+	dcg_number(F),
 	dcg_p.
 dcg_pass(p(F))  -->
-	dcg_float(F),
+	dcg_number(F),
 	dcg_p,
 	dcg_underscore.
 dcg_pass(p(_))  -->
@@ -241,6 +241,40 @@ dcg_float(R) -->
 	}.
 dcg_float(I) -->
 	dcg_integer(I).
+
+dcg_rational(Z) -->
+	dcg_integer(N1),
+	dcg_slash,
+	dcg_integer(N2),
+	{
+		Z is N1 / N2
+	}.
+dcg_rational(Z) -->
+	dcg_integer(N1),
+	dcg_plus,
+	dcg_integer(N2),
+	dcg_slash,
+	dcg_integer(N3),
+	{
+		Z is N1 + (N2 / N3)
+	}.
+dcg_rational(Z) -->
+	dcg_integer(N1),
+	dcg_minus,
+	dcg_integer(N2),
+	dcg_slash,
+	dcg_integer(N3),
+	{
+		Z is N1 - (N2 / N3)
+	}.
+dcg_rational(I) -->
+	dcg_integer(I).
+
+dcg_number(R) -->
+	dcg_float(R).
+dcg_number(Z) -->
+	dcg_rational(Z).
+
 
 dcg_and -->
 	"and".
@@ -272,6 +306,15 @@ dcg_underscore -->
 	"?".
 dcg_underscore -->
 	"*".
+	
+dcg_slash -->
+	"/".
+
+dcg_plus -->
+	"+".
+
+dcg_minus -->
+	"-".
 
 dcg_p -->
 	"p".
