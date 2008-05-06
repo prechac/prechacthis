@@ -19,6 +19,16 @@ db_siteswap_exists(Siteswap) :-   %should return stars
 		),
 		odbc_query(db, SQL, row(_)).
 
+/*
+%% [prechacthis]
+%% DSN = prechacthis
+%% Driver = MySQL
+%% SERVER = localhost
+%% USER = jj
+%% PASSWORD = dbpw42
+%% DATABASE = prechacthis
+
+
 
 %%% old %%%
 
@@ -147,3 +157,4 @@ db_siteswap_by_id(Siteswap,ID) :-
 		[ID]
 	),
 	odbc_query(db,SQL,Siteswap,[findall(Throw,row(Throw))]).
+*/
