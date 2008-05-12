@@ -178,7 +178,7 @@ th {
 	padding: 0ex;
 }
 
-.info_clubs,  .info_pointintime, .info_hand, .info_juggler {
+.info_clubs,  .info_pointintime, .info_hand, .info_juggler, .info_cross{
 	text-align: center;
 	border-width: 0px;
 	border-style: dotted;
