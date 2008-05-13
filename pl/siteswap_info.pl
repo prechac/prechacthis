@@ -11,9 +11,8 @@ throw_time(ThrowingJuggler, Position, Time, NumberOfJugglers, Period) :-
 	JugglerMax is NumberOfJugglers - 1,
 	between(0, JugglerMax, ThrowingJuggler),
 	Minuend is Period rdiv NumberOfJugglers,
-	TimePlusOne is Time + 1,
-	PositionPlusOne is Position + 1,
-	TimePlusOne is float_fractional_part(ThrowingJuggler * Minuend) + PositionPlusOne. %% Bug in Prolog: 0.2 is float_fractional_part(2.2). --> No !?!? 
+	TimeTmp is float_fractional_part(ThrowingJuggler * Minuend) + Position, %% Bug in Prolog: ?- A is float(1 rdiv 5), A is 0.2. --> No !?!? 
+	abs(TimeTmp - Time) < 10^(-12).
 	
 pass_to_juggler(PassingJuggler, Index, CatchingJuggler, NumberOfJugglers) :-  %% Juggler = 0,1,2,...,NumberOfJugglers-1
 	CatchingJuggler is (PassingJuggler + Index) mod NumberOfJugglers.
