@@ -1,5 +1,6 @@
 AuthType Basic
-AuthName "no entry" 
-AuthUserFile /no/entry
-require user noentry
+AuthName "Flo's Verzeichnis" 
+AuthUserFile /home/flo/etc/apache-users
+AuthGroupFile /home/flo/etc/apache-groups
+require user flo jj 
 

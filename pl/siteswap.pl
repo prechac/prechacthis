@@ -1,8 +1,7 @@
-:- [siteswap_engine],
-   [siteswap_constraints],
-   [siteswap_preprocessing],
-   [siteswap_multiplex],
+:- [siteswap_solo],
+   [siteswap_passing],
    [siteswap_print],
    [siteswap_info],
-   [siteswap_helpers],
+   [multiplex],
+   [siteswap_db],
    [helpers].
