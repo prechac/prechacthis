@@ -1,9 +1,12 @@
+:- ensure_loaded([helpers, siteswap_helpers, siteswap_solo, siteswap_multiplex]).
+
+
 passing_siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, ContainShort, DontContainShort, ClubDoesShort, ReactShort) :-
    length(Throws, Length),  %create list with one of the specified period-lengths
    passing_siteswap(Throws, Persons, Objects, Max, NumberOfMultiplexes),
    passesMin(Throws, PassesMin),
    passesMax(Throws, PassesMax),
-   convertShortPasses(ContainShort,Length,Persons,Max,Contain), %1.3p -> 1.33333333p
+   convertShortPasses(ContainShort,Length,Persons,Max,Contain), %  p(1.3,_,_) -> p(4 rdiv 3, O, I)
    convertShortPasses(DontContainShort,Length,Persons,Max,DontContain),
    convertShortPasses(ClubDoesShort,Length,Persons,Max,ClubDoes),
    convertShortPasses(ReactShort,Length,Persons,Max,React),
@@ -27,6 +30,7 @@ passing_siteswap(PassingSiteswap, Persons, Objects, Max, NumberOfMultiplexes) :-
    allHeightsSmaller(SoloSiteswapWithM, MaxSolo),
    transform_start(SoloSiteswapWithM, Persons, IndexList, PassingSiteswap),
    allHeightsSmaller(PassingSiteswap, Max).
+
 
 isIndexList(_, []).
 isIndexList(Persons, [Head|Tail]) :-
@@ -87,7 +91,7 @@ containsAny(Pattern, [FirstSegment|RestSegments]) :-
    containsAll(Pattern, FirstSegment);
    containsAny(Pattern, RestSegments).
 
-containsAll(_Pattern, []).
+containsAll(_Pattern, []) :- !.
 containsAll(_Pattern, Seq) :- var(Seq).
 containsAll(Pattern, [FirstSegment|RestSegments]) :-
    rotate(Pattern, PatternRotated),
@@ -98,17 +102,25 @@ contains(Pattern, Segment) :-
    append(Segment, _, Pattern).
 
 dontcontainSome(Pattern, [FirstSegment|RestSegments]) :-
-   dontcontainAny(Pattern, FirstSegment);
-   dontcontainSome(Pattern, RestSegments).
+   dontcontainAny(Pattern, FirstSegment),!;
+   dontcontainSome(Pattern, RestSegments),!.
 
 dontcontainAny(_Pattern, []).
 dontcontainAny(_Pattern, Seq) :- var(Seq).
 dontcontainAny(Pattern, [FirstSegment|RestSegments]) :- 
-   not(
-   (rotate(Pattern, PatternRotated),
-   contains(PatternRotated, FirstSegment))),
-   dontcontainAny(Pattern, RestSegments).
+   forall(rotate(Pattern, Rotation),
+      dontcontain(Rotation, FirstSegment)
+   ),
+   dontcontainAny(Pattern, RestSegments),!.
 
+
+dontcontain(_, []) :- !.
+dontcontain([PatternHead|Pattern], [SegmentHead|Segment]) :-
+   (var(PatternHead); var(SegmentHead)),
+   dontcontain(Pattern, Segment).
+dontcontain([PatternHead|Pattern], [SegmentHead|Segment]) :-
+   PatternHead \= SegmentHead,
+   dontcontain(Pattern, Segment).
 
 clubDoesAny(Pattern, [FirstSegment|RestSegments]) :-
    clubDoesAll(Pattern, FirstSegment);
@@ -121,7 +133,7 @@ clubDoesAll(Pattern, [FirstSegment | RestSegments]) :-
    clubDoesAll(Pattern, RestSegments).
 
 clubDoes(Pattern, Seq) :-
-   insertThrows(Seq, 0, Pattern).
+   insertThrows(Pattern, 0, Seq).
 
 
 reactAny(Pattern, [FirstSegment|RestSegments]) :-
@@ -137,40 +149,19 @@ reactAll(Pattern, [FirstSegment | RestSegments]) :-
 
 
 react(Pattern, Seq) :-
-	insertThrows(Seq, 0, Pattern, -2).
-   
+	insertThrows(Pattern, 0, Seq, -2).
 
 
 insertThrows(Pattern, Site, Seq) :-
 	insertThrows(Pattern, Site, Seq, 0).
-insertThrows([],_,_,_).
-insertThrows([Throw | Rest], Site, Pattern, Delta) :-
+insertThrows(_,_,[],_).
+insertThrows(Pattern, Site, [Throw | Rest], Delta) :-
    length(Pattern, Length),
    nth0(Site, Pattern, Throw),
    SitePlusDelta is Site + Delta,
    %Test ob Hoehe OK!?! (react: 1 2 nicht sinnvoll)
    landingSite(SitePlusDelta, Throw, Length, NextSite),
-   insertThrows(Rest, NextSite, Pattern, Delta).
-
-
-landingSite(Site, Throw, Length, LandingSite) :- %self
-   number(Throw),!,
-   LandingSite is (Site + Throw) mod Length.
-
-landingSite(Site, p(_,_,Origen), Length, LandingSite) :- %pass
-	landingSite(Site, Origen, Length, LandingSite).
-
-landingSite(Site, Multiplex, Length, LandingSite) :- %multiplex
-	is_list(Multiplex),
-	member(Throw,Multiplex),
-	landingSite(Site, Throw, Length, LandingSite).
-
-landingSite1(Site1, Throw, Length, LandingSite1) :-
-	Site0 is Site1 - 1,
-	landingSite(Site0, Throw, Length, LandingSite0),
-	LandingSite1 is LandingSite0 + 1.
-
-
+   insertThrows(Pattern, NextSite, Rest, Delta).
 
 
 float_to_shortpass(Throw,ShortPass) :-

@@ -16,6 +16,27 @@ body{
 	margin-top: 1em;
 	margin-bottom: 1em;
 }
+
+.back {
+	text-align: left;
+	font-family: Arial,sans-serif;
+	width: 100%;
+	font-size: 80%;
+	margin-top: 0.5em;
+	margin-left: 0.5em;
+	border-width: 0px;
+	border-style: dotted;
+}
+.back a {
+	color: blue;
+}
+.back a:visited, .back a:link {
+	text-decoration: underline;
+}
+.back a:hover {
+	text-decoration: underline;
+}
+
 .inline{
 	display:inline-block;
 	vertical-align:top;
@@ -57,11 +78,25 @@ h3{
 	margin-bottom: 0ex;
 	font-size: 100%;
 }
+.exception{
+	color: black;
+	font-family: 'Courier New', Courier, monospace !important;
+	font-weight: bold;
+	font-size: 100%;
+	margin-top: 1ex;
+	margin-bottom: 1ex;
+}
 .time{
 	font-family: Arial,sans-serif;
 	margin-top: 0ex;
 	margin-bottom: 1ex;
 	font-size: 80%;
+}
+.some, .all{
+	font-family: Arial,sans-serif;
+	margin-top: 0.1ex;
+	margin-bottom: 0.1ex;
+	font-size: 90%;
 }
 .classic{
 	color:blue;
@@ -143,7 +178,7 @@ th {
 	padding: 0ex;
 }
 
-.info_clubs,  .info_pointintime, .info_hand, .info_juggler {
+.info_clubs,  .info_pointintime, .info_hand, .info_juggler, .info_cross{
 	text-align: center;
 	border-width: 0px;
 	border-style: dotted;
@@ -159,7 +194,14 @@ th {
 	border-style: dotted;
 	width: 3em;
 }
-
+.info_clubdistri {
+	text-align: center;
+	font-family: Arial,sans-serif;
+	color: red;
+	margin-top: 3ex;
+	margin-bottom: 0ex;
+	font-size: 80%;
+}
 
 #path {
 	text-align: right;

@@ -1,23 +1,40 @@
+:- ensure_loaded([helpers, siteswap_helpers]).
+
 siteswap(Objects, Pattern, MaxHeight) :-
+	siteswap(Objects, Pattern, MaxHeight, _). 
+
+siteswap(Objects, Pattern, MaxHeight, ConstraintsPattern) :-
    length(Pattern, Length),
+   length(ConstraintsPattern, Length),
+%   addKey(Pattern, Key-Pattern),
+   stateOfPattern(ConstraintsPattern, StatePattern),
    state(Objects, Length, StatePattern),
    MaxStateHeight is Length + MaxHeight - 1,
    allHeightsSmaller(StatePattern, MaxStateHeight),
-   variations(StatePattern, Variations),
+%   addKey(StatePattern, StateKey-StatePattern),
+%   variations(StateKey-StatePattern, Variations),
+%   member(Key-Pattern, Variations),
+   vary(StatePattern, [], Variations),
    member(Pattern, Variations),
+   checkConstrains(Pattern, ConstraintsPattern),
+%   allHeightsSmaller(Key-Pattern, MaxHeight).
    allHeightsSmaller(Pattern, MaxHeight).
 
+
+checkConstrains([],[]).
+checkConstrains([_Throw|Pattern], [Constraint|ConstraintsPattern]) :-
+   var(Constraint),!,
+   checkConstrains(Pattern, ConstraintsPattern).
+checkConstrains([Throw|Pattern], [Constraint|ConstraintsPattern]) :-
+   nonvar(Constraint),!,
+   Throw = Constraint,
+   checkConstrains(Pattern, ConstraintsPattern).
+	
 
 state(Objects, Length, Pattern) :- 
    length(TempPattern, Length),
    distribute(TempPattern, Objects),
    multiply(TempPattern, Length, Pattern).
-
-multiply([], _Factor, []).
-multiply([HeadIn | TailIn], Factor, [HeadOut | TailOut]) :-
-   HeadOut is HeadIn * Factor,
-   multiply(TailIn, Factor, TailOut).
-
 
 
 distribute([], 0).
@@ -27,15 +44,28 @@ distribute([Head | Tail],Amount) :-
    distribute(Tail, RestAmount).
 
 
+vary(Pattern, Old, New) :-
+   length(Pattern, Length),
+   First_Upper is Length - 1,
+   between(1, First_Upper, First),
+   Second_Lower is First + 1,
+   between(Second_Lower, Length, Second),
+   swap(Pattern, First, Second, NewPattern),
+   allHeightsHeigher(NewPattern, 0),
+   not(member(NewPattern, Old)),!,
+   vary(NewPattern, [NewPattern | Old], New).
 
-variations(Pattern, Variations) :-
+vary(_, All, All).
+
+
+variations(Key-Pattern, Variations) :-
   sumlist(Pattern, Max),
   length(Pattern, Length),
   OneShorter is Length-1,
   zeros(OneShorter, Zeros),
   append([Max], Zeros, LimitHi),
   append(Zeros, [Max], LimitLo),
-  variations(Pattern, LimitLo, LimitHi, Variations).
+  variations(Key-Pattern, LimitLo-LimitLo, LimitHi-LimitHi, Variations).
 
 variations(Pattern, LimitLo, LimitHi, Variations) :-
   variationsLower(Pattern, LimitLo, VariationsLower),
@@ -58,29 +88,31 @@ variationsUpper(_Pattern, _LimitHi, []).
 
 
 nextLower(Pattern, LimitLo, NextLowerPattern) :-
-  length(Pattern, Length),
+  lengthK(Pattern, Length),
   LengthMinus1 is Length - 1,
   between(1, LengthMinus1, Offset),
   First is Length - Offset,
   findall(P, varySecond(Pattern, LimitLo, First, P), BagOfLowerPatterns),
   not(length(BagOfLowerPatterns, 0)),!, %if a lower pattern is found, dont look for more
-  is_biggest(NextLowerPattern, BagOfLowerPatterns).
+  is_biggest(BagOfLowerPatterns, NextLowerPattern).
 
 nextUpper(Pattern, LimitHi, NextHigherPattern) :-
-  length(Pattern, Length),
+  lengthK(Pattern, Length),
   LengthMinus1 is Length - 1,
   between(1, LengthMinus1, Offset),
   First is Length - Offset,
   findall(P, varySecond(Pattern, LimitHi, First, P), BagOfHigherPatterns),
   not(length(BagOfHigherPatterns, 0)),!, %if a lower pattern is found, dont look for more
-  is_smallest(NextHigherPattern, BagOfHigherPatterns).
+  is_smallest(BagOfHigherPatterns, NextHigherPattern).
 
-varySecond(Pattern, Limit, First, NewPattern) :-
+varySecond(Key-Pattern, Limit, First, NewKey-NewPattern) :-
   FirstPlus1 is First + 1,
   length(Pattern, Length),
   between(FirstPlus1, Length, Second),
   swap(Pattern, First, Second, NewPattern),
-  withinLimits(Pattern, Limit, NewPattern).
+  addKey(NewPattern, NewKey-NewPattern),
+  allHeightsHeigher(NewKey-NewPattern, 0),
+  withinLimits(Key-Pattern, Limit, NewKey-NewPattern).
 
 withinLimits(Pattern, Limit, NewPattern) :-
   compare_heights(Order, Limit, Pattern),!,
@@ -98,35 +130,47 @@ swap(OldPattern, FirstIndex, SecondIndex, NewPattern) :-
    nth1(FirstIndex,  OldPattern, OldFirstThrow),
    nth1(SecondIndex, OldPattern, OldSecondThrow),
 
-   NewFirstThrow  is OldSecondThrow + Delta,
-   NewSecondThrow is OldFirstThrow - Delta,
-
-   NewSecondThrow >= 0,
-   NewFirstThrow >= 0,
+   (var(OldSecondThrow) ->
+      NewFirstThrow = _OldSecondThrow;
+      NewFirstThrow  is OldSecondThrow + Delta
+   ),
+   (var(OldFirstThrow) ->
+      NewSecondThrow = _OldFirstThrow;
+      NewSecondThrow is OldFirstThrow - Delta
+   ),
 
    nth1(FirstIndex,  NewPattern, NewFirstThrow),
    nth1(SecondIndex, NewPattern, NewSecondThrow),
 
-   fillIn(OldPattern, NewPattern).
+   fillIn(OldPattern, NewPattern, 1, [FirstIndex, SecondIndex]),!.
 
-fillIn([],[]).
 
-fillIn( [_Orig_Head | Orig_Rest], [Copy_Head | Copy_Rest]) :-
-   not(var(Copy_Head)),
-   fillIn(Orig_Rest, Copy_Rest).
+fillIn([],[], _, _).
 
-fillIn( [Orig_Head | Orig_Rest], [Copy_Head | Copy_Rest]) :-
-   var(Copy_Head),
+fillIn( [_Orig_Head | Orig_Rest], [_Copy_Head | Copy_Rest], Position, DontChange) :-
+   member(Position, DontChange),!,
+   NextPosition is Position + 1,
+   fillIn(Orig_Rest, Copy_Rest, NextPosition, DontChange).
+
+fillIn( [Orig_Head | Orig_Rest], [Copy_Head | Copy_Rest], Position, DontChange) :-
+   nonvar(Orig_Head),
    Copy_Head = Orig_Head,
-   fillIn(Orig_Rest, Copy_Rest).
+   NextPosition is Position + 1,
+   fillIn(Orig_Rest, Copy_Rest, NextPosition, DontChange).
+
+fillIn( [Orig_Head | Orig_Rest], [_ | Copy_Rest], Position, DontChange) :-
+   var(Orig_Head),
+   NextPosition is Position + 1,
+   fillIn(Orig_Rest, Copy_Rest, NextPosition, DontChange).
 
 
 stateOfPattern(Pattern, State) :-
 	swapToLandingSite(Pattern, 1, State).
 
-swapToLandingSite(Pattern, Position, Pattern) :-
+swapToLandingSite(Pattern, Position, NextPattern) :-
 	length(Pattern, Period),
-	Position > Period.
+	Position > Period,!,
+	fillIn(Pattern, NextPattern, 1, []).
 	
 swapToLandingSite(Pattern, Position, NextPattern) :-
 	findThrowToThisSite(Pattern, Position, PositionNow),!, %if no throw is found throw is a var. -> go on
@@ -144,72 +188,3 @@ findThrowToThisSite(Pattern, LandingSite, Position) :-
 	nth1(Position, Pattern, Throw),
 	landingSite1(Position, Throw, Period, LandingSite),!.
 	
-
-
-height( [],  0).
-height( Throw, Throw) :- number(Throw),!.
-height( Throw, Height) :- rational_to_number(Throw,Height).
-height(p(Throw,_,_), Height) :- rational_to_number(Throw,Height).
-height([MultiplexHead|MultiplexRest], X) :-
-	height(MultiplexRest, X),
-	height(MultiplexHead, HeightHead),
-	X >= HeightHead.
-height([MultiplexHead|MultiplexRest], X) :-
-	height(MultiplexRest, HeightRest),
-	height(MultiplexHead, X),
-	X > HeightRest.
-
-
-
-maxHeight([PatternHead|PatternRest], X) :-
-	height(PatternRest, X),
-	height(PatternHead, HeightHead),
-	X >= HeightHead.
-maxHeight([PatternHead|PatternRest], X) :-
-	height(PatternRest, HeightRest),
-	height(PatternHead, X),
-	X > HeightRest.
-
-
-allHeightsSmaller([], _Max).
-allHeightsSmaller([Throw| Siteswap], Max) :- 
-   height(Throw, Height),
-   Height =< Max,
-   allHeightsSmaller(Siteswap, Max).
-
-
-listOfHeights([],[]) :- !.
-listOfHeights([Throw|Siteswap],[Height|List]) :-
-	height(Throw,Height),
-	listOfHeights(Siteswap,List).
-
-compare_heights(Order,P1,P2) :-
-	listOfHeights(P1,H1),
-	listOfHeights(P2,H2),
-	compare(Order,H1,H2).
-
-is_biggest(Siteswap,List) :-
-	member(Siteswap,List),
-	is_bigger_than_list(Siteswap,List).
-
-is_bigger_than_list(_Siteswap,[]).
-is_bigger_than_list(Siteswap,[Head|Tail]) :-
-	compare_heights(Order,Siteswap,Head),
-	Order \= <,
-	is_bigger_than_list(Siteswap,Tail).
-
-
-is_smallest(Siteswap,List) :-
-	member(Siteswap,List),
-	is_smaller_than_list(Siteswap,List).
-
-is_smaller_than_list(_Siteswap,[]).
-is_smaller_than_list(Siteswap,[Head|Tail]) :-
-	compare_heights(Order,Siteswap,Head),
-	Order \= >,
-	is_smaller_than_list(Siteswap,Tail).
-
-rotateHighestFirst(Siteswap,Rotated) :-
-	findall(R,rotate(Siteswap,R),ListOfRotations),
-	is_biggest(Rotated,ListOfRotations).
-
