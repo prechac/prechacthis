@@ -196,13 +196,24 @@ testClubDistribution(ActionList, NumberOfJugglers, Period, ClubsInPattern) :-
 	),
 	sumlist(ListOfClubs, ClubsInPattern).
 	
+	
+applyNewSwaps(OldSwapList, NewSwaps, SwapList) :-
+	intersection(OldSwapList, NewSwaps, Intersection),
+	subtract(OldSwapList, Intersection, RemainingOld),
+	subtract(NewSwaps, Intersection, RemainingNew),
+	union(RemainingOld, RemainingNew, SwapList).
+	
+	
 
-
+	
+	
+	
 %%% --- print ---
 
 print_pattern_info(Pattern, NumberOfJugglers) :-
-	print_pattern_info(Pattern, NumberOfJugglers, '').
-print_pattern_info(PatternWithShortPasses, NumberOfJugglers, BackURL) :-
+	print_pattern_info(Pattern, NumberOfJugglers, [], [], '').
+print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwaps, BackURL) :-
+	applyNewSwaps(OldSwapList, NewSwaps, SwapList),
 	length(PatternWithShortPasses, Period),
 	maxHeight(PatternWithShortPasses, ShortMaxHeight),
 	MaxHeight is truncate(ShortMaxHeight) + 1,
@@ -215,10 +226,10 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers, BackURL) :-
 	NumberOfClubs is AverageNumberOfClubs * NumberOfJugglers,
 	(testClubDistribution(ActionList, NumberOfJugglers, Period, NumberOfClubs) ->
 		true;
-		format("<p class='info_clubdistri'>Not a possible starting point without extra throws ahead.<br>Try to turn pattern.</p>\n\n")
+		format("<p class='info_clubdistri'>Not a possible starting point without extra throws ahead.<br>Number of clubs not correct!<br>Try to turn pattern.</p>\n\n")
 	),
 	JugglerMax is NumberOfJugglers - 1,
-	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, NumberOfJugglers, Period)).
+	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, SwapList, NumberOfJugglers, Period, PatternWithShortPasses, BackURL)).
 	
 	
 writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period) :-
@@ -231,25 +242,34 @@ writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period) :-
 	forall(between(0, JugglerMax, Juggler), print_jugglers_throws(Juggler, ActionList, PointsInTime, NumberOfJugglers, Period)),
 	format("</table>\n\n").
 
-writeJugglerInfo(Juggler, ActionList, NumberOfJugglers, Period) :-
-	ColspanLong is Period + 1,
+writeJugglerInfo(Juggler, ActionList, SwapList, NumberOfJugglers, Period, Pattern, BackURL) :-
+	ColspanLong is Period,
 	ColspanShort is Period - 1,
 	jugglerShown(Juggler, JugglerShown),
 	clubsInHand(Juggler, a, Period, ActionList, ClubsHandA),
 	clubsInHand(Juggler, b, Period, ActionList, ClubsHandB),
+	handShown(Juggler, a, SwapList, HandShownA),
+	handShownLong(HandShownA, HandShownALong),
+	handShown(Juggler, b, SwapList, HandShownB),
+	handShownLong(HandShownB, HandShownBLong),
 	format("<table class='info_juggler_table'>"),
 	format("<tr>\n"),
+	writeSwapLink(Juggler, SwapList, NumberOfJugglers, Pattern, BackURL),
 	format("<th class='info_title' colspan=~w>juggler ~s</th>\n", [ColspanLong, JugglerShown]),
 	format("</tr>\n"),
 	format("<tr>\n"),
-	format("<td class='info_lable'>clubs in hand a:</td>\n"),	
+	format("<td class='info_lable'>clubs in ~w hand:</td>\n", [HandShownALong]),	
 	format("<td class='info_clubs'>~w</td>\n", [ClubsHandA]),
 	format("<td class='info_clubs' colspan=~w>&nbsp;</th>\n", [ColspanShort]),
 	format("</tr>\n"),
 	format("<tr>\n"),
-	format("<td class='info_lable'>clubs in hand b:</td>\n"),	
+	format("<td class='info_lable'>clubs in ~w hand:</td>\n", [HandShownBLong]),	
 	format("<td class='info_clubs'>~w</td>\n", [ClubsHandB]),
 	format("<td class='info_clubs' colspan=~w>&nbsp;</th>\n", [ColspanShort]),
+	format("</tr>\n"),
+	format("<tr>\n"),
+	format("<td class='info_lable'>throwing hand:</td>\n"),
+	forall(member(Action, ActionList), print_throwing_hand(Juggler, Action, SwapList)),
 	format("</tr>\n"),
 	format("<tr>\n"),
 	format("<td class='info_lable'>throw:</td>\n"),
@@ -257,11 +277,7 @@ writeJugglerInfo(Juggler, ActionList, NumberOfJugglers, Period) :-
 	format("</tr>\n"),
 	format("<tr>\n"),
 	format("<td class='info_lable'>cross/tramline:</td>\n"),
-	forall(member(Action, ActionList), print_cross_tramline(Juggler, Action)),
-	format("</tr>\n"),
-	format("<tr>\n"),
-	format("<td class='info_lable'>throwing hand:</td>\n"),
-	forall(member(Action, ActionList), print_throwing_hand(Juggler, Action)),
+	forall(member(Action, ActionList), print_cross_tramline(Juggler, Action, SwapList)),
 	format("</tr>\n"),
 	format("<tr>\n"),
 	format("<td class='info_lable'>catching juggler:</td>\n"),
@@ -269,8 +285,9 @@ writeJugglerInfo(Juggler, ActionList, NumberOfJugglers, Period) :-
 	format("</tr>\n"),
 	format("<tr>\n"),
 	format("<td class='info_lable'>catching hand:</td>\n"),
-	forall(member(Action, ActionList), print_catching_hand(Juggler, Action)),
+	forall(member(Action, ActionList), print_catching_hand(Juggler, Action, SwapList)),
 	format("</tr>\n"),
+/*
 	format("<tr>\n"),
 	format("<td class='info_lable'>throwing time:</td>\n"),
 	forall(member(Action, ActionList), print_throwing_time(Juggler, Action)),
@@ -279,8 +296,12 @@ writeJugglerInfo(Juggler, ActionList, NumberOfJugglers, Period) :-
 	format("<td class='info_lable'>landing time:</td>\n"),
 	forall(member(Action, ActionList), print_landing_time(Juggler, Action)),
 	format("</tr>\n"),
+*/
 	format("</table>\n\n").
-
+	
+writeSwapLink(Juggler, SwapList, NumberOfJugglers, Pattern, BackURL) :-
+	NewSwaps = [Juggler],
+	format("<td class='info_swaplink'><a href='info.php?pattern=~w&persons=~w&swap=~w&newswap=~w&back=~w'>swap hands</a></td>\n", [Pattern, NumberOfJugglers, SwapList, NewSwaps, BackURL]).
 
 writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
 	format("<table align='center'>\n"),
@@ -332,7 +353,7 @@ print_jugglers_point_in_time(_, _, _, _, _) :-
 
 
 
-	%%%  Action = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition].
+%%%  Action = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition].
 
 
 
@@ -353,26 +374,30 @@ print_throwing_time(ThrowingJuggler, Action) :-
 	format("<td class='info_pointintime'>~w</td>\n", [ShortTime]).
 print_throwing_time(_, _).
 
-print_throwing_hand(ThrowingJuggler, Action) :-
+print_throwing_hand(ThrowingJuggler, Action, SwapList) :-
 	nth1(2, Action, ThrowingJuggler),!,
 	nth1(3, Action, ThrowingSiteswapPosition),
 	hand(ThrowingSiteswapPosition, Hand),
-	format("<td class='info_hand'>~w</td>\n", [Hand]).
-print_throwing_hand(_, _).
+	handShown(ThrowingJuggler, Hand, SwapList, HandShown),
+	format("<td class='info_hand'>~w</td>\n", [HandShown]).
+print_throwing_hand(_, _, _).
 
-print_cross_tramline(ThrowingJuggler, Action) :-
+print_cross_tramline(ThrowingJuggler, Action, _SwapList) :-
 	nth1(2, Action, ThrowingJuggler),
 	nth1(6, Action, ThrowingJuggler),!, % self
 	format("<td class='info_cross'>&nbsp;</td>\n").
-print_cross_tramline(ThrowingJuggler, Action) :-
+print_cross_tramline(ThrowingJuggler, Action, SwapList) :-
 	nth1(2, Action, ThrowingJuggler),!,
 	nth1(3, Action, ThrowingSiteswapPosition),
+	nth1(6, Action, CatchingJuggler),
 	nth1(7, Action, CatchingSiteswapPosition),
 	hand(ThrowingSiteswapPosition, ThrowingHand),
 	hand(CatchingSiteswapPosition, CatchingHand),
-	cross_or_tramline(ThrowingHand, CatchingHand, CrossOrTram),
+	handShown(ThrowingJuggler, ThrowingHand, SwapList, ThrowingHandShown),
+	handShown(CatchingJuggler, CatchingHand, SwapList, CatchingHandShown),
+	cross_or_tramline(ThrowingHandShown, CatchingHandShown, CrossOrTram),
 	format("<td class='info_cross'>~s</td>\n", [CrossOrTram]).
-print_cross_tramline(_, _).
+print_cross_tramline(_, _, _).
 
 cross_or_tramline(Hand, Hand, "X") :- !.
 cross_or_tramline(_HandA, _HandB, "|&nbsp;|") :- !.
@@ -384,12 +409,14 @@ print_catching_juggler(ThrowingJuggler, Action) :-
 	format("<td class='info_juggler'>~s</td>\n", [JugglerShown]).
 print_catching_juggler(_, _).
 	
-print_catching_hand(ThrowingJuggler, Action) :-
+print_catching_hand(ThrowingJuggler, Action, SwapList) :-
 	nth1(2, Action, ThrowingJuggler),!,
+	nth1(6, Action, CatchingJuggler),
 	nth1(7, Action, CatchingSiteswapPosition),
 	hand(CatchingSiteswapPosition, Hand),
-	format("<td class='info_hand'>~w</td>\n", [Hand]).
-print_catching_hand(_, _).
+	handShown(CatchingJuggler, Hand, SwapList, HandShown),
+	format("<td class='info_hand'>~w</td>\n", [HandShown]).
+print_catching_hand(_, _, _).
 
 
 print_landing_time(ThrowingJuggler, Action) :-
@@ -403,4 +430,15 @@ print_landing_time(_, _).
 jugglerShown(Juggler, JugglerShown) :-
 	JugglerList = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"],
 	nth0(Juggler, JugglerList, JugglerShown).
+	
+handShown(Juggler, a, SwapList, l) :-
+	member(Juggler, SwapList), !.
+handShown(_Juggler, a, _SwapList, r) :- !.	
+handShown(Juggler, b, SwapList, r) :-
+	member(Juggler, SwapList), !.
+handShown(_Juggler, b, _SwapList, l) :- !.
+
+handShownLong(r, right) :- !.
+handShownLong(l, left) :- !.
+	 
 	

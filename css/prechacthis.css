@@ -27,14 +27,15 @@ body{
 	border-width: 0px;
 	border-style: dotted;
 }
-.back a {
+a {
 	color: blue;
 }
-.back a:visited, .back a:link {
+a:visited, a:link {
 	text-decoration: underline;
 }
-.back a:hover {
+a:hover {
 	text-decoration: underline;
+	color: #160B9C;
 }
 
 .inline{
@@ -143,7 +144,7 @@ th {
 }
 
 
-.info_lable, .info_lable_swap{
+.info_lable, .info_lable_swap, .info_swaplink{
 	text-align: right !important;
 	font-family: Arial,sans-serif;
 	padding-right: 1ex;
@@ -156,6 +157,11 @@ th {
 	font-size: 90%;
 	white-space: nowrap;
 }
+
+.info_swaplink{
+	vertical-align: bottom;
+}
+
 
 .info_left {
 	text-align: left !important;
