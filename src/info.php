@@ -9,13 +9,34 @@
 <?php
 $debug = false;
 
-if ($_REQUEST){
+if ($_GET){
+	
+	//foreach($_GET as $oneGET) {
+	//	echo "<p>$oneGET</p>";
+	//}
+	
+	if($_GET["swap"]) {
+		$swaplist = $_GET["swap"];
+	}else{
+		$swaplist = "[]";
+	}
+	
+	if($_GET["newswap"]) {
+		$newswap = $_GET["newswap"];
+	} else {
+		$newswap = "[]";
+	}
+	
 	if($_GET["debug"]=="on") $debug = true;
 
 	if($_GET["back"]) {
-		$back_url = "./?". rawurldecode($_GET["back"]);
-		echo "<p class='back'><a href='".$back_url."'>back to results</a></p>";
+		$back_url = $_GET["back"];
+		$back_url_decoded = rawurldecode($back_url);
+		$back_url_encoded = rawurlencode($back_url_decoded);
+		
+		echo "<p class='back'><a href='./?".$back_url_decoded."'>back to results</a></p>";
 	}
+	
 	
 	if($_GET["pattern"] && $_GET["persons"]) {
 	    echo "\n<table align='center' cellpadding='0'><tr><td><div align='center'>\n";
@@ -27,7 +48,9 @@ if ($_REQUEST){
 		          . "-g \"print_pattern_info("
 		          . $_GET["pattern"] . ", "
 		          . $_GET["persons"] . ", "
-		          . "'". rawurlencode($_GET["back"]) ."'"
+				  . $swaplist . ", "
+				  . $newswap . ","
+		          . "'$back_url_encoded'"
 		          . "), halt.\" "
 		          . "2> $errorlogfile";
 
@@ -42,7 +65,7 @@ if ($_REQUEST){
 	}
 	
 	if($_GET["back"]) {
-		echo "<br><p class='back'><a href='".$back_url."'>back to results</a></p>";
+		echo "<br><p class='back'><a href='./?".$back_url_decoded."'>back to results</a></p>";
 	}
 }
 ?>
