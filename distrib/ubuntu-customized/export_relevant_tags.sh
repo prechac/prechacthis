@@ -1,6 +1,8 @@
 #!/bin/bash
-CHROOT=~/tmp/remaster-root
-PT_DIR=$CHROOT/var/www/prechacthis
+CHROOTwww=$CHROOT/var/www
+PT_DIR=$CHROOTwww/prechacthis
+echo "sudo chmod a+rw $CHROOTwww"
+sudo chmod a+rw $CHROOTwww
 mkdir -p $CHROOT/var/www/prechacthis
 svn export ../../../tags/1.1 $PT_DIR/stable
 svn export ../../../tags/multiplex $PT_DIR/multiplex
