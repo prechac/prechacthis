@@ -8,5 +8,6 @@ mkdir -p $CHROOT/var/www/prechacthis
 svn export $REPO/tags/1.1 $PT_DIR/stable
 svn export $REPO/tags/multiplex $PT_DIR/multiplex
 svn export $REPO/trunk/src $PT_DIR/beta
+svn export $REPO/trunk/distrib/ubuntu-customized/index_releases.html $PT_DIR/index.html
 chmod -R a+r $PT_DIR
 chmod a+x `find $PT_DIR -type d`

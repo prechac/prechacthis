@@ -169,3 +169,4 @@ dpkg-dev		install
 html2text		install
 patch		install
 dpatch		install
+xfce4-xkb-plugin		install
