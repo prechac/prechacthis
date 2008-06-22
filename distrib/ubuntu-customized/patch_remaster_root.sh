@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/bash -x
 USER=$(whoami)
 
 CHROOT=/home/$USER/tmp/remaster-root
 
-echo "chmod -R a+rw $CHROOT/etc $CHROOT/var"
+echo "chmod -R a+rw $CHROOT/etc/skel $CHROOT/var"
 sudo chmod -R a+rw $CHROOT/etc/skel $CHROOT/var/www
 
 sudo ./export_relevant_tags.sh $CHROOT
