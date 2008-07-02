@@ -1,1 +1,1 @@
-vbox mouse-integration
+vbox image with mouse-integration
