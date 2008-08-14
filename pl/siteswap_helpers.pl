@@ -264,3 +264,28 @@ sumHeights([Throw|RestPattern], Sum) :-
    sumHeights(RestPattern, OldSum),
    height(Throw, Height),
    Sum is OldSum + Height.
+
+%%% orbits %%%
+
+orbits(Pattern, Orbits) :-
+	length(Pattern, Length),
+	length(Orbits, Length),
+	writeOrbit(Pattern, Orbits, 0, 0).
+	
+writeOrbit(_, Orbits, _, _) :- ground(Orbits), !.
+writeOrbit(Pattern, Orbits, Pos, OrbitNo) :-
+	nth0(Pos, Orbits, OrbitNoOrig),
+	var(OrbitNoOrig),!,
+	OrbitNoOrig = OrbitNo,
+	nth0(Pos, Pattern, Throw),
+	length(Pattern, Length),
+	landingSite(Pos, Throw, Length, LandingPos),
+	writeOrbit(Pattern, Orbits, LandingPos, OrbitNo).
+writeOrbit(Pattern, Orbits, Pos, OrbitNo) :-
+	nth0(Pos, Orbits, OrbitNoOrig),
+	nonvar(OrbitNoOrig),!,
+	NextOrbitNo is OrbitNo + 1,
+	firstVar0(Orbits, NextPos),
+	writeOrbit(Pattern, Orbits, NextPos, NextOrbitNo).
+%%% Multiplex Version !!!
+	

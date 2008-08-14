@@ -10,6 +10,12 @@ allMembersUnique([Head | Tail]) :-
    forall(member(X, Tail), (var(X);(nonvar(X),Head\=X))),
    allMembersUnique(Tail).
 
+firstVar0([Var|_List], 0) :-
+	var(Var), !.
+firstVar0([_NonVar|List], Pos1) :-
+	firstVar0(List, Pos),
+	Pos1 is Pos + 1.
+
 
 %% fillIn(Original, Copy, StartingPosition, ListOfNotChangingPositions)
 fillIn([],[], _, _) :- !.
