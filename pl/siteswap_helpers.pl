@@ -313,4 +313,11 @@ justThisOrbit([Throw|Pattern], [Orbit|OrbitPattern], Orbit, [Throw|JustThisOrbit
 justThisOrbit([_Thorw|Pattern], [_OtherOrbit|OrbitPattern], Orbit, [0|JustThisOrbit]) :-
 	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit).
 	
+
+magicOrbits(Pattern, NumberOfJugglers, MagicOrbits) :-
+	orbits(Pattern, OrbitPattern),
+	clubsInOrbits(Pattern, OrbitPattern, Clubs),
+	MagicClubPerPerson is 1 rdiv NumberOfJugglers,
+	positionsInList(Clubs, MagicClubPerPerson, MagicOrbits).
+	
 	
