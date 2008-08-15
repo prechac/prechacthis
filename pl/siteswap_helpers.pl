@@ -288,4 +288,29 @@ writeOrbit(Pattern, Orbits, Pos, OrbitNo) :-
 	firstVar0(Orbits, NextPos),
 	writeOrbit(Pattern, Orbits, NextPos, NextOrbitNo).
 %%% Multiplex Version !!!
+
+clubsInOrbits(Pattern, OrbitPattern, Clubs) :-
+	flatten(OrbitPattern, OrbitsFlat),
+	list_to_set(OrbitsFlat, OrbitsSet),
+	sort(OrbitsSet, Orbits),
+	clubsInOrbit(Pattern, OrbitPattern, Orbits, Clubs).
+
+clubsInOrbit(_, _, [], []) :- !.
+clubsInOrbit(Pattern, OrbitPattern, [Orbit|OrbitList], [Clubs| ClubsList]) :-
+	clubsInOrbit(Pattern, OrbitPattern, Orbit, Clubs),!,
+	clubsInOrbit(Pattern, OrbitPattern, OrbitList, ClubsList).
+	
+clubsInOrbit(Pattern, OrbitPattern, Orbit, Clubs) :-
+	number(Orbit),
+	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit),
+	objects(JustThisOrbit, Clubs).
+	
+
+justThisOrbit([], [], _, []) :- !.
+justThisOrbit([Throw|Pattern], [Orbit|OrbitPattern], Orbit, [Throw|JustThisOrbit]) :-
+	!,
+	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit).
+justThisOrbit([_Thorw|Pattern], [_OtherOrbit|OrbitPattern], Orbit, [0|JustThisOrbit]) :-
+	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit).
+	
 	
