@@ -15,6 +15,17 @@ firstVar0([Var|_List], 0) :-
 firstVar0([_NonVar|List], Pos1) :-
 	firstVar0(List, Pos),
 	Pos1 is Pos + 1.
+	
+positionsInList(List, Object, Positions) :-
+	positionsInList(List, Object, 0, Positions).
+positionsInList([], _, _, []) :- !.
+positionsInList([Object|Tail], Object, Pos, [Pos|Positions]) :-
+	!,
+	NextPos is Pos + 1,
+	positionsInList(Tail, Object, NextPos, Positions).
+positionsInList([_Object|Tail], Object, Pos, Positions) :-	
+	NextPos is Pos + 1,
+	positionsInList(Tail, Object, NextPos, Positions).
 
 
 %% fillIn(Original, Copy, StartingPosition, ListOfNotChangingPositions)
