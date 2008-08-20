@@ -81,10 +81,10 @@ rotate(List, Rotated) :-
 	LengthRight > 0,
     append(Right, Left, Rotated).
 
-rotate_left([Head|Tail], Rotated) :-
+rotate_right([Head|Tail], Rotated) :-
 	append(Tail, [Head], Rotated),!.
 
-rotate_right(List, Rotated) :-
+rotate_left(List, Rotated) :-
 	append(Liat, [Daeh], List),
 	append([Daeh], Liat, Rotated),!.
 

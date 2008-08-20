@@ -127,7 +127,9 @@ h3{
 	width:1em
 }
 
-
+td {
+	border: 0px solid #999;
+}
 th {
 	padding-top: 2em;
 	font-family: Arial,sans-serif;
@@ -136,6 +138,11 @@ th {
 }
 
 
+.magic {
+	border-color: #7F7F7F;
+	border-width: 0 0 .2ex 0;
+	border-style: dotted;
+}
 .info_juggler_table, .info_pattern_table {
 	padding: 4ex 2ex 2ex 2ex;
 }
@@ -162,14 +169,26 @@ th {
 	vertical-align: bottom;
 }
 
+.info_left_arrow {
+	vertical-align: bottom;
+	text-align: right;
+	padding: 0 2em 2em 0;
+}
+.info_right_arrow {
+	vertical-align: bottom;
+	text-align: left;
+	padding: 0 0 2em 2em;
+}
+
+.info_bottom {
+	vertical-align: bottom;
+}
 
 .info_left {
 	text-align: left !important;
-	padding-bottom: 2em;
 }
 .info_right {
 	text-align: right !important;
-	padding-bottom: 2em;
 }
 
 .big_swap {
@@ -179,9 +198,14 @@ th {
 	font-size: 300%;
 	margin-top: 3ex;
 	margin-bottom: .2ex;
-	margin-right: 0ex;
-	margin-left: 0ex;
+	margin-right: .4ex;
+	margin-left: .4ex;
 	padding: 0ex;
+}
+
+.info_orbits {
+	text-align: center;
+	font-family: Arial,sans-serif;
 }
 
 .info_clubs,  .info_pointintime, .info_hand, .info_juggler, .info_cross{

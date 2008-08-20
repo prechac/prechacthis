@@ -270,23 +270,23 @@ sumHeights([Throw|RestPattern], Sum) :-
 orbits(Pattern, Orbits) :-
 	length(Pattern, Length),
 	length(Orbits, Length),
-	writeOrbit(Pattern, Orbits, 0, 0).
+	setOrbit(Pattern, Orbits, 0, 0).
 	
-writeOrbit(_, Orbits, _, _) :- ground(Orbits), !.
-writeOrbit(Pattern, Orbits, Pos, OrbitNo) :-
+setOrbit(_, Orbits, _, _) :- ground(Orbits), !.
+setOrbit(Pattern, Orbits, Pos, OrbitNo) :-
 	nth0(Pos, Orbits, OrbitNoOrig),
 	var(OrbitNoOrig),!,
 	OrbitNoOrig = OrbitNo,
 	nth0(Pos, Pattern, Throw),
 	length(Pattern, Length),
 	landingSite(Pos, Throw, Length, LandingPos),
-	writeOrbit(Pattern, Orbits, LandingPos, OrbitNo).
-writeOrbit(Pattern, Orbits, Pos, OrbitNo) :-
+	setOrbit(Pattern, Orbits, LandingPos, OrbitNo).
+setOrbit(Pattern, Orbits, Pos, OrbitNo) :-
 	nth0(Pos, Orbits, OrbitNoOrig),
 	nonvar(OrbitNoOrig),!,
 	NextOrbitNo is OrbitNo + 1,
 	firstVar0(Orbits, NextPos),
-	writeOrbit(Pattern, Orbits, NextPos, NextOrbitNo).
+	setOrbit(Pattern, Orbits, NextPos, NextOrbitNo).
 %%% Multiplex Version !!!
 
 clubsInOrbits(Pattern, OrbitPattern, Clubs) :-
@@ -301,16 +301,16 @@ clubsInOrbit(Pattern, OrbitPattern, [Orbit|OrbitList], [Clubs| ClubsList]) :-
 	clubsInOrbit(Pattern, OrbitPattern, OrbitList, ClubsList).
 	
 clubsInOrbit(Pattern, OrbitPattern, Orbit, Clubs) :-
-	number(Orbit),
+	number(Orbit),!,
 	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit),
-	objects(JustThisOrbit, Clubs).
+	averageNumberOfClubs(JustThisOrbit, Clubs).
 	
 
 justThisOrbit([], [], _, []) :- !.
 justThisOrbit([Throw|Pattern], [Orbit|OrbitPattern], Orbit, [Throw|JustThisOrbit]) :-
 	!,
 	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit).
-justThisOrbit([_Thorw|Pattern], [_OtherOrbit|OrbitPattern], Orbit, [0|JustThisOrbit]) :-
+justThisOrbit([_Thorw|Pattern], [_OtherOrbit|OrbitPattern], Orbit, [p(0,0,0)|JustThisOrbit]) :-
 	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit).
 	
 

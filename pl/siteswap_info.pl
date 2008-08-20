@@ -220,8 +220,9 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwa
 	convertShortPasses(PatternWithShortPasses,Period,NumberOfJugglers,MaxHeight,Pattern),
 	all_points_in_time(PointsInTime, NumberOfJugglers, Period),
 	what_happens(PointsInTime, Pattern, NumberOfJugglers, ActionList),
-	writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
+	writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
 	writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period),
+	writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers),
 	averageNumberOfClubs(Pattern, AverageNumberOfClubs),
 	NumberOfClubs is AverageNumberOfClubs * NumberOfJugglers,
 	(testClubDistribution(ActionList, NumberOfJugglers, Period, NumberOfClubs) ->
@@ -231,14 +232,15 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwa
 	JugglerMax is NumberOfJugglers - 1,
 	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, SwapList, NumberOfJugglers, Period, PatternWithShortPasses, BackURL)).
 	
-	
 writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period) :-
 	format("<table class='info_pattern_table' align='center'>\n"),
 	format("<tr>\n"),
+/*	
 	format("<td class='info_lable_swap'>point in time:</td>\n"),
 	forall(member(Point, PointsInTime), (shortPointInTime(Point, ShortPoint), format("<td class='info_pointintime'>~w</td>\n", [ShortPoint]))),
-	JugglerMax is NumberOfJugglers - 1,
 	format("</tr>\n"),
+*/
+	JugglerMax is NumberOfJugglers - 1,
 	forall(between(0, JugglerMax, Juggler), print_jugglers_throws(Juggler, ActionList, PointsInTime, NumberOfJugglers, Period)),
 	format("</table>\n\n").
 
@@ -299,21 +301,32 @@ writeJugglerInfo(Juggler, ActionList, SwapList, NumberOfJugglers, Period, Patter
 */
 	format("</table>\n\n").
 	
+writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
+	format("<table align='center'>\n"),
+	writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
+%	writeOrbits(Pattern, NumberOfJugglers),
+	format("</table>\n\n").
+	
 writeSwapLink(Juggler, SwapList, NumberOfJugglers, Pattern, BackURL) :-
 	NewSwaps = [Juggler],
 	format("<td class='info_swaplink'><a href='info.php?pattern=~w&persons=~w&swap=~w&newswap=~w&back=~w'>swap hands</a></td>\n", [Pattern, NumberOfJugglers, SwapList, NewSwaps, BackURL]).
 
 writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
-	format("<table align='center'>\n"),
-	format("<tr><td colspan=2>"),
+	rotate_left(PatternWithShortPasses, PatternRotatedLeft),
+	rotate_right(PatternWithShortPasses, PatternRotatedRight),
+	sformat(ArrowLeft, "<img src='./images/left_arrow.png' alt='rotate left' border=0>", []),
+	sformat(ArrowRight, "<img src='./images/right_arrow.png' alt='rotate right' border=0>", []),
+	format("<tr>\n"),
+	format("<td class='info_left_arrow'><a href='./info.php?pattern=~w&persons=~w&back=~w'>~w</a></td>\n", [PatternRotatedLeft,NumberOfJugglers,BackURL,ArrowLeft]),
 	writeBigSwap(Pattern, NumberOfJugglers),
-	format("</td></tr>\n"),
-	writeRotatedLinks(PatternWithShortPasses, NumberOfJugglers, BackURL),
-	format("</table>\n\n").
+	format("<td class='info_right_arrow'><a href='./info.php?pattern=~w&persons=~w&back=~w'>~w</a></td>\n", [PatternRotatedRight,NumberOfJugglers,BackURL,ArrowRight]),
+	format("</tr>\n").
 	
 writeBigSwap(Throws) :-
-   concat_atom(Throws, ' ', Swap),
-   format("<h1 class='big_swap'>~w</h1>\n", [Swap]),!.
+	concat_atom(Throws, ' ', Swap),
+	format("<td><h1 class='big_swap'>"),
+	format(Swap),
+	format("</h1></td>\n").
 
 writeBigSwap(Throws, Persons) :-
 	length(Throws, Length),
@@ -321,15 +334,23 @@ writeBigSwap(Throws, Persons) :-
 	convertMultiplex(ThrowsP,ThrowsPM),
     writeBigSwap(ThrowsPM).
 	
-writeRotatedLinks(Pattern, NumberOfJugglers, BackURL) :-
-	rotate_left(Pattern, PatternRotatedLeft),
-	rotate_right(Pattern, PatternRotatedRight),
-	sformat(ArrowLeft, "<img src='./images/left_arrow.png' alt='rotate left' border=0>", []),
-	sformat(ArrowRight, "<img src='./images/right_arrow.png' alt='rotate right' border=0>", []),
-	format("<tr>\n"),
-	format("<td class='info_left'><a href='./info.php?pattern=~w&persons=~w&back=~w'>~w</a></td>\n", [PatternRotatedLeft,NumberOfJugglers,BackURL,ArrowLeft]),
-	format("<td class='info_right'><a href='./info.php?pattern=~w&persons=~w&back=~w'>~w</a></td>\n", [PatternRotatedRight,NumberOfJugglers,BackURL,ArrowRight]),
-	format("</tr>\n").	
+writeOrbitInfo(_Pattern, _PatternWithShortPasses, _NumberOfJugglers) :-
+	true.
+
+writeOrbits(Pattern, NumberOfJugglers) :-
+	orbits(Pattern, Orbits),
+	orbitShown(Orbits, OrbitsShown),
+	clubsInOrbits(Pattern, Orbits, AvClubs),
+	multiply(AvClubs, NumberOfJugglers, Clubs),	
+	concat_atom(OrbitsShown, '</td><td class="info_orbits">', OrbitsTDs),
+	format("<tr>\n<td class='info_lable'>Orbits:</td>\n<td class='info_orbits'>"),
+	format(OrbitsTDs),
+	format("</td>\n<td>&nbsp;</td>\n</tr>\n"),
+	length(Pattern, Length),
+	Colspan is Length + 2,
+	format("<tr><td colspan='~w'>", [Colspan]),
+	print(Clubs),
+	format("</td></tr>\n").
 	
 print_jugglers_throws(Juggler, ActionList, PointsInTime, NumberOfJugglers, Period) :-
 	format("<tr>\n"),
@@ -425,7 +446,16 @@ print_landing_time(ThrowingJuggler, Action) :-
 	shortPointInTime(Time, ShortTime),
 	format("<td class='info_pointintime'>~w</td>\n", [ShortTime]).
 print_landing_time(_, _).
-	
+
+orbitShown([], []) :- !.
+orbitShown([Orbit|ListOrbit], [Shown|ListShown]) :-
+	!,
+	orbitShown(Orbit, Shown),
+	orbitShown(ListOrbit, ListShown).
+orbitShown(Orbit, OrbitShown) :-
+	OrbitList = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'],
+	nth0(Orbit, OrbitList, OrbitShown).	
+
 
 jugglerShown(Juggler, JugglerShown) :-
 	JugglerList = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"],
