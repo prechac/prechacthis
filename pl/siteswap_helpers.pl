@@ -302,22 +302,45 @@ clubsInOrbit(Pattern, OrbitPattern, [Orbit|OrbitList], [Clubs| ClubsList]) :-
 	
 clubsInOrbit(Pattern, OrbitPattern, Orbit, Clubs) :-
 	number(Orbit),!,
-	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit),
+	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit, calc),
 	averageNumberOfClubs(JustThisOrbit, Clubs).
 	
 
-justThisOrbit([], [], _, []) :- !.
-justThisOrbit([Throw|Pattern], [Orbit|OrbitPattern], Orbit, [Throw|JustThisOrbit]) :-
+justThisOrbit([], [], _, [], _) :- !.
+justThisOrbit([Throw|Pattern], [Orbit|OrbitPattern], Orbit, [Throw|JustThisOrbit], Type) :-
 	!,
-	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit).
-justThisOrbit([_Thorw|Pattern], [_OtherOrbit|OrbitPattern], Orbit, [p(0,0,0)|JustThisOrbit]) :-
-	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit).
-	
+	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit, Type).
+justThisOrbit([_Thorw|Pattern], [_OtherOrbit|OrbitPattern], Orbit, [p(0,0,0)|JustThisOrbit], calc) :-
+	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit, calc).
+justThisOrbit([_Thorw|Pattern], [_OtherOrbit|OrbitPattern], Orbit, ['&nbsp;'|JustThisOrbit], print) :-
+	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit, print).
 
+	
 magicOrbits(Pattern, NumberOfJugglers, MagicOrbits) :-
+	magicOrbits(Pattern, NumberOfJugglers, _OrbitPattern, MagicOrbits), !.
+magicOrbits(Pattern, NumberOfJugglers, OrbitPattern, MagicOrbits) :-
 	orbits(Pattern, OrbitPattern),
 	clubsInOrbits(Pattern, OrbitPattern, Clubs),
 	MagicClubPerPerson is 1 rdiv NumberOfJugglers,
 	positionsInList(Clubs, MagicClubPerPerson, MagicOrbits).
 	
+
+magicPositions(Pattern, NumberOfJugglers, MagicPositions) :-
+	magicOrbits(Pattern, NumberOfJugglers, OrbitPattern, MagicOrbits),
+	orbitPositions(MagicOrbits, OrbitPattern, MagicPositions).
+
+orbitPositions(Orbits, OrbitPattern, Positions) :-
+	is_list(Orbits), !,
+	findall(
+		Position,
+		(
+			member(Orbit, Orbits), 
+			orbitPositions(Orbit, OrbitPattern, PositionsTmp),
+			member(Position, PositionsTmp)
+		),
+		Positions
+	).
+orbitPositions(Orbit, OrbitPattern, Positions) :-
+	number(Orbit), !,
+	positionsInList(OrbitPattern, Orbit, Positions).
 	

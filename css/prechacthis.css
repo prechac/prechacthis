@@ -139,12 +139,12 @@ th {
 
 
 .magic {
-	border-color: #7F7F7F;
+	border-color: #CF6;
 	border-width: 0 0 .2ex 0;
 	border-style: dotted;
 }
 .info_juggler_table, .info_pattern_table {
-	padding: 4ex 2ex 2ex 2ex;
+	padding: 4ex 2ex 4ex 2ex;
 }
 .info_juggler_table {
 	display: inline;
@@ -162,6 +162,37 @@ th {
 	border-width: 0px !important;
 	border-style: dotted;
 	font-size: 90%;
+	white-space: nowrap;
+}
+
+.info_right_info {
+	text-align: center !important;
+	font-family: Arial,sans-serif;
+	padding-right: 1ex;
+	padding-left: 1ex;
+	margin-right: 1ex;
+	margin-left: 1ex;
+	padding-bottom:.5ex;
+	border-color: black;
+	border-width: 0 0 0 1px !important;
+	border-style: dotted;
+	font-size: 90%;
+	white-space: nowrap;
+}
+
+td.info_title {
+	text-align: center !important;	
+	font-weight: bold;
+	font-family: Arial,sans-serif;
+	padding-right: 2ex;
+	padding-left: 2ex;
+	margin-right: 2ex;
+	margin-left: 2ex;
+	padding-bottom: 2ex;
+	border-color: black;
+	border-width: 0 !important;
+	border-style: dotted;
+	font-size: 100%;
 	white-space: nowrap;
 }
 
