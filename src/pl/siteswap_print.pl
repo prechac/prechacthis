@@ -68,15 +68,16 @@ convertP([p(FirstThrow,Index,Origen) | RestThrows ], [  FirstThrowP| RestThrowsP
 	float_to_shortpass(FirstThrow,FirstThrowShort),
 	((
 		Persons > 2,
-		sformat(FirstThrowP, "<span class='~w'>~wp<sub>~w</sub></span>", [Style,FirstThrowShort,Index])
+		format(string(FirstThrowP), "<span class='~w'>~wp<sub>~w</sub></span>", [Style,FirstThrowShort,Index])
 	);
 	(
 		Persons = 2,
-		sformat(FirstThrowP, "<span class='~w'>~wp</span>", [Style,FirstThrowShort])
+		format(string(FirstThrowP), "<span class='~w'>~wp</span>", [Style,FirstThrowShort])
 	)),
     convertP(RestThrows, RestThrowsP, Length, Persons).
-convertP([ p(FirstThrow, 0, _Origen)  | RestThrows ], [ FirstThrow | RestThrowsP], Length, Persons) :-
+convertP([ p(FirstThrow, 0, _Origen)  | RestThrows ], [ FirstThrowP | RestThrowsP], Length, Persons) :-
     number(FirstThrow),
+	format(string(FirstThrowP), "~w", [FirstThrow]),
 	%%atom_concat(FirstThrow, '', FirstThrowP),
     convertP(RestThrows, RestThrowsP, Length, Persons).
 convertP([ FirstThrow | RestThrows ], [ FirstThrowP | RestThrowsP], Length, Persons) :-
@@ -91,6 +92,18 @@ convertP(p(Throw, Index, Origen), ThrowP, Length, Persons) :-
 convertP(Throw, ThrowP, Length, Persons) :-
 	number(Throw),
 	convertP([Throw], [ThrowP], Length, Persons).
+
+convertMagic(Pattern, [], Pattern) :- !.
+convertMagic(Pattern, MagicPositions, MagicPattern) :-
+	convertMagicThrows(Pattern, MagicPositions, MagicPattern),
+	fillIn(Pattern, MagicPattern, 0, MagicPositions).
+
+convertMagicThrows(_, [], _) :- !.
+convertMagicThrows(Pattern, [Pos|MagicPositions], MagicPattern) :- 
+	nth0(Pos, Pattern, Throw),
+	format(string(MagicThrow), "<span class='magic'>~s</span>", [Throw]),
+	nth0(Pos, MagicPattern, MagicThrow),
+	convertMagicThrows(Pattern, MagicPositions, MagicPattern).
 
 
 %% single throw version needed!!!

@@ -331,11 +331,37 @@ writeBigSwap(Throws) :-
 writeBigSwap(Throws, Persons) :-
 	length(Throws, Length),
     convertP(Throws, ThrowsP, Length, Persons),
-	convertMultiplex(ThrowsP,ThrowsPM),
-    writeBigSwap(ThrowsPM).
+	magicPositions(Throws, Persons, MagicPositions),
+	convertMagic(ThrowsP, MagicPositions, ThrowsPM),
+	convertMultiplex(ThrowsPM,ThrowsPMM),
+    writeBigSwap(ThrowsPMM).
 	
-writeOrbitInfo(_Pattern, _PatternWithShortPasses, _NumberOfJugglers) :-
-	true.
+writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers) :-
+	orbits(Pattern, OrbitPattern),
+	magicPositions(Pattern, NumberOfJugglers, MagicPositions),
+	length(Pattern, Period),
+	convertP(PatternWithShortPasses, PatternP, Period, NumberOfJugglers),
+	convertMagic(PatternP, MagicPositions, PatternPM),
+	convertMultiplex(PatternPM, PatternPMM),
+	flatten(OrbitPattern, OrbitsFlat),
+	list_to_set(OrbitsFlat, OrbitsSet),
+	sort(OrbitsSet, Orbits),
+	format("<table class='info_pattern_table' align='center'>\n"),
+	Colspan is Period,
+	format("<td class='info_title' colspan=~w>orbits</td><td class='info_right_info'>clubs</td>\n", [Colspan]),
+	forall(member(Orbit, Orbits), writeThisOrbitInfo(OrbitPattern, Orbit, Pattern, NumberOfJugglers, PatternPMM)),
+	format("</table>\n\n").
+	
+writeThisOrbitInfo(OrbitPattern, Orbit, Pattern, NumberOfJugglers, PatternPMM) :-	
+	clubsInOrbit(Pattern, OrbitPattern, Orbit, ClubsAV),
+	Clubs is ClubsAV * NumberOfJugglers,
+	justThisOrbit(PatternPMM, OrbitPattern, Orbit, PatternPrint, print),
+	concat_atom(PatternPrint, '</td><td class="info_throw">', Swap),
+	format("<tr>\n"),
+	format("<td class='info_throw'>"),
+	format(Swap),
+	format("</td><td class='info_right_info'>~w</td>\n", [Clubs]),
+	format("</tr>\n").
 
 writeOrbits(Pattern, NumberOfJugglers) :-
 	orbits(Pattern, Orbits),
