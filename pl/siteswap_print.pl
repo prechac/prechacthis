@@ -101,7 +101,7 @@ convertMagic(Pattern, MagicPositions, MagicPattern) :-
 convertMagicThrows(_, [], _) :- !.
 convertMagicThrows(Pattern, [Pos|MagicPositions], MagicPattern) :- 
 	nth0(Pos, Pattern, Throw),
-	format(string(MagicThrow), "<span class='magic'>~s</span>", [Throw]),
+	format(string(MagicThrow), "<span class='magic' title='it&#39;s&nbsp;magic'>~s</span>", [Throw]),
 	nth0(Pos, MagicPattern, MagicThrow),
 	convertMagicThrows(Pattern, MagicPositions, MagicPattern).
 
