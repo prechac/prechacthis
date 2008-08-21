@@ -39,9 +39,9 @@ a:hover {
 }
 
 .inline{
-	display:inline-block;
-	vertical-align:top;
-	border-width:0px;
+	display: inline-block;
+	vertical-align: top;
+	border-width: 0px;
 	border-color: black;
 	border-style: solid;
 	margin-right: 1em;
@@ -144,7 +144,8 @@ th {
 	border-style: dotted;
 }
 .info_juggler_table, .info_pattern_table {
-	padding: 4ex 2ex 4ex 2ex;
+	padding: 0 2ex 0 2ex;
+	margin: 4ex 0 4ex 0;
 }
 .info_juggler_table {
 	display: inline;
