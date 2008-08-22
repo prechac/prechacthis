@@ -5,4 +5,5 @@
    [siteswap_print],
    [siteswap_info],
    [siteswap_helpers],
-   [helpers].
+   [helpers],
+   [joepass].

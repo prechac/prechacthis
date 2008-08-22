@@ -1,31 +1,32 @@
 <?php
 if (isset($_GET["pattern"]) && isset($_GET["persons"])){
 	
-	if($_GET["swap"]) {
+	if(isset($_GET["swap"])) {
 		$swaplist = $_GET["swap"];
 	}else{
 		$swaplist = "[]";
 	}
 	
-	if($_GET["newswap"]) {
-		$newswap = $_GET["newswap"];
-	} else {
-		$newswap = "[]";
-	}
-	
 	$plquery  = "swipl -q "
 	          . "-f " . dirname($_SERVER["SCRIPT_FILENAME"]) . "/pl/siteswap.pl "
-	          . "-g \"print_pattern_info("
+	          . "-g \"jp_pattern_def("
 	          . $_GET["pattern"] . ", "
 	          . $_GET["persons"] . ", "
-			  . $swaplist . ", "
-			  . $newswap . ", "
-			  . "''"
+			  . $swaplist
 	          . "), halt.\"";
-
-    header("Content-type: application/force-download");
-    header("Content-Transfer-Encoding: Binary");
-    header("Content-disposition: attachment; filename=\"".$_REQUEST["pattern"].".pass\"");
+	
+	if(isset($_GET["file"])) {
+    	header("Content-type: application/force-download");
+    	header("Content-Transfer-Encoding: Binary");
+    	header("Content-disposition: attachment; filename=\"".$_REQUEST["persons"]."_".$_REQUEST["file"].".pass\"");
+	} else {
+	    header("Content-type: text/plain");
+	}
+	if(isset($_GET["debug"])) {
+		echo $plquery;
+	}
 	echo `$plquery`;
+} else {
+	echo "something is wrong :-(";
 }
 ?>

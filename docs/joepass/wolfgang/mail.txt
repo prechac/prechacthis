@@ -1,0 +1,113 @@
+Hi everybody
+
+Thanks to Seans for your posting.
+Here are some more informations that you will need to translate the notation on prechacThis to JoePass.pass files.
+
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+Writing patterns for JoePass! is not that difficult.
+
+A)
+undelayed patterns:
+In std. siteswap patterns the destination hand is calculated from the number directly.
+<  3p 3 1 1p | 1 1p 3p 3>
+All throws are odd, so they all go to the opposite hand,both selfs and passes.
+
+
+7-clubs 2 count
+To make it look familiar juggler 2 has to start with the left hand.
+Switch the hands of juggler 2
+#jugglerStartLeft 2     ! switch hands of juggler 2, do all passes with the right hand
+<4p 3|3 4p>                    
+
+JoePass! will take care of the destination hand automatically, so don´t add information about the direction of the passes to the pattern (i.e. don´t add an x to the pass to point out that they go to the other hand.)
+
+
+B) delayed patterns:
+You have 2 options.
+
+B.1)    handle delays automatically
+Use the same system as above, i.e. write a siteswap and let the software calculate the direction and the timing.
+For example, let´s take the 2 club 2-count on singles. We want all throws on the same height. Siteswap tells us that every throw value must be 3.5.
+
+To change the height of the throws, both jugglers have to delay their right hand.
+
+#jugglerStartLeft 2     ! switch hands of juggler 2, do all passes with the right hand
+                                       ! place this command before any delay commands (bug)
+
+#D +                            ! Software handles delays, throw height and direction
+#jugglerDelay 1 r 0.5   ! Delay right hand of juggler 1
+#jugglerDelay 2 l 0.5   ! Delay left hand of juggler 2 (NB: switched by jugglerStartLeft to right hand)
+
+<4p 3|3 4p>                     ! same pattern as above
+
+
+This notation reaches it´s limits when you deal with passes < 1, i.e. 0.5p.
+This has to be expanded to
+#D +                            ! Software handles delays, throw height and direction
+#jugglerDelay 1  0.5    ! Delay right hand of juggler 1
+<1p|0p>                         ! see discussions about 0x on rec.juggling :)
+
+
+B.2) handle delays manually
+To change the height of the throws, both jugglers have to delay their right hand.
+
+#sx                                     ! no longer plain siteswap. Activate some extensions, here frictional numbers
+                                       ! siteswap values must be separated by spaces
+                                       ! as long as use spaces between throws, #sx can always be activated
+
+
+#jugglerStartLeft 2     ! switch hands of juggler 2, do all passes with the right hand
+                                       ! place this command before any delay commands (bug)
+
+#D -                                    ! Software _does not_ handles delays, throw height and direction.
+                                       ! do it manually
+#jugglerDelay 1 r 0.5   ! Delay right hand of juggler 1
+#jugglerDelay 2 l 0.5   ! Delay left hand of juggler 2
+
+<3.5px 3.5 | 3.5 3.5px>  ! slightly different pattern
+
+The throw direction is calculated from the integer value (3 in this case).
+Therefore, the 3.5 self goes to the other hand, what´s fine here.
+The direction of the pass is wrong: without switching the hand it should cross (should go from right to right, i.e. stay in the same hand)
+which it will not do according to the rule named above. Add an x to force a throw to the opposite hand.
+
+The <1p|0p> pattern will work with this notation.
+#sx                                     ! no longer plain siteswap. Activate some extensions, here frictional numbers
+                                       ! siteswap values must be separated by spaces
+                                       ! as long as use spaces between throws, #sx can always be activated
+
+#D -                                    ! Software _does not_ handles delays, throw height and direction.
+                                       ! do it manually
+#jugglerDelay 1 0.5     ! delay both hands of  juggler 1
+
+<0.5p|0.5px>
+
+
+------------------------------------------------------------------------------------------------------------------------------------
+Here´s an important bit:
+you have to write down the whole passing pattern (i.e. not only one juggler) because
+a) otherwise it is hard to tell how many jugglers are in the pattern.
+b) all commands starting with a # are disabled in JoePass! when the symetric pattern extension is called.
+
+
+In  the pattern output on prechacThis, you can change
+juggler A:              by      <
+juggler B: ...          by      |
+add an extra            >
+
+and add x to the siteswap values according to the rule eplained above.
+This should do the trick.
+
+
+I hope this makes sense.
+
+yours
+wolfgang
+
+
+
+
+
+

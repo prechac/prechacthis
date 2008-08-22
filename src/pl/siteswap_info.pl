@@ -230,7 +230,8 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwa
 		format("<p class='info_clubdistri'>Not a possible starting point without extra throws ahead.<br>Number of clubs not correct!<br>Try to turn pattern.</p>\n\n")
 	),
 	JugglerMax is NumberOfJugglers - 1,
-	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, SwapList, NumberOfJugglers, Period, PatternWithShortPasses, BackURL)).
+	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, SwapList, NumberOfJugglers, Period, PatternWithShortPasses, BackURL)),
+	writeJoepassLink(PatternWithShortPasses, NumberOfJugglers, SwapList).
 	
 writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period) :-
 	format("<table class='info_pattern_table' align='center'>\n"),
@@ -309,22 +310,25 @@ writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
 	
 writeSwapLink(Juggler, SwapList, NumberOfJugglers, Pattern, BackURL) :-
 	NewSwaps = [Juggler],
-	format("<td class='info_swaplink'><a href='info.php?pattern=~w&persons=~w&swap=~w&newswap=~w&back=~w'>swap hands</a></td>\n", [Pattern, NumberOfJugglers, SwapList, NewSwaps, BackURL]).
+	pattern_to_string(Pattern, PatternStr),
+	format("<td class='info_swaplink'><a href='info.php?pattern=~s&persons=~w&swap=~w&newswap=~w&back=~w'>swap hands</a></td>\n", [PatternStr, NumberOfJugglers, SwapList, NewSwaps, BackURL]).
 
 writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
 	rotate_left(PatternWithShortPasses, PatternRotatedLeft),
+	pattern_to_string(PatternRotatedLeft, PatternRotatedLeftStr),
 	rotate_right(PatternWithShortPasses, PatternRotatedRight),
+	pattern_to_string(PatternRotatedRight, PatternRotatedRightStr),
 	sformat(ArrowLeft, "<img src='./images/left_arrow.png' alt='rotate left' border=0>", []),
 	sformat(ArrowRight, "<img src='./images/right_arrow.png' alt='rotate right' border=0>", []),
 	format("<tr>\n"),
-	format("<td class='info_left_arrow'><a href='./info.php?pattern=~w&persons=~w&back=~w'>~w</a></td>\n", [PatternRotatedLeft,NumberOfJugglers,BackURL,ArrowLeft]),
+	format("<td class='info_left_arrow'><a href='./info.php?pattern=~s&persons=~w&back=~w'>~w</a></td>\n", [PatternRotatedLeftStr,NumberOfJugglers,BackURL,ArrowLeft]),
 	writeBigSwap(Pattern, NumberOfJugglers),
-	format("<td class='info_right_arrow'><a href='./info.php?pattern=~w&persons=~w&back=~w'>~w</a></td>\n", [PatternRotatedRight,NumberOfJugglers,BackURL,ArrowRight]),
+	format("<td class='info_right_arrow'><a href='./info.php?pattern=~s&persons=~w&back=~w'>~w</a></td>\n", [PatternRotatedRightStr,NumberOfJugglers,BackURL,ArrowRight]),
 	format("</tr>\n").
 	
 writeBigSwap(Throws) :-
 	concat_atom(Throws, ' ', Swap),
-	format("<td><h1 class='big_swap'>"),
+	format("<td class='big_swap'><h1 class='big_swap'>"),
 	format(Swap),
 	format("</h1></td>\n").
 
@@ -377,6 +381,14 @@ writeOrbits(Pattern, NumberOfJugglers) :-
 	format("<tr><td colspan='~w'>", [Colspan]),
 	print(Clubs),
 	format("</td></tr>\n").
+	
+writeJoepassLink(Pattern, NumberOfJugglers, SwapList) :-
+	pattern_to_string(Pattern, PatternStr),
+	jp_filename(Pattern, FileName),
+	format("<div class='jp_link'>\n"),
+	format("<a href='joepass.php?pattern=~s&persons=~w&file=~w&swap=~w'>download JoePass file</a> (just testing!)\n", [PatternStr, NumberOfJugglers, FileName, SwapList]),
+	format("</div>\n").
+	
 	
 print_jugglers_throws(Juggler, ActionList, PointsInTime, NumberOfJugglers, Period) :-
 	format("<tr>\n"),
