@@ -253,3 +253,13 @@ gather(B,Bag) :-
 	gather([X|B],Bag),
 	!.
 gather(S,S).
+
+%%% string operations %%%
+
+remove_whitespace([], []) :- !.
+remove_whitespace([White|String], CleanString) :-
+	char_type(White, white), !,
+	remove_whitespace(String, CleanString).
+remove_whitespace([NonWhite|String], [NonWhite|CleanString]) :-
+	remove_whitespace(String, CleanString).
+

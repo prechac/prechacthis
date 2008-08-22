@@ -120,7 +120,8 @@ convertMultiplex([Throw | Rest], [Throw | RestNew]) :-
 writeSwap(ThrowsPM, Throws, Persons, BackURL) :-
    concat_atom(ThrowsPM, ' ', Swap),
    float_to_shortpass(Throws,ThrowsShort),
-   format("<a href='./info.php?pattern=~w&persons=~w&back=~w'>~w</a><br>\n", [ThrowsShort,Persons,BackURL,Swap]),!.
+   pattern_to_string(ThrowsShort, URLPattern),
+   format("<a href='./info.php?pattern=~s&persons=~w&back=~w'>~w</a><br>\n", [URLPattern,Persons,BackURL,Swap]),!.
 
 writePassingSwap(Throws, Persons, BackURL) :-
 	length(Throws,Length),
@@ -134,6 +135,10 @@ writeCompletedSiteswap(Pattern, Persons, Objects, Length, Max, NumberOfMultiplex
    writePassingSwap(Pattern, Persons, BackURL).
 
 
+pattern_to_string(Pattern, PatternStr) :-
+	format(atom(TempStr), "~w", [Pattern]),
+	string_to_list(TempStr, TempLst),
+	remove_whitespace(TempLst, PatternStr).
 
 
 pStyle(Length, Origen, classic) :- 

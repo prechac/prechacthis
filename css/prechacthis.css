@@ -146,6 +146,7 @@ th {
 .info_juggler_table, .info_pattern_table {
 	padding: 0 2ex 0 2ex;
 	margin: 4ex 0 4ex 0;
+	white-space: nowrap;
 }
 .info_juggler_table {
 	display: inline;
@@ -199,17 +200,14 @@ td.info_title {
 
 .info_swaplink{
 	vertical-align: bottom;
+	white-space: nowrap;
 }
 
-.info_left_arrow {
-	vertical-align: bottom;
-	text-align: right;
-	padding: 0 2em 2em 0;
-}
-.info_right_arrow {
-	vertical-align: bottom;
-	text-align: left;
-	padding: 0 0 2em 2em;
+.info_left_arrow, .info_right_arrow {
+	vertical-align: middle;
+	padding: 2em;
+	margin: 2em;
+	text-align: center;
 }
 
 .info_bottom {
@@ -223,21 +221,25 @@ td.info_title {
 	text-align: right !important;
 }
 
-.big_swap {
+h1.big_swap {
 	text-align: center;
 	font-family: 'Courier New', Courier, monospace !important;
 	font-weight: bold;
 	font-size: 300%;
-	margin-top: 3ex;
-	margin-bottom: .2ex;
-	margin-right: .4ex;
-	margin-left: .4ex;
-	padding: 0ex;
+	white-space: nowrap;
+	margin: 0;
+	padding: 0;
+}
+td.big_swap {
+	margin: 0;
+	padding: 4em 0 4em 0;
+	vertical-align: middle;
 }
 
 .info_orbits {
 	text-align: center;
 	font-family: Arial,sans-serif;
+	white-space: nowrap;
 }
 
 .info_clubs,  .info_pointintime, .info_hand, .info_juggler, .info_cross{
@@ -246,6 +248,7 @@ td.info_title {
 	border-style: dotted;
 	vertical-align: middle;
 	width: 2em;
+	white-space: nowrap;
 }
 .info_throw {
 	font-family: 'Courier New', Courier, monospace !important;
@@ -255,6 +258,7 @@ td.info_title {
 	border-width: 0px;
 	border-style: dotted;
 	width: 3em;
+	white-space: nowrap;
 }
 .info_clubdistri {
 	text-align: center;
@@ -274,5 +278,16 @@ td.info_title {
 	margin-right: 2em;
 	border-width: 0px;
 	border-style: dotted;
+	white-space: nowrap;
 }
 
+.jp_link {
+	text-align: center !important;
+	font-family: Arial,sans-serif;
+	margin: 5em 0 1em 0;
+	border-color: black;
+	border-width: 0 !important;
+	border-style: dotted;
+	font-size: 80%;
+	white-space: nowrap;
+}
