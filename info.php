@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>PrechacThis - Pattern Info</title>
-	<link rel="shortcut icon" href="./favicon.png">
+	<link rel="shortcut icon" href="./images/favicon.png">
 	<link rel="stylesheet" type="text/css" href="./css/prechacthis.css">
 </head>
 <body>

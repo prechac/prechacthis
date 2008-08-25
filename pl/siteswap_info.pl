@@ -60,6 +60,11 @@ all_points_in_time(PointsInTime, NumberOfJugglers, Period) :-
 	setof(Point, possible_point_in_time(Point, NumberOfJugglers, Period), PointsInTimeR),
 	sort_list_of_expr(PointsInTimeR, PointsInTime).
 	
+time_between_throws(NumberOfJugglers, Period, Time) :-
+	all_points_in_time(PointsInTime, NumberOfJugglers, Period),
+	nth0(1, PointsInTime, Time).
+
+	
 what_happens([], _, _, []).
 what_happens([Point|PointsInTime], Pattern, NumberOfJugglers, Action) :-
 	findall(ThisAction, what_happens_at_point_in_time(Point, Pattern, NumberOfJugglers, ThisAction), ActionBag),
@@ -386,7 +391,7 @@ writeJoepassLink(Pattern, NumberOfJugglers, SwapList) :-
 	pattern_to_string(Pattern, PatternStr),
 	jp_filename(Pattern, FileName),
 	format("<div class='jp_link'>\n"),
-	format("<a href='joepass.php?pattern=~s&persons=~w&file=~w&swap=~w'>download JoePass file</a> (just testing!)\n", [PatternStr, NumberOfJugglers, FileName, SwapList]),
+	format("<a href='joepass.php?pattern=~s&persons=~w&file=~w&swap=~w'>JoePass file</a> (just testing!)\n", [PatternStr, NumberOfJugglers, FileName, SwapList]),
 	format("</div>\n").
 	
 	
