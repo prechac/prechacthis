@@ -291,3 +291,19 @@ td.big_swap {
 	font-size: 80%;
 	white-space: nowrap;
 }
+
+.jp_backlink {
+	font-family: Arial,sans-serif;
+	margin: 1em 0 1em 2em;
+	border-color: black;
+	border-width: 0 !important;
+	border-style: dotted;
+	font-size: 80%;
+	white-space: nowrap;	
+}
+pre {
+	margin: 2em 2em 1em 2em;
+	border-color: black;
+	border-width: 0 !important;
+	border-style: dotted;
+}

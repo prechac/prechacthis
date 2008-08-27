@@ -6,13 +6,14 @@ if (isset($_REQUEST["pattern"]) && isset($_REQUEST["persons"])){
 	}else{
 		$swaplist = "[]";
 	}
-	
+	$jugglerStyle = "normal";
 	$plquery  = "swipl -q "
 	          . "-f " . dirname($_SERVER["SCRIPT_FILENAME"]) . "/pl/siteswap.pl "
 	          . "-g \"jp_pattern_def("
 	          . $_REQUEST["pattern"] . ", "
 	          . $_REQUEST["persons"] . ", "
-			  . $swaplist
+			  . $swaplist. ", "
+			  . $jugglerStyle
 	          . "), halt.\"";
 	
 	if(isset($_REQUEST["download"]) && isset($_REQUEST["file"])) {
@@ -37,8 +38,12 @@ if (isset($_REQUEST["pattern"]) && isset($_REQUEST["persons"])){
 	<pre><?php echo `$plquery`; ?></pre>
 	<br>
 	<br>
-<?php echo "<a href=\"./joepass.php?download=on&". $_SERVER["QUERY_STRING"] ."\">download</a>"; ?>
-<?php if(isset($_SERVER["HTTP_REFERER"])) {echo "&nbsp;|&nbsp;<a href=\"". $_SERVER["HTTP_REFERER"] ."\">back</a>";} ?>
+<?php 
+	echo "<div class='jp_backlink'>";
+	echo "<a href=\"./joepass.php?download=on&". $_SERVER["QUERY_STRING"] ."\">download</a>"; 
+	if(isset($_SERVER["HTTP_REFERER"])) {echo "&nbsp;|&nbsp;<a href=\"". $_SERVER["HTTP_REFERER"] ."\">back</a>";} 
+	echo "</div>";
+?>
 
 </body>
 </html>	
