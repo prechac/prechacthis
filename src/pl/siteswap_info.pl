@@ -391,7 +391,10 @@ writeJoepassLink(Pattern, NumberOfJugglers, SwapList) :-
 	pattern_to_string(Pattern, PatternStr),
 	jp_filename(Pattern, FileName),
 	format("<div class='jp_link'>\n"),
-	format("<a href='joepass.php?pattern=~s&persons=~w&file=~w&swap=~w'>JoePass file</a> (just testing!)\n", [PatternStr, NumberOfJugglers, FileName, SwapList]),
+	format("<a href='joepass.php?pattern=~s&persons=~w&file=~w&swap=~w'>show</a>", [PatternStr, NumberOfJugglers, FileName, SwapList]),
+	format("/"),
+	format("<a href='joepass.php?pattern=~s&persons=~w&file=~w&swap=~w&download=on'>download</a>", [PatternStr, NumberOfJugglers, FileName, SwapList]),
+	format(" JoePass! file\n"),
 	format("</div>\n").
 	
 	
@@ -506,10 +509,12 @@ jugglerShown(Juggler, JugglerShown) :-
 	
 handShown(Juggler, a, SwapList, l) :-
 	member(Juggler, SwapList), !.
-handShown(_Juggler, a, _SwapList, r) :- !.	
+handShown(Juggler, a, SwapList, r) :-	
+	not(member(Juggler, SwapList)), !.
 handShown(Juggler, b, SwapList, r) :-
 	member(Juggler, SwapList), !.
-handShown(_Juggler, b, _SwapList, l) :- !.
+handShown(Juggler, b, SwapList, l) :- 
+	not(member(Juggler, SwapList)), !.
 
 handShownLong(r, right) :- !.
 handShownLong(l, left) :- !.
