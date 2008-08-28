@@ -89,7 +89,10 @@ prechacThisThrow(p(Throw, Index, _Origen), up, NumberOfJugglers, Period, p(NewTh
 prechacThisThrow(p(Throw, Index, _Origen), down, NumberOfJugglers, Period, p(NewThrow, NewIndex, NewOrigen)) :-
 	Prechator is Period rdiv NumberOfJugglers,
 	NewThrow is Throw - Prechator,
-	NewIndex is (Index - 1) mod NumberOfJugglers,
+	(Index = 0 ->
+		NewIndex is NumberOfJugglers - 1;
+		NewIndex is Index - 1
+	),
 	(NewThrow >= 1; (NewThrow = 0, NewIndex = 0)), !,
 	(NewIndex = 0 ->
 		NewOrigen = NewThrow;
