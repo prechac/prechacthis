@@ -15,19 +15,19 @@
 		}else{
 			$pt_url = "../index.php";
 		}
-		if(isset($_REQUEST["docuurl"])) {
-			$docu_url = $_REQUEST["docuurl"];
+		if(isset($_REQUEST["docurl"])) {
+			$doc_url = $_REQUEST["docurl"];
 		}else{
-			$docu_url = "";
+			$doc_url = "";
 		}
-		echo "<frame src='./docu.php?".$docu_url."' name='Docu'>";
+		echo "<frame src='./doc.php?".$doc_url."' name='Docu'>";
 		echo "<frame src='". $pt_url ."' name='PrechacThis'>";
 		?>
 		
 		<noframes>
 			<body>
 				<p>
-					<a href="./docu.php">Documentation</a> <a href="../index.php">PrechacThis</a>
+					<a href="./doc.php">Documentation</a> <a href="../index.php">PrechacThis</a>
 				</p>
 			</body>
 		</noframes>

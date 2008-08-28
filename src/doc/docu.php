@@ -11,7 +11,7 @@
 	
 <?php
 if (isset($_REQUEST['section'])) {
-	//$filename = "./sections/".$_REQUEST['section']."docu";
+	//$filename = "./sections/".$_REQUEST['section']."inc";
 	$filename = $_REQUEST['section'];
 	$file = fopen($filename,"r");
 	$doc_title = fgets($file); // Read first line
@@ -24,12 +24,12 @@ if (isset($_REQUEST['section'])) {
 		<h1>Documentation</h1>
 <?php
 	echo "<ul>\n";
-	foreach (glob("./sections/*.docu") as $filename) {
+	foreach (glob("./sections/*.doc") as $filename) {
 		$file = fopen($filename,"r");
 		$doc_title = fgets($file); // Read first line
 		$doc_url = fgets($file); // Read second line
 	
-		echo "<li><a href='./index.php?docuurl=".$docu_url."&pturl=".$pt_url."' target='_parent'>". $doc_title ."</a></li>"; 
+		echo "<li><a href='./index.php?docurl=".$doc_url."&pturl=".$pt_url."' target='_parent'>". $doc_title ."</a></li>"; 
 	
 		fclose($file);
 	}
