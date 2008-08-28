@@ -10,18 +10,20 @@
 	<frameset cols="300,*">
 	
 		<?php
-		if(isset($_REQUEST["pturl"])) {
-			$pt_url = $_REQUEST["pturl"];
-		}else{
-			$pt_url = "../index.php";
-		}
-		if(isset($_REQUEST["docurl"])) {
-			$doc_url = $_REQUEST["docurl"];
-		}else{
-			$doc_url = "";
-		}
-		echo "<frame src='./doc.php?".$doc_url."' name='Docu'>";
-		echo "<frame src='". $pt_url ."' name='PrechacThis'>";
+			if(isset($_REQUEST["pturl"])) {
+				$pt_encoded = $_REQUEST["pturl"];
+				$pt_url = rawurldecode($pt_encoded);
+			}else{
+				$pt_url = "index.php";
+			}
+			if(isset($_REQUEST["docurl"])) {
+				$doc_encoded = $_REQUEST["docurl"];
+				$doc_url = rawurldecode($doc_encoded);			
+			}else{
+				$doc_url = "doc.php";
+			}
+			echo "<frame src='./".$doc_url."' name='Doc'>";
+			echo "<frame src='../". $pt_url ."' name='PrechacThis'>";
 		?>
 		
 		<noframes>

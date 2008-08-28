@@ -8,9 +8,10 @@
 		<link rel="stylesheet" type="text/css" href="../css/prechacthis.css">
 	</head>
 	<body>
-	
 <?php
 if (isset($_REQUEST['section'])) {
+	echo "<div class='doc_close'><a href='../index.php' target='_parent'>close</a>";
+	echo "&nbsp;|&nbsp;<a href='./doc.php' target='Doc'>up</a>";
 	//$filename = "./sections/".$_REQUEST['section']."inc";
 	$filename = $_REQUEST['section'];
 	$file = fopen($filename,"r");
@@ -20,16 +21,18 @@ if (isset($_REQUEST['section'])) {
 	echo fpassthru($file);
 	fclose($file);
 } else {
-?>
-		<h1>Documentation</h1>
-<?php
+	echo "<div class='doc_close'><a href='../index.php' target='_parent'>close</a></div>";
+	echo "<h1>Documentation</h1>";
 	echo "<ul>\n";
-	foreach (glob("./sections/*.doc") as $filename) {
+	foreach (glob("./sections/*.inc") as $filename) {
 		$file = fopen($filename,"r");
 		$doc_title = fgets($file); // Read first line
-		$doc_url = fgets($file); // Read second line
+		$doc_url = "./doc.php?section=". $filename;
+		$doc_url_encoded = rawurlencode($doc_url);
+		$pt_url = fgets($file); // Read second line
+		$pt_url_encoded = rawurlencode($pt_url);
 	
-		echo "<li><a href='./index.php?docurl=".$doc_url."&pturl=".$pt_url."' target='_parent'>". $doc_title ."</a></li>"; 
+		echo "<li><a href='./index.php?docurl=".$doc_url_encoded."&pturl=".$pt_url_encoded."' target='_parent'>". $doc_title ."</a></li>"; 
 	
 		fclose($file);
 	}
