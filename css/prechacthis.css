@@ -148,6 +148,11 @@ th {
 	margin: 4ex 0 4ex 0;
 	white-space: nowrap;
 }
+
+.info_bigSwap_table {
+	margin: 4ex 0 4ex 0;
+	white-space: nowrap;
+}
 .info_juggler_table {
 	display: inline;
 }
@@ -205,7 +210,14 @@ td.info_title {
 
 .info_left_arrow, .info_right_arrow {
 	vertical-align: middle;
-	padding: 1em 3em 4em 3em;
+	padding: 0 2em 0 2em;
+	margin: 0;
+	text-align: center;
+}
+
+.prechacthis_link {
+	vertical-align: middle;
+	padding: 0;
 	margin: 0;
 	text-align: center;
 }
@@ -232,8 +244,9 @@ h1.big_swap {
 }
 td.big_swap {
 	margin: 0;
-	padding: 2em 0 4em 0;
+	padding: 0 1em 0 1em;
 	vertical-align: middle;
+	text-align: center;
 }
 
 .info_orbits {
