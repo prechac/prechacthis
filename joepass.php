@@ -5,18 +5,27 @@ if (isset($_REQUEST["pattern"]) && isset($_REQUEST["persons"])){
 		$swaplist = $_REQUEST["swap"];
 	}else{
 		$swaplist = "[]";
+	}	
+	if(isset($_REQUEST["download"])) {
+		$download = $_REQUEST["download"];
+	}else{
+		$download = "on";
 	}
-	$jugglerStyle = "normal";
+	if(isset($_REQUEST["style"])) {
+		$style = $_REQUEST["style"];
+	}else{
+		$style = "normal";
+	}
 	$plquery  = "swipl -q "
 	          . "-f " . dirname($_SERVER["SCRIPT_FILENAME"]) . "/pl/siteswap.pl "
 	          . "-g \"jp_pattern_def("
 	          . $_REQUEST["pattern"] . ", "
 	          . $_REQUEST["persons"] . ", "
 			  . $swaplist. ", "
-			  . $jugglerStyle
+			  . $style
 	          . "), halt.\"";
 	
-	if(isset($_REQUEST["download"]) && isset($_REQUEST["file"])) {
+	if(($download == 'on') && isset($_REQUEST["file"])) {
     	header("Content-type: application/force-download");
     	header("Content-Transfer-Encoding: Binary");
     	header("Content-disposition: attachment; filename=\"".$_REQUEST["persons"]."_".$_REQUEST["file"].".pass\"");
@@ -40,8 +49,8 @@ if (isset($_REQUEST["pattern"]) && isset($_REQUEST["persons"])){
 	<br>
 <?php 
 	echo "<div class='jp_backlink'>";
-	echo "<a href=\"./joepass.php?download=on&". $_SERVER["QUERY_STRING"] ."\">download</a>"; 
-	if(isset($_SERVER["HTTP_REFERER"])) {echo "&nbsp;|&nbsp;<a href=\"". $_SERVER["HTTP_REFERER"] ."\">back</a>";} 
+	//echo "<a href=\"./joepass.php?download=on&". $_SERVER["QUERY_STRING"] ."\">download</a>"; 
+	if(isset($_SERVER["HTTP_REFERER"])) {echo "<a href=\"". $_SERVER["HTTP_REFERER"] ."\">back</a>";} 
 	echo "</div>";
 ?>
 
