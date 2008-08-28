@@ -425,10 +425,32 @@ writeJoepassLink(Pattern, NumberOfJugglers, SwapList) :-
 	pattern_to_string(Pattern, PatternStr),
 	jp_filename(Pattern, FileName),
 	format("<div class='jp_link'>\n"),
-	format("<a href='joepass.php?pattern=~s&persons=~w&file=~w&swap=~w'>show</a>", [PatternStr, NumberOfJugglers, FileName, SwapList]),
-	format("/"),
-	format("<a href='joepass.php?pattern=~s&persons=~w&file=~w&swap=~w&download=on'>download</a>", [PatternStr, NumberOfJugglers, FileName, SwapList]),
-	format(" JoePass! file\n"),
+	format("<form action='./joepass.php' method='post'>\n"),
+	format("<input type='hidden' name='pattern' value='~s'>\n", [PatternStr]),
+	format("<input type='hidden' name='persons' value='~w'>\n", [NumberOfJugglers]),
+	format("<input type='hidden' name='file' value='~w'>\n", [FileName]),
+	format("<input type='hidden' name='swap' value='~w'>\n", [SwapList]),
+	format("JoePass! file:&nbsp;\n"),
+	format("<select name='download' size='1'>"),
+	format("<option value='on'>download</option>"),
+	format("<option value='off'>show</option>"),
+	format("</select>\n"),
+	(NumberOfJugglers = 2 ->
+		(
+			format("&nbsp;"),
+			format("<select name='style' size='1'>"),
+			format("<option value='normal'>face to face</option>"),
+			format("<option value='sidebyside'>side by side</option>"),
+			format("</select>\n")
+		); true
+	),
+	format("&nbsp;"),
+	format("<input type='submit' value='go'>\n"),
+	format("</form>\n"),
+	%format("<a href='joepass.php?pattern=~s&persons=~w&file=~w&swap=~w'>show</a>", [PatternStr, NumberOfJugglers, FileName, SwapList]),
+	%format("/"),
+	%format("<a href='joepass.php?pattern=~s&persons=~w&file=~w&swap=~w&download=on'>download</a>", [PatternStr, NumberOfJugglers, FileName, SwapList]),
+	%format(" JoePass! file\n"),
 	format("</div>\n").
 	
 	
