@@ -435,15 +435,12 @@ writeJoepassLink(Pattern, NumberOfJugglers, SwapList) :-
 	format("<option value='on'>download</option>"),
 	format("<option value='off'>show</option>"),
 	format("</select>\n"),
-	(NumberOfJugglers = 2 ->
-		(
-			format("&nbsp;"),
-			format("<select name='style' size='1'>"),
-			format("<option value='normal'>face to face</option>"),
-			format("<option value='sidebyside'>side by side</option>"),
-			format("</select>\n")
-		); true
-	),
+	format("&nbsp;"),
+	format("<select name='style' size='1'>"),
+	format("<option value='normal'>face to face</option>"),
+	format("<option value='shortdistance'>short distance</option>"),
+	format("<option value='sidebyside'>side by side</option>"),
+	format("</select>\n"),
 	format("&nbsp;"),
 	format("<input type='submit' value='go'>\n"),
 	format("</form>\n"),
