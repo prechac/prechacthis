@@ -245,7 +245,7 @@ h1.big_swap {
 td.big_swap {
 	margin: 0;
 	padding: 0 1em 0 1em;
-	vertical-align: middle;
+	vertical-align: top;
 	text-align: center;
 }
 
