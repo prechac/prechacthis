@@ -8,14 +8,13 @@ jp_pattern_def(PatternShort, NumberOfJugglers, SwapList, Style) :-
 	jp_listOfJugglerStartLeft(Period, NumberOfJugglers, SwapList, LeftList),
 	jp_header,
 	jp_positions(NumberOfJugglers, Style),
-	jp_colors,
+	jp_colors(Pattern, NumberOfJugglers, Period),
 	jp_jugglerStartLeft(LeftList),
 	jp_delay(NumberOfJugglers, Period, Delay),
 	jp_pattern(ActionList, SwapList, LeftList, PointsInTime, Delay, NumberOfJugglers).
 
 jp_header :- 
 	format("#sx\n\n").
-	%%format("#mhn*\n").
 
 jp_positions(_, sidebyside) :-
 	format("#sidetoside\n"), !.
@@ -31,7 +30,26 @@ jp_printJugglerPosition(Juggler, NumberOfJugglers, circle, D) :-
 	V is round(Radius * sin(X)),
 	format("#j ~w (~w,0,~w)(0,0,0)\n", [Juggler,U,V]).
 
-jp_colors :- !.
+jp_colors(Pattern, NumberOfJugglers, Period) :- 
+	orbits(Pattern, OrbitPattern),
+	averageNumberOfClubs(Pattern, AVClubs),
+	NumberOfClubs is AVClubs * NumberOfJugglers,
+	forall(between(1, NumberOfClubs, Club), jp_printClubColor(Club, OrbitPattern, NumberOfJugglers, Period)).
+
+jp_printClubColor(Club, ListOfColors, NumberOfJugglers, Period) :-
+	Club0 is Club - 1,
+	siteswap_position_general(Club0, SiteswapPosition, NumberOfJugglers, Period),
+	length(ListOfColors, Length),
+	ColorPos is SiteswapPosition mod Length,
+	nth0(ColorPos, ListOfColors, ColorNo),
+	jp_Color(ColorNo, Color),
+	format("#O ~w ~w\n", [Club, Color]).
+	
+jp_Color(Number, Color) :-
+	ColorList = ['(1,0,0)','(0,1,0)','(0,0,1)','(0,1,1)','(1,0,1)','(1,1,0)','(1,1,1)','(0,0,0)','(0.5,0,0)','(0,0.5,0)','(0,0,0.5)','(0,0.5,0.5)','(0.5,0,0.5)','(0.5,0.5,0)','(0.5,0.5,0.5)'],
+	length(ColorList, NumberOfColors),
+	Pos is Number mod NumberOfColors,
+	nth0(Pos, ColorList, Color).
 
 jp_jugglerStartLeft([]) :- !.
 jp_jugglerStartLeft([Juggler|LeftList]) :-

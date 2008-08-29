@@ -263,3 +263,13 @@ remove_whitespace([White|String], CleanString) :-
 remove_whitespace([NonWhite|String], [NonWhite|CleanString]) :-
 	remove_whitespace(String, CleanString).
 
+%%% sort %%% 
+
+keysort(List, Keys, Sorted) :-
+	keys(List, Keys, ListWithKeys),
+	keysort(ListWithKeys, SortedWithKeys),
+	keys(Sorted, _Keys, SortedWithKeys).
+
+keys([], [], []) :- !.
+keys([Head|Tail], [Key|Keys], [Key-Head|TailWithKeys]) :-
+	keys(Tail, Keys, TailWithKeys).
