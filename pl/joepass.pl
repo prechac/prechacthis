@@ -17,9 +17,19 @@ jp_header :-
 	format("#sx\n\n").
 	%%format("#mhn*\n").
 
-jp_positions(2, sidebyside) :-
-	format("#j 2 (60,0,0)(60,0,100)\n#j 1 (-60,0,0)(-60,0,100)\n\n"), !.
+jp_positions(_, sidebyside) :-
+	format("#sidetoside\n"), !.
+jp_positions(NumberOfJugglers, shortdistance) :-
+	D = 150,
+	forall(between(1, NumberOfJugglers, Juggler), jp_printJugglerPosition(Juggler, NumberOfJugglers, circle, D)), !.
 jp_positions(_NumberOfJugglers, _Style) :- !.
+
+jp_printJugglerPosition(Juggler, NumberOfJugglers, circle, D) :-
+	X is 2 * pi * (Juggler - 1)/NumberOfJugglers,
+	Radius is D / (2 * sin(pi/NumberOfJugglers)),
+	U is round(Radius * cos(X)),
+	V is round(Radius * sin(X)),
+	format("#j ~w (~w,0,~w)(0,0,0)\n", [Juggler,U,V]).
 
 jp_colors :- !.
 
