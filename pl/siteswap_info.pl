@@ -7,6 +7,31 @@ shift_by_minuend(OldPosition, Times, NewPosition, NumberOfJugglers, Period) :-
 siteswap_position(Juggler, Position, SiteswapPosition, NumberOfJugglers, Period) :-	 %% Pos. = 1 is what Juggler does first ...
 	shift_by_minuend(Position, Juggler, SiteswapPosition, NumberOfJugglers, Period).
 
+siteswap_position_general(Position, SiteswapPosition, NumberOfJugglers, Period) :-
+	throwing_juggler(Position, LocalPosition, Juggler, NumberOfJugglers, Period),
+	siteswap_position(Juggler, LocalPosition, SiteswapPosition, NumberOfJugglers, Period).
+	
+throwing_juggler(Position, LocalPosition, Juggler, NumberOfJugglers, Period) :-
+	throwing_order_of_jugglers(NumberOfJugglers, Period, ThrowingOrder),
+	Pos is Position mod NumberOfJugglers,
+	nth0(Pos, ThrowingOrder, Juggler),
+	LocalPosition is round(float_integer_part(Position / NumberOfJugglers)). 
+	
+throwing_order_of_jugglers(NumberOfJugglers, Period, ThrowingOrder) :-
+	findall(
+		DelayF,
+		(
+			between(1, NumberOfJugglers, Juggler),	
+			RealDelay is (Period rdiv NumberOfJugglers) * (Juggler - 1),
+			Delay is float_fractional_part(RealDelay),
+			DelayF is float(Delay)
+		),
+		Delays
+	), 
+	JugglerMax is NumberOfJugglers - 1,
+	numlist(0, JugglerMax, Jugglers),
+	keysort(Jugglers, Delays, ThrowingOrder).
+
 throw_time(ThrowingJuggler, Position, Time, NumberOfJugglers, Period) :-
 	JugglerMax is NumberOfJugglers - 1,
 	between(0, JugglerMax, ThrowingJuggler),
