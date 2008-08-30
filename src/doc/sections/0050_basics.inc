@@ -1,5 +1,6 @@
 Basics
 index.php?persons=2&objects=4%3B+5&lengths=3%3B+4&max=3&passesmin=1&passesmax=3
+index.php?persons=2&objects=4+or+5&lengths=3+or+4&max=3&passesmin=1&passesmax=3
 <ul>
 	<li>Jugglers:<br>number of jugglers is 2</li>
 	<li>Objects:<br>number of clubs ;-) is 4 or 5</li> 
