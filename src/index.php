@@ -33,12 +33,12 @@ if ($_REQUEST){
     echo "<table align='center' cellpadding='0'><tr><td>";
 
 	if (!$_GET["objects"]){$_GET["objects"] = "3;4;5;6;7";}
-	$_GET["objects"] = str_replace("or", ";", $_GET["objects"]);
-	$objects = explode(";", $_GET["objects"]);
+	$_GET["objects"] = str_replace(";", "or", $_GET["objects"]);
+	$objects = explode("or", $_GET["objects"]);
 	
 	if (!$_GET["lengths"]){$_GET["lengths"] = "2;3;4;5;6;8";}
-	$_GET["lengths"] = str_replace("or", ";", $_GET["lengths"]);
-	$lengths = explode(";", $_GET["lengths"]);
+	$_GET["lengths"] = str_replace(";", "or", $_GET["lengths"]);
+	$lengths = explode("or", $_GET["lengths"]);
 	
 	if ($_GET["persons"]){echo "<h2>" . $_GET["persons"] . " persons</h2>";}
 
