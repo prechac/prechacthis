@@ -4,18 +4,81 @@ shift_by_minuend(OldPosition, Times, NewPosition, NumberOfJugglers, Period) :-
 	NewPosition is OldPosition + Times * Period - truncate(Times * Minuend).
 	
 
-siteswap_position(Juggler, Position, SiteswapPosition, NumberOfJugglers, Period) :-	 %% Pos. = 1 is what Juggler does first ...
+siteswap_position(Juggler, Position, SiteswapPosition, NumberOfJugglers, Period) :-	 
 	shift_by_minuend(Position, Juggler, SiteswapPosition, NumberOfJugglers, Period).
 
 siteswap_position_general(Position, SiteswapPosition, NumberOfJugglers, Period) :-
 	throwing_juggler(Position, LocalPosition, Juggler, NumberOfJugglers, Period),
 	siteswap_position(Juggler, LocalPosition, SiteswapPosition, NumberOfJugglers, Period).
+
+
+all_club_siteswap_positions(Pattern, NumberOfJugglers, SiteswapPositions) :-
+	averageNumberOfClubs(Pattern, AVClubs),
+	ClubsMax is AVClubs * NumberOfJugglers - 1,
+	findall(
+		Position,
+		(
+			between(0, ClubsMax, Club),
+			club_siteswap_position(Club, Pattern, Position, NumberOfJugglers)
+		),
+		SiteswapPositions
+	).
+
+club_siteswap_position(Club, Pattern, SiteswapPosition, NumberOfJugglers) :-
+	averageNumberOfClubs(Pattern, AVClubs),
+	NumberOfClubs is AVClubs * NumberOfJugglers,
+	Club =< NumberOfClubs,
+	orbits(Pattern, OrbitPattern),
+	clubsInOrbits(Pattern, OrbitPattern, AVClubsInOrbits),
+	multiply(AVClubsInOrbits, NumberOfJugglers, ClubsInOrbits),
+	club_siteswap_position(Club, 0, SiteswapPosition, NumberOfJugglers, OrbitPattern, ClubsInOrbits), !.
 	
+club_siteswap_position(-1, PositionReal, SiteswapPosition, NumberOfJugglers, OrbitPattern, _ClubsInOrbits) :-
+	!,
+	PositionBevor is PositionReal - 1,
+	length(OrbitPattern, Period),
+	siteswap_position_general(PositionBevor, SiteswapPosition, NumberOfJugglers, Period).
+club_siteswap_position(Position, PositionReal, SiteswapPosition, NumberOfJugglers, OrbitPattern, ClubsInOrbits) :-
+	length(OrbitPattern, Period),
+	siteswap_position_general(PositionReal, SiteswapPosition0, NumberOfJugglers, Period),
+	ModPos is SiteswapPosition0 mod Period,
+	nth0(ModPos, OrbitPattern, Orbit),
+	nth0(Orbit, ClubsInOrbits, 0),
+	NextPositionReal is PositionReal + 1,
+	club_siteswap_position(Position, NextPositionReal, SiteswapPosition, NumberOfJugglers, OrbitPattern, ClubsInOrbits).
+club_siteswap_position(Pos, PositionReal, SiteswapPosition, NumberOfJugglers, OrbitPattern, ClubsInOrbits) :-
+	length(OrbitPattern, Period),
+	siteswap_position_general(PositionReal, SiteswapPosition0, NumberOfJugglers, Period),
+	ModPos is SiteswapPosition0 mod Period,
+	nth0(ModPos, OrbitPattern, Orbit),
+	nth0(Orbit, ClubsInOrbits, Clubs),
+	ClubsNew is Clubs - 1,
+	changeOnePosition(ClubsInOrbits, Orbit, ClubsNew, NewClubsInOrbits),
+	NextPos is Pos - 1,
+	NextPositionReal is PositionReal + 1,
+	club_siteswap_position(NextPos, NextPositionReal, SiteswapPosition, NumberOfJugglers, OrbitPattern, NewClubsInOrbits).
+
+zerosTillPos_general([p(0,0,0)|_Pattern], 0, _NumberOfJugglers, 1) :- !.
+zerosTillPos_general(_Pattern, 0, _NumberOfJugglers, 0) :- !.
+zerosTillPos_general(Pattern, Pos, NumberOfJugglers, NumberOf0) :-
+	length(Pattern, Period),
+	siteswap_position_general(Pos, SiteswapPosition, NumberOfJugglers, Period),
+	ModPos is SiteswapPosition mod Period,
+	nth0(ModPos, Pattern, p(0,0,0)),!,
+	NextPos is Pos - 1,
+	zerosTillPos_general(Pattern, NextPos, NumberOfJugglers, NumberOf0Befor),
+	NumberOf0 is NumberOf0Befor + 1.
+zerosTillPos_general(Pattern, Pos, NumberOfJugglers, NumberOf0) :-
+	NextPos is Pos - 1,
+	zerosTillPos_general(Pattern, NextPos, NumberOfJugglers, NumberOf0).
+
+	
+
 throwing_juggler(Position, LocalPosition, Juggler, NumberOfJugglers, Period) :-
 	throwing_order_of_jugglers(NumberOfJugglers, Period, ThrowingOrder),
 	Pos is Position mod NumberOfJugglers,
 	nth0(Pos, ThrowingOrder, Juggler),
-	LocalPosition is round(float_integer_part(Position / NumberOfJugglers)). 
+	LocalPosition is Position // NumberOfJugglers. 
 	
 throwing_order_of_jugglers(NumberOfJugglers, Period, ThrowingOrder) :-
 	findall(

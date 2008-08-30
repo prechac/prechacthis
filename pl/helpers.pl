@@ -27,6 +27,23 @@ positionsInList([_Object|Tail], Object, Pos, Positions) :-
 	NextPos is Pos + 1,
 	positionsInList(Tail, Object, NextPos, Positions).
 
+nth0List([], _, []) :- !.
+nth0List([Pos|PosList], List, [X|Xs]) :-
+	nth0(Pos, List, X),
+	nth0List(PosList, List, Xs).
+
+changeOnePosition(List, Pos, X, NewList) :-
+	length(List, Length),
+	length(NewList, Length),
+	PreLength is Pos,
+	PostLength is Length - Pos - 1,
+	length(PreList, PreLength),
+	length(PostList, PostLength),
+	append(PreList, _, List),
+	append(_, PostList, List),
+	append(PreList, _, NewList),
+	append(_, PostList, NewList),
+	nth0(Pos, NewList, X).
 
 %% fillIn(Original, Copy, StartingPosition, ListOfNotChangingPositions)
 fillIn([],[], _, _) :- !.

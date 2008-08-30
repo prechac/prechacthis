@@ -315,6 +315,11 @@ justThisOrbit([_Thorw|Pattern], [_OtherOrbit|OrbitPattern], Orbit, [p(0,0,0)|Jus
 justThisOrbit([_Thorw|Pattern], [_OtherOrbit|OrbitPattern], Orbit, ['&nbsp;'|JustThisOrbit], print) :-
 	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit, print).
 
+zeroOrbits(Pattern, Orbits) :-
+	orbits(Pattern, OrbitPattern),
+	positionsInList(Pattern, p(0,0,0), ZerroPositions),
+	nth0List(ZerroPositions, OrbitPattern, Orbits).
+	
 	
 magicOrbits(Pattern, NumberOfJugglers, MagicOrbits) :-
 	magicOrbits(Pattern, NumberOfJugglers, _OrbitPattern, MagicOrbits), !.
