@@ -45,6 +45,12 @@ changeOnePosition(List, Pos, X, NewList) :-
 	append(_, PostList, NewList),
 	nth0(Pos, NewList, X).
 
+changePositions(List, [], _X, List) :- !.
+changePositions(List, [Pos|Positions], X, NewList) :-
+	changePositions(List, Positions, X, TmpList),
+	changeOnePosition(TmpList, Pos, X, NewList).
+	
+
 %% fillIn(Original, Copy, StartingPosition, ListOfNotChangingPositions)
 fillIn([],[], _, _) :- !.
 fillIn( [_Orig_Head | Orig_Rest], [_Copy_Head | Copy_Rest], Position, DontChange) :-

@@ -349,3 +349,7 @@ orbitPositions(Orbit, OrbitPattern, Positions) :-
 	number(Orbit), !,
 	positionsInList(OrbitPattern, Orbit, Positions).
 	
+killOrbit(Pattern, Orbit, NewPattern) :-
+	orbits(Pattern, OrbitPattern),
+	orbitPositions(Orbit, OrbitPattern, Positions),
+	changePositions(Pattern, Positions, p(0,0,0), NewPattern).
