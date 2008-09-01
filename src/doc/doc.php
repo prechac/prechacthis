@@ -10,19 +10,22 @@
 	<body>
 <?php
 if (isset($_REQUEST['section'])) {
-	echo "<div class='doc_close'><a href='../index.php' target='_parent'>close</a>";
-	echo "&nbsp;|&nbsp;<a href='./doc.php' target='Doc'>up</a>";
+	echo "<div class='back'><a href='../index.php' target='_parent'>close</a>";
+	echo "&nbsp;|&nbsp;<a href='./doc.php' target='Doc'>up</a>\n";
 	//$filename = "./sections/".$_REQUEST['section']."inc";
 	$filename = $_REQUEST['section'];
 	$file = fopen($filename,"r");
 	$doc_title = fgets($file); // Read first line
 	$doc_url = fgets($file); // Read second line
-	echo "<h1>".$doc_title."</h1>";
-	echo fpassthru($file);
+	echo "<h1>".$doc_title."</h1>\n";
+	echo "<div id='doc_main'>\n";
+	fpassthru($file);
+	echo "</div>\n";
 	fclose($file);
 } else {
-	echo "<div class='doc_close'><a href='../index.php' target='_parent'>close</a></div>";
-	echo "<h1>Documentation</h1>";
+	echo "<div class='doc_close'><a href='../index.php' target='_parent'>close</a></div>\n";
+	echo "<h1>Documentation</h1>\n";
+	echo "<div id='doc_main'>\n";
 	echo "<ul>\n";
 	foreach (glob("./sections/*.inc") as $filename) {
 		$file = fopen($filename,"r");
@@ -31,16 +34,15 @@ if (isset($_REQUEST['section'])) {
 		$doc_url_encoded = rawurlencode($doc_url);
 		$pt_url = fgets($file); // Read second line
 		$pt_url_encoded = rawurlencode($pt_url);
-	
-		echo "<li><a href='./index.php?docurl=".$doc_url_encoded."&pturl=".$pt_url_encoded."' target='_parent'>". $doc_title ."</a></li>"; 
+		
+		echo "<li><a href='./index.php?docurl=".$doc_url_encoded."&pturl=".$pt_url_encoded."' target='_parent'>". $doc_title ."</a></li>\n"; 
 	
 		fclose($file);
 	}
 	echo "</ul>\n";
+	echo "</div>\n";
 }
 ?>
 
-
-
-	</body>
+</body>
 </html>

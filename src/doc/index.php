@@ -7,7 +7,7 @@
 		</title>
 		<link rel="shortcut icon" href="../images/favicon.png">
 	</head>
-	<frameset cols="300,*">
+	<frameset cols="350,*">
 	
 		<?php
 			if(isset($_REQUEST["pturl"])) {
