@@ -143,6 +143,19 @@ oneToN(Period, OneToN) :-
 	append(OldOneToN, [Period], OneToN).
 
 
+
+listOfNumber(Number, Length, List) :- listOf(Number, Length, List).
+listOfNumber(Number, List) :- listOf(Number, List).
+
+listOf(X, Length, List) :-
+	length(List, Length),
+	listOf(X, List).
+listOf(_X, []) :- !.
+listOf(X, [X|Tail]) :-
+	listOf(X, Tail).
+
+
+
 %%%  --- number operations ---
 
 compare_expr(=,R1,R2) :-
