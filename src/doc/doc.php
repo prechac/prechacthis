@@ -21,6 +21,8 @@ if (isset($_REQUEST['section'])) {
 	echo "<div id='doc_main'>\n";
 	fpassthru($file);
 	echo "</div>\n";
+	echo "<div class='back'><a href='../index.php' target='_parent'>close</a>";
+	echo "&nbsp;|&nbsp;<a href='./doc.php' target='Doc'>up</a></div>\n";
 	fclose($file);
 } else {
 	echo "<div class='back'><a href='../index.php' target='_parent'>close</a></div>\n";
@@ -41,6 +43,7 @@ if (isset($_REQUEST['section'])) {
 	}
 	echo "</ul>\n";
 	echo "</div>\n";
+	echo "<div class='back'><a href='../index.php' target='_parent'>close</a></div>\n";
 }
 ?>
 
