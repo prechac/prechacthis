@@ -348,7 +348,7 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwa
 	what_happens(PointsInTime, Pattern, NumberOfJugglers, ActionList),
 	writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
 	writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period),
-	writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers),
+	writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
 	%averageNumberOfClubs(Pattern, AverageNumberOfClubs),
 	%NumberOfClubs is AverageNumberOfClubs * NumberOfJugglers,
 	%(testClubDistribution(ActionList, NumberOfJugglers, Period, NumberOfClubs) ->
@@ -439,7 +439,7 @@ writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
 writeSwapLink(Juggler, SwapList, NumberOfJugglers, Pattern, BackURL) :-
 	NewSwaps = [Juggler],
 	pattern_to_string(Pattern, PatternStr),
-	format("<td class='info_swaplink'><a href='info.php?pattern=~s&persons=~w&swap=~w&newswap=~w&back=~w'>swap hands</a></td>\n", [PatternStr, NumberOfJugglers, SwapList, NewSwaps, BackURL]).
+	format("<td class='info_swaplink'><a href='info.php?pattern=~s&persons=~w&swap=~w&newswap=~w&back=~w' class='small'>swap hands</a></td>\n", [PatternStr, NumberOfJugglers, SwapList, NewSwaps, BackURL]).
 
 writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
 	rotate_left(PatternWithShortPasses, PatternRotatedLeft),
@@ -500,7 +500,7 @@ arrowUpDown(down, String) :-
 	format(string(String), "<img src='./images/down.png' alt='down' border=0>", []).
 	
 
-writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers) :-
+writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
 	orbits(Pattern, OrbitPattern),
 	magicPositions(Pattern, NumberOfJugglers, MagicPositions),
 	length(Pattern, Period),
@@ -514,11 +514,11 @@ writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers) :-
 	Colspan is Period,
 	averageNumberOfClubs(Pattern, AVClubs),
 	Clubs is AVClubs * NumberOfJugglers,
-	format("<td class='info_title' colspan=~w>orbits</td><td class='info_right_info'>~w clubs</td>\n", [Colspan, Clubs]),
-	forall(member(Orbit, Orbits), writeThisOrbitInfo(OrbitPattern, Orbit, Pattern, NumberOfJugglers, PatternPMM)),
+	format("<td class='info_title' colspan=~w>orbits</td><td class='info_right_info'>~w clubs</td><td>&nbsp;</td>\n", [Colspan, Clubs]),
+	forall(member(Orbit, Orbits), writeThisOrbitInfo(OrbitPattern, Orbit, Pattern, NumberOfJugglers, PatternPMM, BackURL)),
 	format("</table>\n\n").
 	
-writeThisOrbitInfo(OrbitPattern, Orbit, Pattern, NumberOfJugglers, PatternPMM) :-	
+writeThisOrbitInfo(OrbitPattern, Orbit, Pattern, NumberOfJugglers, PatternPMM, BackURL) :-	
 	clubsInOrbit(Pattern, OrbitPattern, Orbit, ClubsAV),
 	Clubs is ClubsAV * NumberOfJugglers,
 	justThisOrbit(PatternPMM, OrbitPattern, Orbit, PatternPrint, print),
@@ -527,6 +527,15 @@ writeThisOrbitInfo(OrbitPattern, Orbit, Pattern, NumberOfJugglers, PatternPMM) :
 	format("<td class='info_throw'>"),
 	format(Swap),
 	format("</td><td class='info_right_info'>~w</td>\n", [Clubs]),
+	(Clubs > 0 -> 
+		(
+			killOrbit(Pattern, Orbit, PatternK),
+			float_to_shortpass(PatternK, PatternKShort),
+			pattern_to_string(PatternKShort, PatternKString),
+			format("<td><a href='./info.php?pattern=~s&persons=~w&back=~w' class='small'>kill</a></td>\n", [PatternKString, NumberOfJugglers, BackURL])
+		);
+		format("<td>&nbsp;</td>\n")
+	),
 	format("</tr>\n").
 
 writeOrbits(Pattern, NumberOfJugglers) :-

@@ -38,6 +38,13 @@ a:hover {
 	color: #160B9C;
 }
 
+
+a.small {
+	font-family: Arial,sans-serif;
+	font-size: 85%;
+	white-space: nowrap;
+}
+
 .inline{
 	display: inline-block;
 	vertical-align: top;
