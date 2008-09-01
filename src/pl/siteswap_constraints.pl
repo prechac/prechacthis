@@ -46,8 +46,11 @@ mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainString, ClubDoe
 		throw(constraint_unclear('"React"'))
 	),
 	findall(Pattern, (length(Pattern, Length), member(Contain,  ContainConstraints ), contains(Pattern, Contain )), BagContains),
+	(BagContains = [] -> ContainConstraints = []; true),
 	findall(Pattern, (length(Pattern, Length), member(ClubDoes, ClubDoesConstraints), clubDoes(Pattern, ClubDoes)), BagClubDoes),
+	(BagClubDoes = [] -> ClubDoesConstraints = []; true),
 	findall(Pattern, (length(Pattern, Length), member(React,    ReactConstraints   ), react(   Pattern, React   )), BagReact   ),
+	(BagReact = [] -> ReactConstraints = []; true),
 	append(BagContains, BagClubDoes, BagTmp),
 	append(BagTmp, BagReact, BagOfConstraints),
 	(BagOfConstraints = [] ->
