@@ -320,3 +320,20 @@ pre {
 	border-width: 0 !important;
 	border-style: dotted;
 }
+
+#doc_main {
+	margin: 1ex .2ex .2ex .2ex;
+}
+#doc_main ul {
+	padding: 0 0 0 3ex;
+}
+#doc_main ul li {
+	padding: 0 0 1ex 0;
+}
+
+#doc_main a:visited, #doc_main a:link {
+	text-decoration: none !important;
+}
+#doc_main a:hover {
+	text-decoration: underline !important;
+}
