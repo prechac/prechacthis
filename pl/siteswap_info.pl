@@ -8,6 +8,9 @@ siteswap_position(Juggler, Position, SiteswapPosition, NumberOfJugglers, Period)
 	shift_by_minuend(Position, Juggler, SiteswapPosition, NumberOfJugglers, Period).
 
 siteswap_position_general(Position, SiteswapPosition, NumberOfJugglers, Period) :-
+	siteswap_position_general(Position, SiteswapPosition, _Juggler, NumberOfJugglers, Period).
+	
+siteswap_position_general(Position, SiteswapPosition, Juggler, NumberOfJugglers, Period) :-
 	throwing_juggler(Position, LocalPosition, Juggler, NumberOfJugglers, Period),
 	siteswap_position(Juggler, LocalPosition, SiteswapPosition, NumberOfJugglers, Period).
 
@@ -23,30 +26,46 @@ all_club_siteswap_positions(Pattern, NumberOfJugglers, SiteswapPositions) :-
 		),
 		SiteswapPositions
 	).
+	
+
+all_club_siteswap_positions_and_jugglers(Pattern, NumberOfJugglers, SiteswapPositions) :-
+	averageNumberOfClubs(Pattern, AVClubs),
+	ClubsMax is AVClubs * NumberOfJugglers - 1,
+	findall(
+		[Juggler, Position],
+		(
+			between(0, ClubsMax, Club),
+			club_siteswap_position(Club, Pattern, Position, Juggler, NumberOfJugglers)
+		),
+		SiteswapPositions
+	).
 
 club_siteswap_position(Club, Pattern, SiteswapPosition, NumberOfJugglers) :-
+	club_siteswap_position(Club, Pattern, SiteswapPosition, _Juggler, NumberOfJugglers), !.
+	
+club_siteswap_position(Club, Pattern, SiteswapPosition, Juggler, NumberOfJugglers) :-
 	averageNumberOfClubs(Pattern, AVClubs),
 	NumberOfClubs is AVClubs * NumberOfJugglers,
 	Club =< NumberOfClubs,
 	orbits(Pattern, OrbitPattern),
 	clubsInOrbits(Pattern, OrbitPattern, AVClubsInOrbits),
 	multiply(AVClubsInOrbits, NumberOfJugglers, ClubsInOrbits),
-	club_siteswap_position(Club, 0, SiteswapPosition, NumberOfJugglers, OrbitPattern, ClubsInOrbits), !.
+	club_siteswap_position(Club, 0, SiteswapPosition, Juggler, NumberOfJugglers, OrbitPattern, ClubsInOrbits), !.
 	
-club_siteswap_position(-1, PositionReal, SiteswapPosition, NumberOfJugglers, OrbitPattern, _ClubsInOrbits) :-
+club_siteswap_position(-1, PositionReal, SiteswapPosition, Juggler, NumberOfJugglers, OrbitPattern, _ClubsInOrbits) :-
 	!,
 	PositionBevor is PositionReal - 1,
 	length(OrbitPattern, Period),
-	siteswap_position_general(PositionBevor, SiteswapPosition, NumberOfJugglers, Period).
-club_siteswap_position(Position, PositionReal, SiteswapPosition, NumberOfJugglers, OrbitPattern, ClubsInOrbits) :-
+	siteswap_position_general(PositionBevor, SiteswapPosition, Juggler, NumberOfJugglers, Period).
+club_siteswap_position(Position, PositionReal, SiteswapPosition, Juggler, NumberOfJugglers, OrbitPattern, ClubsInOrbits) :-
 	length(OrbitPattern, Period),
-	siteswap_position_general(PositionReal, SiteswapPosition0, NumberOfJugglers, Period),
+	siteswap_position_general(PositionReal, SiteswapPosition0, _Juggler0, NumberOfJugglers, Period),
 	ModPos is SiteswapPosition0 mod Period,
 	nth0(ModPos, OrbitPattern, Orbit),
 	nth0(Orbit, ClubsInOrbits, 0),
 	NextPositionReal is PositionReal + 1,
-	club_siteswap_position(Position, NextPositionReal, SiteswapPosition, NumberOfJugglers, OrbitPattern, ClubsInOrbits).
-club_siteswap_position(Pos, PositionReal, SiteswapPosition, NumberOfJugglers, OrbitPattern, ClubsInOrbits) :-
+	club_siteswap_position(Position, NextPositionReal, SiteswapPosition, Juggler, NumberOfJugglers, OrbitPattern, ClubsInOrbits).
+club_siteswap_position(Pos, PositionReal, SiteswapPosition, Juggler, NumberOfJugglers, OrbitPattern, ClubsInOrbits) :-
 	length(OrbitPattern, Period),
 	siteswap_position_general(PositionReal, SiteswapPosition0, NumberOfJugglers, Period),
 	ModPos is SiteswapPosition0 mod Period,
@@ -56,7 +75,7 @@ club_siteswap_position(Pos, PositionReal, SiteswapPosition, NumberOfJugglers, Or
 	changeOnePosition(ClubsInOrbits, Orbit, ClubsNew, NewClubsInOrbits),
 	NextPos is Pos - 1,
 	NextPositionReal is PositionReal + 1,
-	club_siteswap_position(NextPos, NextPositionReal, SiteswapPosition, NumberOfJugglers, OrbitPattern, NewClubsInOrbits).
+	club_siteswap_position(NextPos, NextPositionReal, SiteswapPosition, Juggler, NumberOfJugglers, OrbitPattern, NewClubsInOrbits).
 
 zerosTillPos_general([p(0,0,0)|_Pattern], 0, _NumberOfJugglers, 1) :- !.
 zerosTillPos_general(_Pattern, 0, _NumberOfJugglers, 0) :- !.
@@ -297,7 +316,21 @@ applyNewSwaps(OldSwapList, NewSwaps, SwapList) :-
 	union(RemainingOld, RemainingNew, SwapList).
 	
 	
+club_distribution(Pattern, NumberOfJugglers, ClubDistribution) :-
+	all_club_siteswap_positions_and_jugglers(Pattern, NumberOfJugglers, SiteswapPositions),
+	siteswapPosition2ClubDistribution(SiteswapPositions, NumberOfJugglers, ClubDistribution).
 
+siteswapPosition2ClubDistribution([], NumberOfJugglers, ClubDistribution) :-
+	listOf([0,0], NumberOfJugglers, ClubDistribution), !.
+siteswapPosition2ClubDistribution([[Juggler|Position]|SiteswapPositions], NumberOfJugglers, ClubDistribution) :-	
+	siteswapPosition2ClubDistribution(SiteswapPositions, NumberOfJugglers, OldClubDistribution),
+	Hand is Position mod 2,
+	nth0(Juggler, OldClubDistribution, OldHands),
+	nth0(Hand, OldHands, OldClubs),
+	Clubs is OldClubs + 1,
+	changeOnePosition(OldHands, Hand, Clubs, NewHands),
+	changeOnePosition(OldClubDistribution, Juggler, NewHands, ClubDistribution).
+	
 	
 	
 	
@@ -316,14 +349,15 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwa
 	writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
 	writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period),
 	writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers),
-	averageNumberOfClubs(Pattern, AverageNumberOfClubs),
-	NumberOfClubs is AverageNumberOfClubs * NumberOfJugglers,
-	(testClubDistribution(ActionList, NumberOfJugglers, Period, NumberOfClubs) ->
-		true;
-		format("<p class='info_clubdistri'>Not a possible starting point without extra throws ahead.<br>Number of clubs not correct!<br>Try to turn pattern.</p>\n\n")
-	),
+	%averageNumberOfClubs(Pattern, AverageNumberOfClubs),
+	%NumberOfClubs is AverageNumberOfClubs * NumberOfJugglers,
+	%(testClubDistribution(ActionList, NumberOfJugglers, Period, NumberOfClubs) ->
+	%	true;
+	%	format("<p class='info_clubdistri'>Not a possible starting point without extra throws ahead.<br>Number of clubs not correct!<br>Try to turn pattern.</p>\n\n")
+	%),
+	club_distribution(Pattern, NumberOfJugglers, ClubDistribution),
 	JugglerMax is NumberOfJugglers - 1,
-	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, SwapList, NumberOfJugglers, Period, PatternWithShortPasses, BackURL)),
+	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, PatternWithShortPasses, BackURL)),
 	writeJoepassLink(PatternWithShortPasses, NumberOfJugglers, SwapList).
 	
 writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period) :-
@@ -337,12 +371,13 @@ writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period) :-
 	forall(between(0, JugglerMax, Juggler), print_jugglers_throws(Juggler, ActionList, PointsInTime, NumberOfJugglers, Period)),
 	format("</table>\n\n").
 
-writeJugglerInfo(Juggler, ActionList, SwapList, NumberOfJugglers, Period, Pattern, BackURL) :-
+writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, Pattern, BackURL) :-
 	ColspanLong is Period,
 	ColspanShort is Period - 1,
 	jugglerShown(Juggler, JugglerShown),
-	clubsInHand(Juggler, a, Period, ActionList, ClubsHandA),
-	clubsInHand(Juggler, b, Period, ActionList, ClubsHandB),
+	%clubsInHand(Juggler, a, Period, ActionList, ClubsHandA),
+	%clubsInHand(Juggler, b, Period, ActionList, ClubsHandB),
+	nth0(Juggler, ClubDistribution, [ClubsHandA, ClubsHandB]),
 	handShown(Juggler, a, SwapList, HandShownA),
 	handShownLong(HandShownA, HandShownALong),
 	handShown(Juggler, b, SwapList, HandShownB),
