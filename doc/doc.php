@@ -11,7 +11,7 @@
 <?php
 if (isset($_REQUEST['section'])) {
 	echo "<div class='back'><a href='../index.php' target='_parent'>close</a>";
-	echo "&nbsp;|&nbsp;<a href='./doc.php' target='Doc'>up</a>\n";
+	echo "&nbsp;|&nbsp;<a href='./doc.php' target='Doc'>up</a></div>\n";
 	//$filename = "./sections/".$_REQUEST['section']."inc";
 	$filename = $_REQUEST['section'];
 	$file = fopen($filename,"r");
@@ -23,7 +23,7 @@ if (isset($_REQUEST['section'])) {
 	echo "</div>\n";
 	fclose($file);
 } else {
-	echo "<div class='doc_close'><a href='../index.php' target='_parent'>close</a></div>\n";
+	echo "<div class='back'><a href='../index.php' target='_parent'>close</a></div>\n";
 	echo "<h1>Documentation</h1>\n";
 	echo "<div id='doc_main'>\n";
 	echo "<ul>\n";
