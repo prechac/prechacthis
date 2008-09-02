@@ -99,10 +99,10 @@ $multiplexSelected[$_GET["multiplex"]] = "selected='selected'";
 if (!$_GET["max"]){$_GET["max"] = 4;}
 $maxSelected[$_GET["max"]] = "selected='selected'";
 
-if (!$_GET["passesmin"]){$_GET["passesmin"] = 1;}
+if (!isset($_GET["passesmin"])){$_GET["passesmin"] = 1;}
 $minPassSelected[$_GET["passesmin"]] = "selected='selected'";
 
-if (!$_GET["passesmax"] or !is_numeric($_GET["passesmax"])){$_GET["passesmax"] = 0;}
+if (!isset($_GET["passesmax"]) or !is_numeric($_GET["passesmax"])){$_GET["passesmax"] = 0;}
 $maxPassSelected[$_GET["passesmax"]] = "selected='selected'";
 
 $hidden_debug="";
