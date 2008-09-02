@@ -347,7 +347,7 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwa
 	all_points_in_time(PointsInTime, NumberOfJugglers, Period),
 	what_happens(PointsInTime, Pattern, NumberOfJugglers, ActionList),
 	writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
-	writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period),
+	writePatternInfo(PatternWithShortPasses, PointsInTime, ActionList, NumberOfJugglers, Period, BackURL),
 	writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
 	%averageNumberOfClubs(Pattern, AverageNumberOfClubs),
 	%NumberOfClubs is AverageNumberOfClubs * NumberOfJugglers,
@@ -360,7 +360,7 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwa
 	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, PatternWithShortPasses, BackURL)),
 	writeJoepassLink(PatternWithShortPasses, NumberOfJugglers, SwapList).
 	
-writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period) :-
+writePatternInfo(PatternWithShortPasses, PointsInTime, ActionList, NumberOfJugglers, Period, BackURL) :-
 	format("<table class='info_pattern_table' align='center'>\n"),
 /*	
 	format("<td class='info_lable_swap'>point in time:</td>\n"),
@@ -369,6 +369,19 @@ writePatternInfo(PointsInTime, ActionList, NumberOfJugglers, Period) :-
 */
 	JugglerMax is NumberOfJugglers - 1,
 	forall(between(0, JugglerMax, Juggler), print_jugglers_throws(Juggler, ActionList, PointsInTime, NumberOfJugglers, Period)),
+	(amountOfPasses(PatternWithShortPasses, 0) ->
+		(
+			NumberOfJugglersPlus is NumberOfJugglers + 1,
+			NumberOfJugglersMinus is NumberOfJugglers - 1,
+			pattern_to_string(PatternWithShortPasses, PatternString),
+			format("<tr>"),
+			format("<td class='info_lable'><a href='./info.php?pattern=~s&persons=~w&back=~w' class='small'>add</a>\n", [PatternString, NumberOfJugglersPlus, BackURL]),
+			format("/"),
+			format("<a href='./info.php?pattern=~s&persons=~w&back=~w' class='small'>sub</a></td>\n", [PatternString, NumberOfJugglersMinus, BackURL]),
+			format("<td colspan='~w'>&nbsp;</td>", [Period]),
+			format("</tr>")
+		); true
+	),
 	format("</table>\n\n").
 
 writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, Pattern, BackURL) :-
