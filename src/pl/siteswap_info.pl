@@ -375,8 +375,8 @@ writePatternInfo(PatternWithShortPasses, PointsInTime, ActionList, NumberOfJuggl
 			NumberOfJugglersMinus is NumberOfJugglers - 1,
 			pattern_to_string(PatternWithShortPasses, PatternString),
 			format("<tr>"),
-			format("<td class='info_lable'><a href='./info.php?pattern=~s&persons=~w&back=~w' class='small'>add</a>\n", [PatternString, NumberOfJugglersPlus, BackURL]),
-			format("/"),
+			format("<td class='info_lable'><a href='./info.php?pattern=~s&persons=~w&back=~w' class='small'>add</a>", [PatternString, NumberOfJugglersPlus, BackURL]),
+			format("&nbsp;|&nbsp;"),
 			format("<a href='./info.php?pattern=~s&persons=~w&back=~w' class='small'>sub</a></td>\n", [PatternString, NumberOfJugglersMinus, BackURL]),
 			format("<td colspan='~w'>&nbsp;</td>", [Period]),
 			format("</tr>")
