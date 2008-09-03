@@ -38,6 +38,29 @@ print_exception(Exception) :-
 	format(Exception),
 	!,fail.
 
+cleanListOfSiteswaps(List,CleanList) :-
+   cleanEquals(List, Swaps),
+   rotateAll(Swaps,SwapsRotated),
+   sortListOfSiteswaps(SwapsRotated, CleanList).
+
+sortListOfSiteswaps(Swaps, SwapsSorted) :-
+   addKeys(Swaps,SwapsWithKeys),
+   keysort(SwapsWithKeys,SwapsSortedWithKeys),
+   removeKeys(SwapsSortedWithKeys,SwapsSorted).
+
+
+addKeys([],[]).
+addKeys([Head|Swaps],[Key-Head|SwapsWithKeys]) :-
+	%%listOfHeights(Head,Heights),
+	amountOfPasses(Head,Number),
+	rat2float(Head,HeadFloat),
+	Key = [Number,HeadFloat],
+	addKeys(Swaps,SwapsWithKeys).
+
+removeKeys([],[]).
+removeKeys([_Key-Head|SwapsWithKeys],[Head|Swaps]) :-
+	removeKeys(SwapsWithKeys,Swaps).
+
 convertP([], [], _, _).
 convertP([p(FirstThrow,Index,Origen) | RestThrows ], [  FirstThrowP| RestThrowsP], Length, Persons) :- 
 	Index > 0,
@@ -84,18 +107,15 @@ convertMagicThrows(Pattern, [Pos|MagicPositions], MagicPattern) :-
 
 
 %% single throw version needed!!!
-convertMultiplex(Multiplex, MultiplexNew) :-
-	convertMultiplex(Multiplex, MultiplexNew, ' ').
-convertMultiplex([],[], _Space).
-convertMultiplex([Multiplex | Rest], [MultiplexNew | RestNew], Space) :-
+convertMultiplex([],[]).
+convertMultiplex([Multiplex | Rest], [MultiplexNew | RestNew]) :-
     is_list(Multiplex), !,
- 	concat_atom(Multiplex, Space, MultiplexTemp),
+ 	concat_atom(Multiplex, ',', MultiplexTemp),
  	atom_concat('[',MultiplexTemp,MultiplexTemp2),
  	atom_concat(MultiplexTemp2, ']', MultiplexNew),
- 	convertMultiplex(Rest, RestNew, Space).
-convertMultiplex([Throw | Rest], [Throw | RestNew], Space) :-
-	convertMultiplex(Rest, RestNew, Space).
-	
+ 	convertMultiplex(Rest, RestNew).
+convertMultiplex([Throw | Rest], [Throw | RestNew]) :-
+	convertMultiplex(Rest, RestNew).
 
 writeSwap(ThrowsPM, Throws, Persons, BackURL) :-
    concat_atom(ThrowsPM, ' ', Swap),

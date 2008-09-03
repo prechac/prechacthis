@@ -32,29 +32,10 @@ multiplex(OldPattern, NewPattern, NumberOfMultiplexes) :-
 
 
 
-permutateMultiplexes([],[]) :- !.
+permutateMultiplexes([],[]).
 permutateMultiplexes([Head|Tail],[NewHead|NewTail]) :-
-	is_list(Head),!,
 	permutateMultiplexes(Tail,NewTail),
+	is_list(Head),!,
 	permutation(Head,NewHead).
 permutateMultiplexes([Head|Tail],[Head|NewTail]) :- 
 	permutateMultiplexes(Tail,NewTail).
-
-
-orderMultiplexes([],[]) :- !.
-orderMultiplexes([Multiplex|Pattern], [MultiplexOrderedDesc|NewPattern]) :-
-	is_list(Multiplex), !,
-	sort(Multiplex, MultiplexOrdered),
-	reverse(MultiplexOrdered, MultiplexOrderedDesc),	
-	orderMultiplexes(Pattern, NewPattern).
-orderMultiplexes([Throw|Pattern], [Throw|NewPattern]) :-
-	orderMultiplexes(Pattern, NewPattern).
-	
-checkMultiplexes([]) :- !.
-checkMultiplexes([Multiplex|Pattern]) :-
-	is_list(Multiplex), !,
-	is_set(Multiplex),
-	dontcontain(Multiplex, [p(0,0,0)]),
-	checkMultiplexes(Pattern).
-checkMultiplexes([_Throw|Pattern]) :-
-	checkMultiplexes(Pattern).
