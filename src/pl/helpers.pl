@@ -15,13 +15,7 @@ firstVar0([Var|_List], 0) :-
 firstVar0([_NonVar|List], Pos1) :-
 	firstVar0(List, Pos),
 	Pos1 is Pos + 1.
-
-firstNoGround0([Var|_List], 0) :-
-	not(ground(Var)), !.
-firstNoGround0([_NonVar|List], Pos1) :-
-	firstNoGround0(List, Pos),
-	Pos1 is Pos + 1.
-
+	
 positionsInList(List, Object, Positions) :-
 	positionsInList(List, Object, 0, Positions).
 positionsInList([], _, _, []) :- !.
@@ -38,21 +32,7 @@ nth0List([Pos|PosList], List, [X|Xs]) :-
 	nth0(Pos, List, X),
 	nth0List(PosList, List, Xs).
 
-nth0ListOfLists(Pos, List, X) :-
-	number(Pos), !,
-	nth0(Pos, List, X).
-nth0ListOfLists([Pos], List, X) :-
-	number(Pos), !,
-	nth0(Pos, List, X).
-nth0ListOfLists([Pos|Positions], List, X) :-
-	nth0(Pos, List, InnerList),
-	nth0ListOfLists(Positions, InnerList, X).
-
 changeOnePosition(List, Pos, X, NewList) :-
-	number(Pos), !,
-	changeOnePosition(List, [Pos], X, NewList).
-changeOnePosition(List, [Pos], X, NewList) :-
-	number(Pos), !,
 	length(List, Length),
 	length(NewList, Length),
 	PreLength is Pos,
@@ -64,51 +44,12 @@ changeOnePosition(List, [Pos], X, NewList) :-
 	append(PreList, _, NewList),
 	append(_, PostList, NewList),
 	nth0(Pos, NewList, X).
-changeOnePosition(List, [Pos|Positions], X, NewList) :-
-	length(List, Length),
-	length(NewList, Length),
-	PreLength is Pos,
-	PostLength is Length - Pos - 1,
-	length(PreList, PreLength),
-	length(PostList, PostLength),
-	append(PreList, _, List),
-	append(_, PostList, List),
-	append(PreList, _, NewList),
-	append(_, PostList, NewList),
-	nth0(Pos, List, InnerList),
-	changeOnePosition(InnerList, Positions, X, NewInnerList),
-	nth0(Pos, NewList, NewInnerList).
-	
-
 
 changePositions(List, [], _X, List) :- !.
 changePositions(List, [Pos|Positions], X, NewList) :-
 	changePositions(List, Positions, X, TmpList),
 	changeOnePosition(TmpList, Pos, X, NewList).
 	
-
-posList(List, PosList) :- 
-	posList(List, [0], PosList), !.
-posList([], _Pos, []) :- !.
-posList([InnerList|List], Pos, PosList) :-
-	is_list(InnerList),!,
-	append(Pos, [0], InnerPos),
-	posList(InnerList, InnerPos, InnerPosList),
-	length(Pos, Length),
-	Length0 is Length - 1,
-	nth0(Length0, Pos, EndPos),
-	NextEndPos is EndPos + 1,
-	changeOnePosition(Pos, Length0, NextEndPos, NextPos),	
-	posList(List, NextPos, NextPosList),
-	append(InnerPosList, NextPosList, PosList).
-posList([_X|List], Pos, [Pos|PosList]) :-	
-	length(Pos, Length),
-	Length0 is Length - 1,
-	nth0(Length0, Pos, EndPos),
-	NextEndPos is EndPos + 1,
-	changeOnePosition(Pos, Length0, NextEndPos, NextPos),	
-	posList(List, NextPos, PosList).
-
 
 %% fillIn(Original, Copy, StartingPosition, ListOfNotChangingPositions)
 fillIn([],[], _, _) :- !.
@@ -137,13 +78,6 @@ fillIn( [Orig_Head | Orig_Rest], [Copy_Head | Copy_Rest]) :-
 
 
 fillInAndCopy([],[],[]) :- !.
-fillInAndCopy( [Orig_Multiplex | Orig_Rest], [FillIn_Multiplex | FillIn_Rest], [Copy_Multiplex | Copy_Rest]) :-
-   is_list(Orig_Multiplex),!,
-   length(Orig_Multiplex, Length),
-   length(FillIn_Multiplex, Length),
-   length(Copy_Multiplex, Length),
-   fillInAndCopy(Orig_Multiplex, FillIn_Multiplex, Copy_Multiplex),
-   fillInAndCopy(Orig_Rest, FillIn_Rest, Copy_Rest).
 fillInAndCopy( [Orig_Head | Orig_Rest], [_FillIn_Head | FillIn_Rest], [Copy_Head | Copy_Rest]) :-
    nonvar(Orig_Head),!,
    Copy_Head = Orig_Head,
@@ -152,30 +86,11 @@ fillInAndCopy( [Orig_Head | Orig_Rest], [FillIn_Head | FillIn_Rest], [Copy_Head 
    var(Orig_Head),!,
    Copy_Head = FillIn_Head,
    fillInAndCopy(Orig_Rest, FillIn_Rest, Copy_Rest).
-fillInAndCopy( [Orig_Head | Orig_Rest], [FillIn_Head | FillIn_Rest], [_Copy_Head | Copy_Rest]) :- %%%???
+fillInAndCopy( [Orig_Head | Orig_Rest], [FillIn_Head | FillIn_Rest], [_Copy_Head | Copy_Rest]) :-
    var(Orig_Head),
    var(FillIn_Head),!,
    fillInAndCopy(Orig_Rest, FillIn_Rest, Copy_Rest).
 
-copyList([], []) :- !.
-copyList([Head|List], [HeadCopy|ListCopy]) :-
-	var(HeadCopy), !,
-	HeadCopy = Head,
-	copyList(List, ListCopy).
-copyList([_Head|List], [_HeadCopy|ListCopy]) :-
-	copyList(List, ListCopy).
-	
-	
-numberOfX([], _, 0) :- !.
-numberOfX([Var|Tail], X, Number) :-
-	var(Var), !,
- 	numberOfX(Tail, X, Number).
-numberOfX([X|Tail], X, Number) :-
-	!,
-	numberOfX(Tail, X, OldNumber),
-	Number is OldNumber + 1.
-numberOfX([_Y|Tail], X, Number) :-
-	numberOfX(Tail, X, Number).
 
 multiply([], _Factor, []).
 multiply([HeadIn | TailIn], Factor, [HeadOut | TailOut]) :-
@@ -183,26 +98,6 @@ multiply([HeadIn | TailIn], Factor, [HeadOut | TailOut]) :-
    multiply(TailIn, Factor, TailOut).
 
 
-add(Var, _Summand, _Sum) :-
-	var(Var), !.
-add(Number, Summand, Sum) :-
-	(number(Number); rational(Number)),
-	Sum is Number + Summand, !.
-add([Head|Tail], Summand, [NewHead|NewTail]) :-
-	add(Head, Summand, NewHead),
-	add(Tail, Summand, NewTail), !.
-add([], _, []) :- !.
-
-memberOrEqual(X, List) :-
-	is_list(List),!,
-	member(X, List).
-memberOrEqual(X, X) :- !.
-
-memberOrEqual(X, List, Pos) :-
-	is_list(List),!,
-	nth0(Pos, List, X).
-memberOrEqual(X, X, -1) :- !.
-	
 rotate(List, Rotated) :-
     append(Left, Right, List),
 	length(Right,LengthRight),
@@ -253,44 +148,18 @@ oneToN(Period, OneToN) :-
 	oneToN(PeriodMinus1, OldOneToN),
 	append(OldOneToN, [Period], OneToN).
 
-	
-realSubtract(List, [], List) :- !.	
-realSubtract(List, [Head|Delete], Remaining) :-
-	removeOnce(List, Head, RemainingForNow),
-	realSubtract(RemainingForNow, Delete, Remaining).
 
 
-
-%removeOnce([], _, []) :- !.
-removeOnce([Head|List], Head, List) :- !.
-removeOnce([Head|Tail], Element, [Head|List]) :- 
-	removeOnce(Tail, Element, List), !.
-	
 listOfNumber(Number, Length, List) :- listOf(Number, Length, List).
 listOfNumber(Number, List) :- listOf(Number, List).
-	
+
 listOf(X, Length, List) :-
 	length(List, Length),
 	listOf(X, List).
 listOf(_X, []) :- !.
 listOf(X, [X|Tail]) :-
 	listOf(X, Tail).
-	
 
-nth0_gen(Pos, List, X, NewList) :-
-	var(List), !,
-	length(TmpList, Pos),
-	append(TmpList, [X], NewList).
-nth0_gen(Pos, List, X, List) :-
-	length(List, Length),
-	Pos < Length, !,
-	nth0(Pos, List, X).
-nth0_gen(Pos, List, X, NewList) :-
-	length(List, Length),
-	Delta is Pos - Length + 1,
-	length(AddList, Delta),
-	append(List, AddList, NewList),
-	nth0(Pos, NewList, X).
 
 
 %%%  --- number operations ---
@@ -345,24 +214,6 @@ permutationRandom([Head | Rest], Shuffled) :-
    append(FirstPart, SecondPart, RestShuffled),
    append(FirstPart, [Head|SecondPart], Shuffled).
 
-%%% fillPermutation 
-%% ?- L = [4, _, 1, _], fillPermutation([1,2,3,4], L).
-%% L = [4, 2, 1, 3]
-%% L = [4, 3, 1, 2]
-%%
-%% ?- L = [[4, _], 2, 1, _], fillPermutation([1,1,2,3,4], L).
-%% L = [[4,1], 2, 1, 3]
-%% L = [[4,3], 2, 1, 1]
-%%
-fillPermutation(List, Permutation) :-
-	flatten(List, FlatList),
-	flatten(Permutation, FlatPermutation),
-	removeVars(FlatPermutation, DontPermutate),
-	realSubtract(FlatList, DontPermutate, DoPermutate),
-	permutation(DoPermutate, PermutatedGaps),
-	fillInVars(Permutation, PermutatedGaps).
-	
-
 fillSetPermutation(Set, Permutation) :-
 	is_set(Set),
 	removeVars(Permutation, DontPermutate),
@@ -378,24 +229,14 @@ removeVars([NonVar|ListWithVars], [NonVar|ListWithoutVars]) :-
 	nonvar(NonVar), !,
 	removeVars(ListWithVars, ListWithoutVars).
 
-fillInVars(List, Gaps) :-
-	fillInVars(List, Gaps, _), !.
-
-
-
-fillInVars([], Gaps, Gaps) :- !.
-fillInVars(_, [], []) :- !.
-fillInVars([InnerList|ListWithVars], ListOfGaps, RemainingGaps) :-
-	is_list(InnerList), !,
-	fillInVars(InnerList, ListOfGaps, RemainingGapsFromInnerList),
-	fillInVars(ListWithVars, RemainingGapsFromInnerList, RemainingGaps).
-fillInVars([NonVar|ListWithVars], ListOfGaps, RemainingGaps) :-
+fillInVars(_, []) :- !.
+fillInVars([NonVar|ListWithVars], ListOfGaps) :-
 	nonvar(NonVar), !,
-	fillInVars(ListWithVars, ListOfGaps, RemainingGaps).
-fillInVars([Var|ListWithVars], [Gap|ListOfGaps], RemainingGaps) :-
+	fillInVars(ListWithVars, ListOfGaps).
+fillInVars([Var|ListWithVars], [Gap|ListOfGaps]) :-
 	var(Var), !,
 	Var = Gap,
-	fillInVars(ListWithVars, ListOfGaps, RemainingGaps).
+	fillInVars(ListWithVars, ListOfGaps).
 
 findAtMostNUnique(X, Goal, MaxNumberOfResults, Bag, Flag) :- 
 	initFindAtMostNUnique,
@@ -448,7 +289,6 @@ gather(B,Bag) :-
 	gather([X|B],Bag),
 	!.
 gather(S,S).
-
 
 %%% string operations %%%
 

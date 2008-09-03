@@ -2,7 +2,6 @@
 siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, _NumberOfMultiplexes, PassesMin, PassesMax, ContainString, DontContainString, ClubDoesString, ReactString) :-
 	initConstraintCheck,
 	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainString, ClubDoesString, ReactString),
-	preprocessMultiplexes(Pattern),
 	siteswap(NumberOfJugglers, Objects, MaxHeight, Pattern),
 	(passesMin(Pattern, PassesMin); NumberOfJugglers=1),
 	passesMax(Pattern, PassesMax),
@@ -12,8 +11,7 @@ siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, _NumberOfM
 		throw(constraint_unclear('"Exclude"'))
 	),
 	forall(member(DontContainPattern, DontContain), dontContainRotation(Pattern, DontContainPattern)),
-	orderMultiplexes(Pattern, PatternM),
-	rotateHighestFirst(PatternM, OutputPattern).
+	rotateHighestFirst(Pattern, OutputPattern).
 
 initConstraintCheck :- 
 	retractall(constraintChecked(_)),!.
@@ -53,7 +51,6 @@ mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainString, ClubDoe
 	(BagClubDoes = [] -> ClubDoesConstraints = []; true),
 	findall(Pattern, (length(Pattern, Length), member(React,    ReactConstraints   ), react(   Pattern, React   )), BagReact   ),
 	(BagReact = [] -> ReactConstraints = []; true),
-	% !!!!!! ?????????????????
 	append(BagContains, BagClubDoes, BagTmp),
 	append(BagTmp, BagReact, BagOfConstraints),
 	(BagOfConstraints = [] ->
@@ -114,10 +111,10 @@ amountOfPasses([FirstThrow|RestThrows], Passes) :-
    isPass(FirstThrow, ThisThrowIsPass),
    Passes is ThisThrowIsPass + RestPasses.
 
-isPass(p(_,Index,_), 1) :- Index > 0, !.
-isPass(p(_,Index,_), 0) :- Index = 0, !.
+isPass(p(_,Index,_), 1) :- Index > 0.
+isPass(p(_,Index,_), 0) :- Index = 0.
 isPass(Multiplex, NumberOfPasses) :- 
-	is_list(Multiplex),!,
+	is_list(Multiplex),
 	amountOfPasses(Multiplex, NumberOfPasses).
 
 
@@ -126,40 +123,17 @@ isPass(Multiplex, NumberOfPasses) :-
 contains(Pattern, Segment) :-
    append(Segment, _, Pattern).
 
-
-% Pattern doesn't contain Segment
 dontcontain(_, []) :- fail,!.
-dontcontain([PatternHead|_Pattern], _) :-
-   var(PatternHead),!. % one is var
-dontcontain(_, [SegmentHead|_Segment]) :-
-   var(SegmentHead),!. % one is var
-dontcontain([PatternMultiplex|_Pattern], [SegmentThrow|_Segment]) :-
-	is_list(PatternMultiplex), 
-	not(is_list(SegmentThrow)),!, % PatternHead is Multiplex the other not
-	multiplexDoesntContain(PatternMultiplex, SegmentThrow).
-dontcontain([PatternThrow|_Pattern], [SegmentMultipex|_Segment]) :-
-	not(is_list(PatternThrow)), 
-	is_list(SegmentMultipex),!. % SegHead is Multiplex the other not
-dontcontain([PatternMultiplex|_Pattern], [SegmentMultiplex|_Segment]) :-
-	is_list(PatternMultiplex),
-	is_list(SegmentMultiplex),!,  % both Multiplex
-	multiplexDoesntContain(PatternMultiplex, SegmentMultiplex).
-dontcontain([PatternHead|_Pattern], [SegmentHead|_Segment]) :-
-	not_this_throw(PatternHead, SegmentHead), !. % not same head
-dontcontain([_PatternHead|Pattern], [_SegmentHead|Segment]) :-
-	dontcontain(Pattern, Segment),!. % not same tail
+dontcontain([PatternHead|Pattern], [SegmentHead|Segment]) :-
+   ((var(PatternHead); var(SegmentHead));
+   dontcontain(Pattern, Segment)),!.
+dontcontain([PatternHead|Pattern], [SegmentHead|Segment]) :-
+	(
+		not_this_throw(PatternHead, SegmentHead);
+		dontcontain(Pattern, Segment)
+	),!.
 
-multiplexDoesntContain([], _) :- !.
-multiplexDoesntContain([Head|Multiplex], p(T,I,O)) :-
-	not_this_throw(Head, p(T,I,O)),
-	multiplexDoesntContain(Multiplex, p(T,I,O)),!.
-multiplexDoesntContain(_, []) :- fail,!.
-multiplexDoesntContain(Multiplex, [Head|Tail]) :-
-	multiplexDoesntContain(Multiplex, Head);
-	multiplexDoesntContain(Multiplex, Tail).
 	
-
-
 not_this_throw(p(_Throw, Index, _Origen), p(_SegThrow, SegIndex, _SegOrigen)) :-
 	var(SegIndex),
 	Index = 0,!.
@@ -190,16 +164,12 @@ react(Pattern, Seq) :-
 
 insertThrows(Pattern, Site, Seq) :-
 	insertThrows(Pattern, Site, Seq, 0).
-insertThrows(_,_,[],_) :- !.
+insertThrows(_,_,[],_).
 insertThrows(Pattern, Site, [Throw | Rest], Delta) :-
    length(Pattern, Length),
    nth0(Site, Pattern, Throw),
    SitePlusDelta is Site + Delta,
-   %Test ob Hoehe OK!?! (react: 1 2 nicht sinnvoll) !!!!!!!!!!!!!!!!!!!!!!!
-   landingSite(SitePlusDelta, Throw, Length, NextSiteList),
-   (is_list(NextSiteList) ->
-      member(NextSite, NextSiteList);
-      NextSite = NextSiteList
-   ),!,   % doesn't work with [_ _] 1p   not all are found!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   %Test ob Hoehe OK!?! (react: 1 2 nicht sinnvoll)
+   landingSite(SitePlusDelta, Throw, Length, NextSite),
    insertThrows(Pattern, NextSite, Rest, Delta).
 
