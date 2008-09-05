@@ -146,7 +146,11 @@ th {
 
 
 .magic {
-	border-color: #CF6;
+	/*border-color: #CF6; */
+	/*border-color: #FC6; */
+	/*border-color: #DD6; */
+	border-color: #0F0;
+	/*border-color: ; */
 	border-width: 0 0 .2ex 0;
 	border-style: dotted;
 }
@@ -248,6 +252,7 @@ h1.big_swap {
 	white-space: nowrap;
 	margin: 0;
 	padding: 0;
+	white-space: nowrap;
 }
 td.big_swap {
 	margin: 0;
@@ -263,6 +268,9 @@ td.big_swap {
 }
 
 .info_clubs,  .info_pointintime, .info_hand, .info_juggler, .info_cross{
+	font-family: 'Courier New', Courier, monospace !important;
+	font-weight: bold;
+	vertical-align: top !important;
 	text-align: center;
 	border-width: 0px;
 	border-style: dotted;

@@ -38,29 +38,6 @@ print_exception(Exception) :-
 	format(Exception),
 	!,fail.
 
-cleanListOfSiteswaps(List,CleanList) :-
-   cleanEquals(List, Swaps),
-   rotateAll(Swaps,SwapsRotated),
-   sortListOfSiteswaps(SwapsRotated, CleanList).
-
-sortListOfSiteswaps(Swaps, SwapsSorted) :-
-   addKeys(Swaps,SwapsWithKeys),
-   keysort(SwapsWithKeys,SwapsSortedWithKeys),
-   removeKeys(SwapsSortedWithKeys,SwapsSorted).
-
-
-addKeys([],[]).
-addKeys([Head|Swaps],[Key-Head|SwapsWithKeys]) :-
-	%%listOfHeights(Head,Heights),
-	amountOfPasses(Head,Number),
-	rat2float(Head,HeadFloat),
-	Key = [Number,HeadFloat],
-	addKeys(Swaps,SwapsWithKeys).
-
-removeKeys([],[]).
-removeKeys([_Key-Head|SwapsWithKeys],[Head|Swaps]) :-
-	removeKeys(SwapsWithKeys,Swaps).
-
 convertP([], [], _, _).
 convertP([p(FirstThrow,Index,Origen) | RestThrows ], [  FirstThrowP| RestThrowsP], Length, Persons) :- 
 	Index > 0,
@@ -93,29 +70,28 @@ convertP(Throw, ThrowP, Length, Persons) :-
 	number(Throw),
 	convertP([Throw], [ThrowP], Length, Persons).
 
-convertMagic(Pattern, [], Pattern) :- !.
-convertMagic(Pattern, MagicPositions, MagicPattern) :-
-	convertMagicThrows(Pattern, MagicPositions, MagicPattern),
-	fillIn(Pattern, MagicPattern, 0, MagicPositions).
 
-convertMagicThrows(_, [], _) :- !.
-convertMagicThrows(Pattern, [Pos|MagicPositions], MagicPattern) :- 
-	nth0(Pos, Pattern, Throw),
+convertMagic(Pattern, [], Pattern) :- !.
+convertMagic(Pattern, [Pos|MagicPositions], MagicPattern) :- 
+	nth0ListOfLists(Pos, Pattern, Throw),
 	format(string(MagicThrow), "<span class='magic' title='it&#39;s&nbsp;magic'>~s</span>", [Throw]),
-	nth0(Pos, MagicPattern, MagicThrow),
-	convertMagicThrows(Pattern, MagicPositions, MagicPattern).
+	changeOnePosition(Pattern, Pos, MagicThrow, TmpMagicPattern),
+	convertMagic(TmpMagicPattern, MagicPositions, MagicPattern).
 
 
 %% single throw version needed!!!
-convertMultiplex([],[]).
-convertMultiplex([Multiplex | Rest], [MultiplexNew | RestNew]) :-
+convertMultiplex(Multiplex, MultiplexNew) :-
+	convertMultiplex(Multiplex, MultiplexNew, ' ').
+convertMultiplex([],[], _Space).
+convertMultiplex([Multiplex | Rest], [MultiplexNew | RestNew], Space) :-
     is_list(Multiplex), !,
- 	concat_atom(Multiplex, ',', MultiplexTemp),
+ 	concat_atom(Multiplex, Space, MultiplexTemp),
  	atom_concat('[',MultiplexTemp,MultiplexTemp2),
  	atom_concat(MultiplexTemp2, ']', MultiplexNew),
- 	convertMultiplex(Rest, RestNew).
-convertMultiplex([Throw | Rest], [Throw | RestNew]) :-
-	convertMultiplex(Rest, RestNew).
+ 	convertMultiplex(Rest, RestNew, Space).
+convertMultiplex([Throw | Rest], [Throw | RestNew], Space) :-
+	convertMultiplex(Rest, RestNew, Space).
+	
 
 writeSwap(ThrowsPM, Throws, Persons, BackURL) :-
    concat_atom(ThrowsPM, ' ', Swap),
@@ -124,10 +100,12 @@ writeSwap(ThrowsPM, Throws, Persons, BackURL) :-
    format("<a href='./info.php?pattern=~s&persons=~w&back=~w'>~w</a><br>\n", [URLPattern,Persons,BackURL,Swap]),!.
 
 writePassingSwap(Throws, Persons, BackURL) :-
-	length(Throws,Length),
+	length(Throws, Length),
+	magicPositions(Throws, Persons, MagicPositions),
     convertP(Throws, ThrowsP, Length, Persons),
-	convertMultiplex(ThrowsP,ThrowsPM),
-    writeSwap(ThrowsPM, Throws, Persons, BackURL).
+	convertMagic(ThrowsP, MagicPositions, ThrowsPM),
+	convertMultiplex(ThrowsPM,ThrowsPMM),
+    writeSwap(ThrowsPMM, Throws, Persons, BackURL).
 
 writeCompletedSiteswap(Pattern, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, BackURL) :-
    siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React),

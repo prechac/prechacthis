@@ -14,6 +14,41 @@ string2Constraint(ConstraintString, Constraint) :-
 		throw(constraint_unclear)
 	),!.
 
+preprocessMultiplexes(Pattern) :-
+	preprocessMultiplexes(Pattern, Pattern, 0).
+
+preprocessMultiplexes([], _OrigPattern, _Position) :- !.
+preprocessMultiplexes([Multiplex|Tail], OrigPattern, Position) :-
+	is_list(Multiplex), !,
+	length(Multiplex, Length),
+	set2s(Length, Length, OrigPattern, Position),
+	NewPosition is Position + 1,
+	preprocessMultiplexes(Tail, OrigPattern, NewPosition).
+preprocessMultiplexes([_Head|Tail], OrigPattern, Position) :-
+	NewPosition is Position + 1,
+	preprocessMultiplexes(Tail, OrigPattern, NewPosition).
+	
+set2s(1, _, _, _) :- !.
+set2s(Distance, MultiplexLength, OrigPattern, Position) :-
+	length(OrigPattern, Period),
+	PositionOf2 is Period - 1 - ((Period - 1 - Position + (Distance - 1) * 2) mod Period),
+	calcThe2(Distance, MultiplexLength, The2),
+	nth0(PositionOf2, OrigPattern, The2),
+	%(
+	%	nth0(PositionOf2, OrigPattern, p(2,0,2));
+	%	(
+	%		nth0(PositionOf2, OrigPattern, Multiplex),
+	%		member(p(2,0,2), Multiplex)    %% what happens in second round (2 has to be member twice) !!!
+	%	),!
+	%),
+	NewDistance is Distance - 1,
+	set2s(NewDistance, MultiplexLength, OrigPattern, Position).
+	
+calcThe2(MultiplexLength, MultiplexLength, p(2,0,2)) :- !.
+calcThe2(Distance, MultiplexLength, The2) :-
+	Length is MultiplexLength - Distance + 1,
+	listOf(p(2,0,2), Length, The2).
+	
 
 
 %%% --- short passes ---
@@ -55,6 +90,10 @@ shortpass_to_pass(p(ShortThrow, Index, Origen), Length, Jugglers, MaxHeight, p(T
 shortpass_to_pass(p(Var), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)) :-
 	var(Var),
 	shortpass_to_pass(p(Var, Index), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)).
+shortpass_to_pass(p(Var, Zero), _, _, MaxHeight, p(Self, Zero, Self)) :-
+	var(Var),
+	Zero = 0,
+	between(0, MaxHeight, Self).
 shortpass_to_pass(p(Var, Index), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)) :-
 	var(Var),
 	Prechator is Length rdiv Jugglers,
@@ -182,10 +221,12 @@ dcg_or_patterns([]) -->
 
 dcg_throw_or_constraint([[[Throw]]]) -->
 	dcg_throw(Throw).
+dcg_throw_or_constraint(Multiplex) -->
+	dcg_multiplex(Multiplex).
 dcg_throw_or_constraint(Constraint) -->
-	dcg_bracket_open,
+	dcg_left_parenthesis,
 	dcg_constraint(Constraint),
-	dcg_bracket_close.
+	dcg_right_parenthesis.
 	
 dcg_throws_or_constraints(NewConstraint) -->
 	dcg_whitespace,
@@ -197,11 +238,26 @@ dcg_throws_or_constraints(NewConstraint) -->
 dcg_throws_or_constraints([]) -->
 	[].
 	
+dcg_multiplex(Multiplex) -->
+	dcg_left_bracket,
+	dcg_constraint(Constraint),
+	dcg_right_bracket,
+	{
+		dcgh_constraint_to_multiplex(Constraint, Multiplex)
+	}.
+
+
 dcg_throw(T) -->
 	dcg_self(T).
 dcg_throw(T) -->
 	dcg_pass(T).
 	
+dcg_self(p(_S,0)) -->
+	dcg_underscore,
+	dcg_s.	
+dcg_self(p(S,0)) -->
+	dcg_integer(S),
+	dcg_s.
 dcg_self(S) -->
 	dcg_integer(S).
 dcg_self(_) -->
@@ -290,15 +346,17 @@ dcg_or -->
 dcg_or -->
 	";".
 	
-dcg_bracket_open -->
-	"(".
-dcg_bracket_open -->
-	"[".
 	
-dcg_bracket_close -->
+dcg_left_parenthesis -->
+	"(".
+dcg_right_parenthesis -->
 	")".
-dcg_bracket_close -->
+
+dcg_right_bracket -->
 	"]".
+dcg_left_bracket -->
+	"[".	
+	
 
 dcg_underscore -->
 	"_".
@@ -320,6 +378,12 @@ dcg_p -->
 	"p".
 dcg_p -->
 	"P".
+	
+
+dcg_s -->
+	"s".
+dcg_s -->
+	"S".
 
 dcg_dot -->
 	".".
@@ -403,6 +467,24 @@ dcgh_merge_constraints(ConstraintA, ConstraintB, NewConstraint, concat) :-
 		NewConstraint
 	), !.
 
+
+dcgh_constraint_to_multiplex(Constraint, Multiplex) :-
+	findall(
+		NewOr,
+		(
+			member(Or, Constraint),
+			findall(
+				NewAnd,
+				(
+					member(And, Or),
+					flatten(And, FlatAnd),
+					NewAnd = [FlatAnd]
+				),
+				NewOr
+			)
+		),
+		Multiplex
+	), !.
 
 
 

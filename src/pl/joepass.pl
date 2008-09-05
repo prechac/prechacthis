@@ -8,7 +8,10 @@ jp_pattern_def(PatternShort, NumberOfJugglers, SwapList, Style) :-
 	jp_listOfJugglerStartLeft(Period, NumberOfJugglers, SwapList, LeftList),
 	jp_header,
 	jp_positions(NumberOfJugglers, Style),
-	jp_colors(Pattern, NumberOfJugglers),
+	(noMultiplex(Pattern) -> 
+		jp_colors(Pattern, NumberOfJugglers);
+		true
+	),
 	jp_jugglerStartLeft(LeftList),
 	jp_delay(NumberOfJugglers, Period, Delay),
 	jp_pattern(ActionList, SwapList, LeftList, PointsInTime, Delay, NumberOfJugglers).
@@ -36,6 +39,7 @@ jp_colors(Pattern, NumberOfJugglers) :-
 	NumberOfClubs is AVClubs * NumberOfJugglers,
 	forall(between(1, NumberOfClubs, Club), jp_printClubColor(Club, Pattern, OrbitPattern, NumberOfJugglers)).
 
+% !!! Multiplex ToDo
 jp_printClubColor(Club, Pattern, ListOfColors, NumberOfJugglers) :-
 	Club0 is Club - 1,
 	club_siteswap_position(Club0, Pattern, SiteswapPosition, NumberOfJugglers),
@@ -74,6 +78,7 @@ jp_delay(NumberOfJugglers, Period, delay) :-
 		)
 	).
 
+
 jp_pattern(ActionList, SwapList, LeftList, PointsInTime, Delay, NumberOfJugglers) :-
 	JugglerMax is NumberOfJugglers - 1,
 	format("\n< "),
@@ -88,7 +93,6 @@ jp_print_jugglers_throws(Juggler, ActionList, SwapList, LeftList, PointsInTime, 
 	(Juggler = 0 -> true; format("|\n  ")),
 	forall(member(Point, PointsInTime), jp_print_jugglers_point_in_time(Juggler, Point, SwapList, LeftList, ActionList, Delay)).
 
-
 jp_print_jugglers_point_in_time(Juggler, PointInTime, SwapList, LeftList, ActionList, Delay) :-
 	member(Action, ActionList),
 	nth1(2, Action, Juggler),
@@ -97,10 +101,24 @@ jp_print_jugglers_point_in_time(Juggler, PointInTime, SwapList, LeftList, Action
 	%%jp_throwing_hand(Juggler, Action, SwapList, RightOrLeft),
 	jp_cross_tramline(Juggler, Action, SwapList, LeftList, Delay, CrossOrTram),
 	jp_convertP(Throw, CrossOrTram, ThrowP),
-	%%convertMultiplex_singleThrow(ThrowsP,ThrowsPM),
-	format(ThrowP),
+	jp_formatThrow(ThrowP),
 	format(" ").
 jp_print_jugglers_point_in_time(_, _, _, _, _, _) :- !.
+	
+jp_formatThrow(Multiplex) :-
+	is_list(Multiplex), !,
+	format('[ '),
+	jp_formatThrow(Multiplex, m).
+jp_formatThrow(Throw) :-
+	not(is_list(Throw)), !,
+	format(Throw),
+	format(' ').
+jp_formatThrow([], m) :-
+	format(']'), !.
+jp_formatThrow([Throw|Multiplex], m) :-
+	jp_formatThrow(Throw),
+	jp_formatThrow(Multiplex, m).
+
 	
 jp_convertP(p(Self, 0, _), _, Self) :- !.
 jp_convertP(p(Throw, Index, _), Cross, ThrowP) :-
@@ -108,6 +126,15 @@ jp_convertP(p(Throw, Index, _), Cross, ThrowP) :-
 	ThrowPList = [ShortPass, r, Index, Cross],
 	concat_atom(ThrowPList, ThrowP).
 	%%jp_convertPRightLeft(ThrowP, RightLeft, ThrowPrint).
+jp_convertP([], [], []) :- !.
+jp_convertP([Throw|Multiplex], [C|Cross], [ThrowP|MultiplexP]) :-
+	jp_convertP(Throw, C, ThrowP),
+	jp_convertP(Multiplex, Cross, MultiplexP).
+jp_convertP([], '', []) :- !.
+jp_convertP([Throw|Multiplex], '', [ThrowP|MultiplexP]) :-
+	jp_convertP(Throw, '', ThrowP),
+	jp_convertP(Multiplex, '', MultiplexP).
+	
 
 jp_convertPRightLeft(Throw, l, ThrowPrint) :-
 	format(atom(ThrowPrint), "( ~w , - )", [Throw]).
@@ -140,6 +167,11 @@ jp_cross_tramline(ThrowingJuggler, Action, SwapList, LeftList, _Delay, CrossOrTr
 	jp_cross_or_tramline(ThrowingHandShown, CatchingHandShown, Throw, CrossOrTram).
 jp_cross_tramline(_, _, _, _, _, '').
 
+jp_cross_or_tramline([], [], [], []) :- !.
+jp_cross_or_tramline([A|HandsA], [B|HandsB], [Throw|Multiplex], [CT|CrossOrTram]) :-
+	!,
+	jp_cross_or_tramline(A, B, Throw, CT),
+	jp_cross_or_tramline(HandsA, HandsB, Multiplex, CrossOrTram).
 jp_cross_or_tramline(Hand, Hand, p(Throw, _, _), ' ') :- 
 	ThrowInt is float_integer_part(Throw),
 	even(ThrowInt), !.
@@ -155,6 +187,7 @@ jp_filename(PatternShort, FileName) :-
 	jp_listOfThrows(PatternShort, Throws),
 	concat_atom(Throws, FileName).
 
+
 jp_listOfThrows([], []) :- !.
 jp_listOfThrows([p(Throw, 0, Throw)|Pattern], [Throw|Throws]) :-
 	!,
@@ -162,6 +195,14 @@ jp_listOfThrows([p(Throw, 0, Throw)|Pattern], [Throw|Throws]) :-
 jp_listOfThrows([p(Throw, _Index, _Origen)|Pattern], [ThrowP|Throws]) :-
 	atom_concat(Throw, p, ThrowP),
 	jp_listOfThrows(Pattern, Throws).
+jp_listOfThrows([Multiplex|Pattern], Throws) :-
+	is_list(Multiplex),!,
+	jp_listOfThrows(Multiplex, MultiplexThrows0),
+	append(['['], MultiplexThrows0, MultiplexThrows1),
+	append(MultiplexThrows1, [']'], MultiplexThrows),
+	jp_listOfThrows(Pattern, RestThrows),
+	append(MultiplexThrows, RestThrows, Throws).
+
 
 jp_jugglerStartWithHand(Juggler, Period, NumberOfJugglers, SwapList, Hand) :-
 	siteswap_position(Juggler, 0, SiteswapPosition, NumberOfJugglers, Period),

@@ -13,7 +13,8 @@ lengthK(Pattern, Length) :-
 
 averageNumberOfClubs(Pattern, Clubs) :- 
 	length(Pattern, Period),
-	listOfThrows(Pattern, Throws),
+	flatten(Pattern, PatternFlat),
+	listOfThrows(PatternFlat, Throws),
 	sumlist(Throws, SumThrows),
 	Clubs is SumThrows rdiv Period.
 	
@@ -22,7 +23,85 @@ listOfThrows([p(Throw,_Index,_Origen)|Pattern], [Throw|Throws]) :-
 	listOfThrows(Pattern, Throws).
 
 
+throw2list(Multiplex, Multiplex) :-
+	is_list(Multiplex),!.
+throw2list(Throw, [Throw]) :- !.
+
+
+pattern2Lists([], []) :- !.
+pattern2Lists([Throw|Pattern], [List|PatternOfLists]) :-
+	throw2list(Throw, List),
+	pattern2Lists(Pattern, PatternOfLists).
+
+
+%%% List of Point in Time
+
+is_lpt(LPT, NumberOfJugglers) :-
+	LPT = [LPTA, LPTB],
+	length(LPTA, NumberOfJugglers),
+	length(LPTB, NumberOfJugglers).
+	
+fill_lpt(LPT, X, NumberOfJugglers) :-
+	is_lpt(LPT, NumberOfJugglers),
+	LPT = [LPTA, LPTB],	
+	listOf(X, LPTA),
+	listOf(X, LPTB).
+
+lpt_nth0(LPT, X, Juggler, a) :-
+	LPT = [LPTA, _LPTB],
+	nth0(Juggler, LPTA, X).
+lpt_nth0(LPT, X, Juggler, b) :-
+	LPT = [_LPTA, LPTB],
+	nth0(Juggler, LPTB, X).
+	
+lpt_copy(LPT, LPTCopy) :-
+	LPT = [LPTA, LPTB],
+	LPTCopy = [LPTAC, LPTBC],
+	copyList(LPTA, LPTAC),
+	copyList(LPTB, LPTBC).
+
+lpt_add(LPTOld, X, Juggler, Hand, NumberOfJugglers, LPTNew) :- 
+	lpt_nth0(LPTOld, XOld, Juggler, Hand),
+	XNew is XOld + X,
+	is_lpt(LPTNew, NumberOfJugglers),
+	lpt_nth0(LPTNew, XNew, Juggler, Hand),
+	lpt_copy(LPTOld, LPTNew).
+
+lpt_append(LPTOld, X, Juggler, Hand, NumberOfJugglers, LPTNew) :- 
+	lpt_nth0(LPTOld, XOld, Juggler, Hand),
+	is_list(XOld),
+	append(XOld, [X], XNew),
+	is_lpt(LPTNew, NumberOfJugglers),
+	lpt_nth0(LPTNew, XNew, Juggler, Hand),
+	lpt_copy(LPTOld, LPTNew).
+
+	
 %%% --- landing sites ---
+
+possibleLandingSites(Pattern, PossibleLandingSites) :-
+	possibleLandingSites(Pattern, PossibleLandingSites, 0).
+possibleLandingSites([], [], _Period) :- !.
+possibleLandingSites([Multiplex|Pattern], PossibleLandingSites, Position) :-
+	is_list(Multiplex), !,
+	length(Multiplex, Length),
+	listOfNumber(Position, Length, ListOfPosition),
+	NextPosition is Position + 1,
+	possibleLandingSites(Pattern, RestLandingSites, NextPosition),
+	append(ListOfPosition, RestLandingSites, PossibleLandingSites).
+possibleLandingSites([_Throw|Pattern], [Position|PossibleLandingSites], Position) :-
+	NextPosition is Position + 1,
+	possibleLandingSites(Pattern, PossibleLandingSites, NextPosition).
+	
+	
+possibleLandingSites1(Pattern, LandingSites) :-
+	possibleLandingSites1(Pattern, LandingSites, 1).
+possibleLandingSites1(Pattern, LandingSites1, Position1) :- 
+	Position is Position1 - 1,
+	possibleLandingSites(Pattern, LandingSites, Position),
+	add(LandingSites, 1, LandingSites1).
+	
+	
+	
 
 landingSite(_, Throw, _, _) :-
 	var(Throw), !,
@@ -33,28 +112,43 @@ landingSite(Site, Throw, Length, LandingSite) :- %self
 landingSite(Site, p(_,_,Origen), Length, LandingSite) :- %pass
 	landingSite(Site, Origen, Length, LandingSite).
 landingSite(Site, Multiplex, Length, LandingSite) :- %multiplex
-	is_list(Multiplex),
-	member(Throw,Multiplex),
-	landingSite(Site, Throw, Length, LandingSite).
-	
+	is_list(Multiplex), !,
+	landingSiteMultiplex(Site, Multiplex, Length, LandingSite).
+
+landingSiteMultiplex(_, [], _, []) :- !.
+landingSiteMultiplex(Site, [Head|Multiplex], Period, [_Landing|LandingSites]) :-
+	var(Head), !,
+	landingSiteMultiplex(Site, Multiplex, Period, LandingSites).
+landingSiteMultiplex(Site, [Head|Multiplex], Period, [Landing|LandingSites]) :-
+	landingSite(Site, Head, Period, Landing),
+	landingSiteMultiplex(Site, Multiplex, Period, LandingSites).
+
 landingSite1(Site1, Throw, Length, LandingSite1) :-
 	Site0 is Site1 - 1,
 	landingSite(Site0, Throw, Length, LandingSite0),
 	LandingSite1 is LandingSite0 + 1.	
 	
+landingSites(Pattern, LandingSites) :-
+	length(Pattern, Period),
+	landingSites(Pattern, Period, LandingSites).
+	
+landingSites([], _, []) :- !.
+landingSites([Throw|Pattern], Period, [_Site|LandingSites]) :-
+	var(Throw),!,
+	landingSites(Pattern, Period, LandingSites).
+landingSites([Throw|Pattern], Period, [Site|LandingSites]) :-
+	length(Pattern, Length),
+	Position is Period - Length - 1,
+	landingSite(Position, Throw, Period, Site),
+	landingSites(Pattern, Period, LandingSites).
+	
+	
 landingSites1(Pattern, LandingSites) :-
 	length(Pattern, Period),
 	landingSites1(Pattern, Period, LandingSites).
-	
-landingSites1([], _, []) :- !.
-landingSites1([Throw|Pattern], Period, [_Site|LandingSites]) :-
-	var(Throw),!,
-	landingSites1(Pattern, Period, LandingSites).
-landingSites1([Throw|Pattern], Period, [Site|LandingSites]) :-
-	length(Pattern, Length),
-	Position is Period - Length,
-	landingSite1(Position, Throw, Period, Site),
-	landingSites1(Pattern, Period, LandingSites).
+landingSites1(Pattern, Period, LandingSites1) :- 
+	landingSites(Pattern, Period, LandingSites),
+	add(LandingSites, 1, LandingSites1).
 	
 
 uniqueLandingSites(Pattern) :-
@@ -212,9 +306,40 @@ rotateHighestFirst(Siteswap, Rotated) :-
 
 
 compare_swaps(Order, P1, P2) :-
-	rat2float(P1, P1F),
-	rat2float(P2, P2F),
-	compare(Order, P1F, P2F).
+	siteswapKey(P1, Key1),
+	siteswapKey(P2, Key2),
+	compare(Order, Key1, Key2).
+
+
+cleanListOfSiteswaps(List,CleanList) :-
+   cleanEquals(List, Swaps),
+   rotateAll(Swaps,SwapsRotated),
+   sortListOfSiteswaps(SwapsRotated, CleanList).
+
+sortListOfSiteswaps(Swaps, SwapsSorted) :-
+   addKeys(Swaps,SwapsWithKeys),
+   keysort(SwapsWithKeys,SwapsSortedWithKeys),
+   removeKeys(SwapsSortedWithKeys,SwapsSorted).
+
+
+siteswapKey(Swap, Key) :-
+	%amountOfPasses(Swap,Number),
+	rat2float(Swap, SwapFloat),
+	pattern2Lists(SwapFloat, SwapLists),
+	Key = SwapLists.
+
+addKeys([],[]) :- !.
+addKeys([Head|Swaps],[Key-Head|SwapsWithKeys]) :-
+	siteswapKey(Head, KeyTmp),
+	amountOfPasses(Head,Number),
+	Key = [Number|KeyTmp],
+	addKeys(Swaps,SwapsWithKeys).
+
+removeKeys([],[]) :- !.
+removeKeys([_Key-Head|SwapsWithKeys],[Head|Swaps]) :-
+	removeKeys(SwapsWithKeys,Swaps).
+
+
 
 rat2float([],[]) :- !.	
 rat2float([Var|PRat], [Var|PFloat]) :-
@@ -248,13 +373,28 @@ mergeN([FirstPattern | Rest], Merged) :-
   merge2(RestMerged, FirstPattern, Merged).
 
 
+% objects([[4,2],2,1]) = 9/3 = 3
 objects(Pattern, Objects) :-
    objects(Pattern, 1, Objects).
 
 objects(Pattern, Jugglers, Objects) :-
-   sumHeights(Pattern, SumHeights),
+   sumThrows(Pattern, SumThrows),
    length(Pattern, Period),
-   Objects is round(Jugglers * SumHeights rdiv Period).
+   Objects is round(Jugglers * SumThrows rdiv Period).
+
+
+sumThrows([], 0) :- !.
+sumThrows(Throw,Throw) :- number(Throw),!.
+sumThrows(Throw, SumThrow) :- rational_to_number(Throw, SumThrow),!.
+sumThrows(p(Throw,_,_), SumThrow) :- sumThrows(Throw, SumThrow),!.
+sumThrows([Var|RestPattern], Sum) :-
+   var(Var),!,
+   sumThrows(RestPattern, Sum).
+sumThrows([Throw|RestPattern], Sum) :-
+   sumThrows(RestPattern, OldSum),
+   sumThrows(Throw, SumThrow),
+   Sum is OldSum + SumThrow.
+
 
 sumHeights([], 0) :- !.
 sumHeights([Var|RestPattern], Sum) :-
@@ -270,24 +410,47 @@ sumHeights([Throw|RestPattern], Sum) :-
 orbits(Pattern, Orbits) :-
 	length(Pattern, Length),
 	length(Orbits, Length),
-	setOrbit(Pattern, Orbits, 0, 0).
+	setOrbit(Pattern, Orbits, 0, 0, 0, juststarted), !.
 	
-setOrbit(_, Orbits, _, _) :- ground(Orbits), !.
-setOrbit(Pattern, Orbits, Pos, OrbitNo) :-
-	nth0(Pos, Orbits, OrbitNoOrig),
-	var(OrbitNoOrig),!,
-	OrbitNoOrig = OrbitNo,
+
+setOrbit(Pattern, Orbits, FirstPos, OrbitNo, FirstPos, notjuststarted) :-
+	(ground(Orbits), !);
+	(
+		NextOrbitNo is OrbitNo + 1,
+		firstNoGround0(Orbits, NextPos),
+		setOrbit(Pattern, Orbits, NextPos, NextOrbitNo, NextPos, juststarted)
+	).
+setOrbit(Pattern, Orbits, Pos, OrbitNo, FirstPos, _) :-
 	nth0(Pos, Pattern, Throw),
+	not(is_list(Throw)),!,
+	nth0(Pos, Orbits, OrbitNoOrig),
+	var(OrbitNoOrig),
+	OrbitNoOrig = OrbitNo,
 	length(Pattern, Length),
 	landingSite(Pos, Throw, Length, LandingPos),
-	setOrbit(Pattern, Orbits, LandingPos, OrbitNo).
-setOrbit(Pattern, Orbits, Pos, OrbitNo) :-
+	setOrbit(Pattern, Orbits, LandingPos, OrbitNo, FirstPos, notjuststarted).
+setOrbit(Pattern, Orbits, Pos, OrbitNo, FirstPos, _) :-
+	nth0(Pos, Pattern, Multiplex),
+	is_list(Multiplex),  % Multiplex
 	nth0(Pos, Orbits, OrbitNoOrig),
-	nonvar(OrbitNoOrig),!,
-	NextOrbitNo is OrbitNo + 1,
-	firstVar0(Orbits, NextPos),
-	setOrbit(Pattern, Orbits, NextPos, NextOrbitNo).
-%%% Multiplex Version !!!
+	not(ground(OrbitNoOrig)),
+	length(Multiplex, MultiplexLength),
+	length(OrbitNoOrig, MultiplexLength),
+	not((
+		member(OrbitNoNonVar, OrbitNoOrig),
+		nonvar(OrbitNoNonVar),
+		OrbitNoNonVar = OrbitNo
+	)),
+	nth0(MPos, Multiplex, Throw),
+	nth0(MPos, OrbitNoOrig, OrbitNo),
+	length(Pattern, Length),
+	landingSite(Pos, Throw, Length, LandingPos),
+	setOrbit(Pattern, Orbits, LandingPos, OrbitNo, FirstPos, notjuststarted).
+
+
+	
+	
+
 
 clubsInOrbits(Pattern, OrbitPattern, Clubs) :-
 	flatten(OrbitPattern, OrbitsFlat),
@@ -307,6 +470,14 @@ clubsInOrbit(Pattern, OrbitPattern, Orbit, Clubs) :-
 	
 
 justThisOrbit([], [], _, [], _) :- !.
+justThisOrbit([Multiplex|Pattern], [Orbits|OrbitPattern], Orbit, [NewMultiplex|JustThisOrbit], Type) :-
+	is_list(Multiplex), !,
+	justThisOrbit(Multiplex, Orbits, Orbit, NewMultiplexTmp, Type),
+	(justSpaces(NewMultiplexTmp) ->
+		NewMultiplex = '&nbsp;';
+		NewMultiplex = NewMultiplexTmp
+	),
+	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit, Type).
 justThisOrbit([Throw|Pattern], [Orbit|OrbitPattern], Orbit, [Throw|JustThisOrbit], Type) :-
 	!,
 	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit, Type).
@@ -315,12 +486,23 @@ justThisOrbit([_Thorw|Pattern], [_OtherOrbit|OrbitPattern], Orbit, [p(0,0,0)|Jus
 justThisOrbit([_Thorw|Pattern], [_OtherOrbit|OrbitPattern], Orbit, ['&nbsp;'|JustThisOrbit], print) :-
 	justThisOrbit(Pattern, OrbitPattern, Orbit, JustThisOrbit, print).
 
+justSpaces([]) :- !.
+justSpaces([Space|List]) :-
+	(
+		Space = "&nbsp;";
+		Space = " ";
+		Space = '&nbsp;';
+		Space = ' '
+	),
+	justSpaces(List).
+
+% !!! Multiplex ToDo
 zeroOrbits(Pattern, Orbits) :-
 	orbits(Pattern, OrbitPattern),
 	positionsInList(Pattern, p(0,0,0), ZerroPositions),
 	nth0List(ZerroPositions, OrbitPattern, Orbits).
 	
-	
+
 magicOrbits(Pattern, NumberOfJugglers, MagicOrbits) :-
 	magicOrbits(Pattern, NumberOfJugglers, _OrbitPattern, MagicOrbits), !.
 magicOrbits(Pattern, NumberOfJugglers, OrbitPattern, MagicOrbits) :-
@@ -333,6 +515,7 @@ magicOrbits(Pattern, NumberOfJugglers, OrbitPattern, MagicOrbits) :-
 magicPositions(Pattern, NumberOfJugglers, MagicPositions) :-
 	magicOrbits(Pattern, NumberOfJugglers, OrbitPattern, MagicOrbits),
 	orbitPositions(MagicOrbits, OrbitPattern, MagicPositions).
+
 
 orbitPositions(Orbits, OrbitPattern, Positions) :-
 	is_list(Orbits), !,
