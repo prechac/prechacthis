@@ -1,10 +1,10 @@
 
-allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, MaxNumberOfResults, BackURL) :-
+allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, MaxNumberOfResults, BackURL) :-
    catch(
    (
       get_time(Start),
       findAtMostNUnique(Throws, 
-         siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React),
+         siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic),
          MaxNumberOfResults, 
          Bag,
          Flag

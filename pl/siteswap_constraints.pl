@@ -1,6 +1,11 @@
 
-siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, _NumberOfMultiplexes, PassesMin, PassesMax, ContainString, DontContainString, ClubDoesString, ReactString) :-
+siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, _NumberOfMultiplexes, PassesMin, PassesMax, ContainString, DontContainString, ClubDoesString, ReactString, ContainMagic) :-
 	initConstraintCheck,
+	length(Pattern, Length),
+	(ContainMagic = 1 ->
+		containsMagicOrbit(Pattern, NumberOfJugglers, MaxHeight);
+		true
+	),
 	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainString, ClubDoesString, ReactString),
 	preprocessMultiplexes(Pattern),
 	siteswap(NumberOfJugglers, Objects, MaxHeight, Pattern),
@@ -203,3 +208,58 @@ insertThrows(Pattern, Site, [Throw | Rest], Delta) :-
    ),!,   % doesn't work with [_ _] 1p   not all are found!!!!!!!!!!!!!!!!!!!!!!!!!!!
    insertThrows(Pattern, NextSite, Rest, Delta).
 
+
+containsMagicOrbit(Pattern, NumberOfJugglers, MaxHeight) :-
+	length(Pattern, Length),
+	Prechator is Length rdiv NumberOfJugglers,
+	MagicMaxHeight is min(MaxHeight, Prechator),
+	possibleThrows(NumberOfJugglers, Length, MagicMaxHeight, [p(0,0,0)|PossibleThrows]),
+	searchMagicThrows(PossibleThrows, MagicThrows, Prechator, Length, Length),
+	clubDoes(Pattern, MagicThrows).
+	
+	
+%% 1 = Clubs = SumThrows * Jugglers / Length ==> SumThrows = Prechator
+%%
+%% Orbit ==> SumOrig = N * Length
+%% Orig = Throw + IndexDown * Prechator 
+%% ==>
+%% N = SumOrig / Length
+%%   = Sum(Throw + IndexDown * Prechator) / Length
+%%   = (Prechator + Sum(IndexDown * Prechator))/ Length
+%%   = (Prechator + Prechator * Sum(IndexDown)) / Length
+%%   = (1 + Sum(IndexDown)) / Jugglers
+searchMagicThrows(_PossibleThrows, [], 0, 0, _) :- !.
+searchMagicThrows(PossibleThrows, MagicThrows, Prechator, Length, OrigLength) :-
+	Length =< 0,
+	NextLength is OrigLength + Length,
+	searchMagicThrows(PossibleThrows, MagicThrows, Prechator, NextLength, OrigLength).
+searchMagicThrows(PossibleThrows, [MagicThrow|MagicThrows], Prechator, Length, OrigLength) :-
+	member(MagicThrow, PossibleThrows),
+	MagicThrow = p(Throw, _Index, Origen),
+	Throw > 0,
+	Throw =< Prechator,
+	%Origen =< Length,
+	PrechatorMinus is Prechator - Throw,
+	LengthMinus is Length - Origen,
+	searchMagicThrows(PossibleThrows, MagicThrows, PrechatorMinus, LengthMinus, OrigLength).
+	
+	
+	
+possibleThrows(NumberOfJugglers, Length, MaxHeight, PossibleThrows) :-
+	findall(
+		Throw,
+		possibleThrow(NumberOfJugglers, Length, MaxHeight, Throw),
+		PossibleThrows
+	).
+possibleThrow(_NumberOfJugglers, _Length, MaxHeight, p(Throw, 0, Throw)) :-
+	MaxHeightI is truncate(MaxHeight),
+	between(0, MaxHeightI, Throw).
+possibleThrow(NumberOfJugglers, Length, MaxHeight, p(Throw, Index, Origen)) :-
+	Prechator is Length rdiv NumberOfJugglers,
+	IndexMax is NumberOfJugglers - 1,
+	between(1, IndexMax, Index),
+	MaxHeightSolo is truncate(MaxHeight + (NumberOfJugglers - Index) * Prechator),
+	between(1, MaxHeightSolo, Origen),
+    Throw is Origen - (NumberOfJugglers - Index) * Prechator,
+	Throw >= 1,
+	Throw =< MaxHeight.
