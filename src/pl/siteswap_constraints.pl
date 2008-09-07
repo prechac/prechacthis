@@ -1,12 +1,7 @@
 
 siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, _NumberOfMultiplexes, PassesMin, PassesMax, ContainString, DontContainString, ClubDoesString, ReactString, ContainMagic) :-
 	initConstraintCheck,
-	length(Pattern, Length),
-	(ContainMagic = 1 ->
-		containsMagicOrbit(Pattern, NumberOfJugglers, MaxHeight);
-		true
-	),
-	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainString, ClubDoesString, ReactString),
+	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainString, ClubDoesString, ReactString, ContainMagic),
 	preprocessMultiplexes(Pattern),
 	siteswap(NumberOfJugglers, Objects, MaxHeight, Pattern),
 	(passesMin(Pattern, PassesMin); NumberOfJugglers=1),
@@ -23,10 +18,10 @@ siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, _NumberOfM
 initConstraintCheck :- 
 	retractall(constraintChecked(_)),!.
 
-constraint(Constraint, Length, _Persons, _Max, "", "", "") :-
+constraint(Constraint, Length, _Persons, _Max, "", "", "", 0) :-
 	length(Constraint, Length),!.
-constraint(Constraint, Length, Persons, Max, Contain, ClubDoes, React) :-
-	mergeConstraints(Constraint, Length, Persons, Max, Contain, ClubDoes, React),
+constraint(Constraint, Length, Persons, Max, Contain, ClubDoes, React, ContainMagic) :-
+	mergeConstraints(Constraint, Length, Persons, Max, Contain, ClubDoes, React, ContainMagic),
 	not(supConstraintChecked(Constraint)),
 	asserta(constraintChecked(Constraint)).
 	
@@ -36,7 +31,14 @@ supConstraintChecked(Constraint) :-
 	
 %	cleanEqualConstraints(ListOfConstraints, SetOfConstraints).
 	
-mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainString, ClubDoesString, ReactString) :-
+mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainString, ClubDoesString, ReactString, ContainMagic) :-
+	length(MagicPattern, Length),
+	(ContainMagic = 1 ->	
+		(
+			containsMagicOrbit(MagicPattern, Persons, Max)
+		);
+		true
+	),
 	catch(
 		preprocessConstraint(ContainString, positiv, Length, Persons, Max, ContainConstraints),
 		constraint_unclear,
@@ -59,8 +61,9 @@ mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainString, ClubDoe
 	findall(Pattern, (length(Pattern, Length), member(React,    ReactConstraints   ), react(   Pattern, React   )), BagReact   ),
 	(BagReact = [] -> ReactConstraints = []; true),
 	% !!!!!! ?????????????????
-	append(BagContains, BagClubDoes, BagTmp),
-	append(BagTmp, BagReact, BagOfConstraints),
+	append([MagicPattern], BagContains, BagTmp1),
+	append(BagTmp1, BagClubDoes, BagTmp2),
+	append(BagTmp2, BagReact, BagOfConstraints),
 	(BagOfConstraints = [] ->
 			length(ConstraintRotated, Length);
 			(
