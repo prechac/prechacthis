@@ -46,6 +46,9 @@ if ($_REQUEST){
 
 	if (!$_GET["results"]){$_GET["results"] = 42;}
 	
+	if (!$_GET["magic"]){$_GET["magic"] = 0;}
+	else {$magicChecked = "'checked'";}
+	
 	$back_url = rawurlencode($_SERVER["QUERY_STRING"]);
 	
 	foreach($objects as $object){
@@ -70,6 +73,7 @@ if ($_REQUEST){
 			          . "\\\"". $_GET["exclude"] . "\\\", "
 			          . "\\\"". $_GET["clubdoes"] . "\\\", "
 			          . "\\\"". $_GET["react"] . "\\\", "
+			          . $_GET["magic"] . ", "
 					  . $_GET["results"] . ", "
 			          . "'". $back_url ."'"
 			          . "), halt.\" "
@@ -220,6 +224,11 @@ echo "<form action='./index.php' method='get'>
    <td class='lable'>React:</td>
    <td class='input'><input type='text' name='react' value='$_GET[react]'></td>
    $doku[react]
+  </tr>
+  <tr>
+   <td class='lable'>Contain magic:</td>
+   <td class='input'><input type='checkbox' name='magic' value='1' $magicChecked></td>
+   $doku[magic]
   </tr>
   <tr>
    <td class='lable'>Max results:</td>
