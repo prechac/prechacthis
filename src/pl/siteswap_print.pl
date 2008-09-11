@@ -38,37 +38,48 @@ print_exception(Exception) :-
 	format(Exception),
 	!,fail.
 
-convertP([], [], _, _).
-convertP([p(FirstThrow,Index,Origen) | RestThrows ], [  FirstThrowP| RestThrowsP], Length, Persons) :- 
+
+convertP(Throws, ThrowsP, Length, Persons) :-
+	convertP(Throws, ThrowsP, Length, Persons, relative).
+
+convertP([], [], _, _, _).
+convertP([p(FirstThrow,Index,Origen) | RestThrows ], [  FirstThrowP| RestThrowsP], Length, Persons, ThrowingJuggler) :- 
 	Index > 0,
 	pStyle(Length, Origen, Style),
 	float_to_shortpass(FirstThrow,FirstThrowShort),
+	(number(ThrowingJuggler) ->
+		(
+			CatchingJuggler is (ThrowingJuggler + Index) mod Persons,
+			jugglerShown(CatchingJuggler, PrintIndex)
+		);
+		PrintIndex = Index
+	),
 	((
 		Persons > 2,
-		format(string(FirstThrowP), "<span class='~w'>~wp<sub>~w</sub></span>", [Style,FirstThrowShort,Index])
+		format(string(FirstThrowP), "<span class='~w'>~wp<sub>~w</sub></span>", [Style,FirstThrowShort,PrintIndex])
 	);
 	(
 		Persons = 2,
 		format(string(FirstThrowP), "<span class='~w'>~wp</span>", [Style,FirstThrowShort])
 	)),
-    convertP(RestThrows, RestThrowsP, Length, Persons).
-convertP([ p(FirstThrow, 0, _Origen)  | RestThrows ], [ FirstThrowP | RestThrowsP], Length, Persons) :-
+    convertP(RestThrows, RestThrowsP, Length, Persons, ThrowingJuggler).
+convertP([ p(FirstThrow, 0, _Origen)  | RestThrows ], [ FirstThrowP | RestThrowsP], Length, Persons, Juggler) :-
     number(FirstThrow),
 	format(string(FirstThrowP), "~w", [FirstThrow]),
 	%%atom_concat(FirstThrow, '', FirstThrowP),
-    convertP(RestThrows, RestThrowsP, Length, Persons).
-convertP([ FirstThrow | RestThrows ], [ FirstThrowP | RestThrowsP], Length, Persons) :-
+    convertP(RestThrows, RestThrowsP, Length, Persons, Juggler).
+convertP([ FirstThrow | RestThrows ], [ FirstThrowP | RestThrowsP], Length, Persons, Juggler) :-
     is_list(FirstThrow),
-	convertP(FirstThrow,FirstThrowP, Length, Persons),
-    convertP(RestThrows, RestThrowsP, Length, Persons).
+	convertP(FirstThrow,FirstThrowP, Length, Persons, Juggler),
+    convertP(RestThrows, RestThrowsP, Length, Persons, Juggler).
 
 %% single throw:
-convertP(p(Throw, Index, Origen), ThrowP, Length, Persons) :-
-	convertP([p(Throw, Index, Origen)], [ThrowP], Length, Persons).
+convertP(p(Throw, Index, Origen), ThrowP, Length, Persons, Juggler) :-
+	convertP([p(Throw, Index, Origen)], [ThrowP], Length, Persons, Juggler).
 
-convertP(Throw, ThrowP, Length, Persons) :-
+convertP(Throw, ThrowP, Length, Persons, Juggler) :-
 	number(Throw),
-	convertP([Throw], [ThrowP], Length, Persons).
+	convertP([Throw], [ThrowP], Length, Persons, Juggler).
 
 
 convertMagic(Pattern, [], Pattern) :- !.
