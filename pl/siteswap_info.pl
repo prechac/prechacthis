@@ -712,7 +712,7 @@ print_jugglers_point_in_time(Juggler, PointInTime, ActionList, NumberOfJugglers,
 	nth1(2, Action, Juggler),
 	nth1(1, Action, PointInTime),!,
 	nth1(4, Action, Throw),
-	convertP(Throw, ThrowP, Period, NumberOfJugglers),
+	convertP(Throw, ThrowP, Period, NumberOfJugglers, Juggler),
 	format("<td class='info_throw'>"),
 	format_list(ThrowP),
 	format("</td>\n").
@@ -728,7 +728,7 @@ print_jugglers_point_in_time(_, _, _, _, _) :-
 print_throw(ThrowingJuggler, Action, NumberOfJugglers, Period) :-	
 	nth1(2, Action, ThrowingJuggler),!,
 	nth1(4, Action, Throw),
-	convertP(Throw, ThrowP, Period, NumberOfJugglers),
+	convertP(Throw, ThrowP, Period, NumberOfJugglers, ThrowingJuggler),
 	format("<td class='info_throw'>"),
 	format_list(ThrowP),
 	format("</td>\n").
