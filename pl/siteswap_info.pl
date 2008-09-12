@@ -190,7 +190,7 @@ club_distribution(ActionList, OrbitPattern, NumberOfClubs, NumberOfJugglers, Per
 
 siteswapPosition2ClubDistribution([], NumberOfJugglers, ClubDistribution) :-
 	listOf([0,0], NumberOfJugglers, ClubDistribution), !.
-siteswapPosition2ClubDistribution([[Juggler, Position]|SiteswapPositions], NumberOfJugglers, ClubDistribution) :-	
+siteswapPosition2ClubDistribution([[Juggler, Position, _Orbit]|SiteswapPositions], NumberOfJugglers, ClubDistribution) :-	
 	siteswapPosition2ClubDistribution(SiteswapPositions, NumberOfJugglers, OldClubDistribution),
 	Hand is Position mod 2,
 	nth0(Juggler, OldClubDistribution, OldHands),
@@ -227,7 +227,7 @@ club_siteswap_positions([Action|ActionList], OldActionList, ClubCount, SiteswapP
 	member([ThrowingJuggler, PointInTime, Orbit], ThrownTo),!,
 	nth1(5, Action, LandingTime),
 	club_siteswap_positions(ActionList, OldActionList, ClubCount, SiteswapPositions, OrbitPattern, Period, [[CatchingJuggler, LandingTime, Orbit]|ThrownTo]).
-club_siteswap_positions([Action|ActionList], OldActionList, ClubCount, [[ThrowingJuggler, ClubSiteswapPosition]|SiteswapPositions], OrbitPattern, Period, ThrownTo) :-	
+club_siteswap_positions([Action|ActionList], OldActionList, ClubCount, [[ThrowingJuggler, ClubSiteswapPosition, Orbit]|SiteswapPositions], OrbitPattern, Period, ThrownTo) :-	
 	nth1(6, Action, CatchingJuggler), 
 	number(CatchingJuggler), !, % no Multiplex
 	nth1(3, Action, ClubSiteswapPosition), 
@@ -261,7 +261,7 @@ club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, 
 club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, [_Throw|Multiplex], [LandingTime|LandingTimes], [CJuggler|CatchingJugglers], [Orbit|Orbits], ThrownTo, [[CJuggler, LandingTime, Orbit]|NewThrownTo], NewClubCount, NewSiteswapPositions) :-
 	member([Juggler, PointInTime, Orbit], ThrownTo), !,
 	club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, Multiplex, LandingTimes, CatchingJugglers, Orbits, ThrownTo, NewThrownTo, NewClubCount, NewSiteswapPositions).
-club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, [_Throw|Multiplex], [LandingTime|LandingTimes], [CJuggler|CatchingJugglers], [Orbit|Orbits], ThrownTo, [[CJuggler, LandingTime, Orbit]|NewThrownTo], NewClubCount, [[Juggler, SiteswapPosition]|NewSiteswapPositions]) :-
+club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, [_Throw|Multiplex], [LandingTime|LandingTimes], [CJuggler|CatchingJugglers], [Orbit|Orbits], ThrownTo, [[CJuggler, LandingTime, Orbit]|NewThrownTo], NewClubCount, [[Juggler, SiteswapPosition, Orbit]|NewSiteswapPositions]) :-
 	club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, Multiplex, LandingTimes, CatchingJugglers, Orbits, ThrownTo, NewThrownTo, NextNewClubCount, NewSiteswapPositions), 
 	NewClubCount is NextNewClubCount + 1.
 	

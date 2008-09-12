@@ -8,10 +8,11 @@ jp_pattern_def(PatternShort, NumberOfJugglers, SwapList, Style) :-
 	jp_listOfJugglerStartLeft(Period, NumberOfJugglers, SwapList, LeftList),
 	jp_header,
 	jp_positions(NumberOfJugglers, Style),
-	(noMultiplex(Pattern) -> 
-		jp_colors(Pattern, NumberOfJugglers);
-		true
-	),
+	jp_colors(ActionList, Pattern, NumberOfJugglers),
+	%(noMultiplex(Pattern) -> 
+	%	jp_colors(ActionList, Pattern, NumberOfJugglers);
+	%	true
+	%),
 	jp_jugglerStartLeft(LeftList),
 	jp_delay(NumberOfJugglers, Period, Delay),
 	jp_pattern(ActionList, SwapList, LeftList, PointsInTime, Delay, NumberOfJugglers).
@@ -31,23 +32,36 @@ jp_printJugglerPosition(Juggler, NumberOfJugglers, circle, D) :-
 	Radius is D / (2 * sin(pi/NumberOfJugglers)),
 	U is round(Radius * cos(X)),
 	V is round(Radius * sin(X)),
-	format("#j ~w (~w,0,~w)(0,0,0)\n", [Juggler,U,V]).
+	format("#jugglerPosition ~w (~w,0,~w)(0,0,0)\n", [Juggler,U,V]).
 
-jp_colors(Pattern, NumberOfJugglers) :- 
+jp_colors(ActionList, Pattern, NumberOfJugglers) :- 
 	orbits(Pattern, OrbitPattern),
 	averageNumberOfClubs(Pattern, AVClubs),
 	NumberOfClubs is AVClubs * NumberOfJugglers,
-	forall(between(1, NumberOfClubs, Club), jp_printClubColor(Club, Pattern, OrbitPattern, NumberOfJugglers)).
+	jp_printOrbitDefs(OrbitPattern),
+	length(Pattern, Period),
+	club_siteswap_positions(ActionList, OrbitPattern, NumberOfClubs, Period, SiteswapPositions),
+	jp_printClubColor(SiteswapPositions, NumberOfClubs).
 
-% !!! Multiplex ToDo
-jp_printClubColor(Club, Pattern, ListOfColors, NumberOfJugglers) :-
-	Club0 is Club - 1,
-	club_siteswap_position(Club0, Pattern, SiteswapPosition, NumberOfJugglers),
-	length(ListOfColors, Length),
-	ColorPos is SiteswapPosition mod Length,
-	nth0(ColorPos, ListOfColors, ColorNo),
-	jp_Color(ColorNo, Color),
-	format("#O ~w ~w\n", [Club, Color]).
+jp_printOrbitDefs(OrbitPattern) :-
+	flatten(OrbitPattern, OrbitsFlat),
+	list_to_set(OrbitsFlat, OrbitsSet),
+	length(OrbitsSet, NumberOfOrbits),
+	forall(between(1, NumberOfOrbits, Orbit),
+		(
+			Orbit0 is Orbit - 1,
+			jp_Color(Orbit0, Color),
+			format("#replace orbit~w ~w\n", [Orbit, Color])
+		)
+	).
+
+jp_printClubColor([], _) :- !.
+jp_printClubColor([[_Juggler, _SiteswapPosition, Orbit]|ClubSiteswapPositions], NumberOfClubs) :-
+	length(ClubSiteswapPositions, NumberOfRestClubs),
+	Club is NumberOfClubs - NumberOfRestClubs,
+	Orbit1 is Orbit + 1,
+	format("#objectColor ~w orbit~w\n", [Club, Orbit1]),
+	jp_printClubColor(ClubSiteswapPositions, NumberOfClubs).
 	
 jp_Color(Number, Color) :-
 	ColorList = ['(1,0,0)','(0,1,0)','(0,0,1)','(0,1,1)','(1,0,1)','(1,1,0)','(1,1,1)','(0,0,0)','(0.5,0,0)','(0,0.5,0)','(0,0,0.5)','(0,0.5,0.5)','(0.5,0,0.5)','(0.5,0.5,0)','(0.5,0.5,0.5)'],
@@ -167,19 +181,21 @@ jp_cross_tramline(ThrowingJuggler, Action, SwapList, LeftList, _Delay, CrossOrTr
 	jp_cross_or_tramline(ThrowingHandShown, CatchingHandShown, Throw, CrossOrTram).
 jp_cross_tramline(_, _, _, _, _, '').
 
-jp_cross_or_tramline([], [], [], []) :- !.
-jp_cross_or_tramline([A|HandsA], [B|HandsB], [Throw|Multiplex], [CT|CrossOrTram]) :-
+jp_cross_or_tramline(_HandA, [], [], []) :- !.
+jp_cross_or_tramline(HandA, [B|HandsB], [Throw|Multiplex], [CT|CrossOrTram]) :-
 	!,
-	jp_cross_or_tramline(A, B, Throw, CT),
-	jp_cross_or_tramline(HandsA, HandsB, Multiplex, CrossOrTram).
+	jp_cross_or_tramline(HandA, B, Throw, CT),
+	jp_cross_or_tramline(HandA, HandsB, Multiplex, CrossOrTram).
 jp_cross_or_tramline(Hand, Hand, p(Throw, _, _), ' ') :- 
 	ThrowInt is float_integer_part(Throw),
 	even(ThrowInt), !.
-jp_cross_or_tramline(Hand, Hand, _Throw, x) :- !.
+jp_cross_or_tramline(Hand, Hand, Throw, x) :- 
+	not(is_list(Throw)), !.
 jp_cross_or_tramline(_HandA, _HandB, p(Throw, _, _), ' ') :- 
 	ThrowInt is float_integer_part(Throw),
 	odd(ThrowInt), !.
-jp_cross_or_tramline(_HandA, _HandB, _Throw, x) :- !.
+jp_cross_or_tramline(_HandA, _HandB, Throw, x) :- 
+	not(is_list(Throw)), !.
 
 
 jp_filename([], []) :- !.
