@@ -1,6 +1,11 @@
 
 %%%  --- list operations ---
 
+changeDimension([], [], []) :- !.
+changeDimension([X|XList], [Y|YList], [[X,Y]|XYList]) :-
+	changeDimension(XList, YList, XYList).
+	
+
 allMembersUnique([]) :- !.
 allMembersUnique([Head | Tail]) :-
    var(Head),!,
