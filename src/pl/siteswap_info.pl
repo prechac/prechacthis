@@ -15,71 +15,6 @@ siteswap_position_general(Position, SiteswapPosition, Juggler, NumberOfJugglers,
 	siteswap_position(Juggler, LocalPosition, SiteswapPosition, NumberOfJugglers, Period).
 
 
-all_club_siteswap_positions(Pattern, NumberOfJugglers, SiteswapPositions) :-
-	averageNumberOfClubs(Pattern, AVClubs),
-	ClubsMax is AVClubs * NumberOfJugglers - 1,
-	findall(
-		Position,
-		(
-			between(0, ClubsMax, Club),
-			club_siteswap_position(Club, Pattern, Position, NumberOfJugglers)
-		),
-		SiteswapPositions
-	).
-	
-all_club_siteswap_positions_and_jugglers(Pattern, NumberOfJugglers, SiteswapPositions) :-
-	averageNumberOfClubs(Pattern, AVClubs),
-	ClubsMax is AVClubs * NumberOfJugglers - 1,
-	findall(
-		[Juggler, Position],
-		(
-			between(0, ClubsMax, Club),
-			club_siteswap_position(Club, Pattern, Position, Juggler, NumberOfJugglers)
-		),
-		SiteswapPositions
-	).
-
-club_siteswap_position(Club, Pattern, SiteswapPosition, NumberOfJugglers) :-
-	club_siteswap_position(Club, Pattern, SiteswapPosition, _Juggler, NumberOfJugglers), !.
-	
-club_siteswap_position(Club, Pattern, SiteswapPosition, Juggler, NumberOfJugglers) :-
-	averageNumberOfClubs(Pattern, AVClubs),
-	NumberOfClubs is AVClubs * NumberOfJugglers,
-	Club =< NumberOfClubs,
-	orbits(Pattern, OrbitPattern),
-	clubsInOrbits(Pattern, OrbitPattern, AVClubsInOrbits),
-	multiply(AVClubsInOrbits, NumberOfJugglers, ClubsInOrbits),
-	club_siteswap_position(Club, 0, SiteswapPosition, Juggler, NumberOfJugglers, OrbitPattern, ClubsInOrbits), !.
-
-% !!! Multiplex ToDo	
-club_siteswap_position(-1, PositionReal, SiteswapPosition, Juggler, NumberOfJugglers, OrbitPattern, _ClubsInOrbits) :-
-	!,
-	PositionBevor is PositionReal - 1,
-	length(OrbitPattern, Period),
-	siteswap_position_general(PositionBevor, SiteswapPosition, Juggler, NumberOfJugglers, Period).
-club_siteswap_position(Position, PositionReal, SiteswapPosition, Juggler, NumberOfJugglers, OrbitPattern, ClubsInOrbits) :-
-	length(OrbitPattern, Period),
-	siteswap_position_general(PositionReal, SiteswapPosition0, _Juggler0, NumberOfJugglers, Period),
-	ModPos is SiteswapPosition0 mod Period,
-	nth0(ModPos, OrbitPattern, Orbit),
-	club_siteswap_position_ChangeOrbits(Orbit, ClubsInOrbits, NewClubsInOrbits, Position, NextPosition),
-	NextPositionReal is PositionReal + 1,
-	club_siteswap_position(NextPosition, NextPositionReal, SiteswapPosition, Juggler, NumberOfJugglers, OrbitPattern, NewClubsInOrbits).
-
-club_siteswap_position_ChangeOrbits(Orbit, ClubsInOrbits, ClubsInOrbits, Pos, Pos) :-
-	number(Orbit),
-	nth0(Orbit, ClubsInOrbits, 0), !.
-club_siteswap_position_ChangeOrbits(Orbit, ClubsInOrbits, NewClubsInOrbits, Pos, NextPos) :-
-	number(Orbit),!,
-	nth0(Orbit, ClubsInOrbits, Clubs),
-	ClubsNew is Clubs - 1,
-	changeOnePosition(ClubsInOrbits, Orbit, ClubsNew, NewClubsInOrbits),
-	NextPos is Pos - 1.
-club_siteswap_position_ChangeOrbits([], ClubsInOrbits, ClubsInOrbits, Pos, NextPos) :- 
-	NextPos is Pos - 1, !.
-club_siteswap_position_ChangeOrbits([Orbit|MultiplexOrbits], ClubsInOrbits, NewClubsInOrbits, Pos, NextPos) :-
-	club_siteswap_position_ChangeOrbits(Orbit, ClubsInOrbits, HeadClubsInOrbits, Pos, _),
-	club_siteswap_position_ChangeOrbits(MultiplexOrbits, HeadClubsInOrbits, NewClubsInOrbits, Pos, NextPos).
 	
 zerosTillPos_general([p(0,0,0)|_Pattern], 0, _NumberOfJugglers, 1) :- !.
 zerosTillPos_general(_Pattern, 0, _NumberOfJugglers, 0) :- !.
@@ -211,164 +146,6 @@ nextPeriodActionList([FirstAction|FirstPeriod], Period, [SecondAction|SecondPeri
 	nextPeriodActionList(FirstPeriod, Period, SecondPeriod).
 	
 
-	
-% theory doesn't work for Multiplexes !!!!!!!!!
-clubsInHand_old(Juggler, Hand, Period, ActionList, ClubsInHand) :-
-	member(Hand, [a,b]),
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, ActionList, NumberOfThrows, _FirstCatch),
-	ClubsInHand = NumberOfThrows.
-
-%% old
-listOfCatches(_,_,_,[],[]).
-listOfCatches(CatchingJuggler, Hand, Period, [Action|ActionList], [Catch|ListOfCatches]) :-	
-	not(nth1(4, Action, p(0,_,_))), % Throw not 0
-	nth1(6, Action, CatchingJuggler),
-	((		
-		nth1(7, Action, CatchingSiteswapPosition),
-		hand(CatchingSiteswapPosition, Hand),
-		nth1(5, Action, Catch)
-	);(
-		odd(Period),
-		nth1(5, Action, FirstCatch),
-		Catch is FirstCatch + Period		
-	)),
-	!,
-	listOfCatches(CatchingJuggler, Hand, Period, ActionList, ListOfCatches).
-listOfCatches(CatchingJuggler, Hand, Period, [_|ActionList], ListOfCatches) :-	
-	listOfCatches(CatchingJuggler, Hand, Period, ActionList, ListOfCatches).
-
-%% old
-firstCatch(Juggler, Hand, Period, ActionList, FirstCatch) :-
-	member(Hand, [a,b]),
-	listOfCatches(Juggler, Hand, Period, ActionList, ListOfCatches),
-	min_of_list(FirstCatch, ListOfCatches).
-
-
-%%%                 1              2                     3               4         5              6                    7
-%%%  Action = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition].
-
-numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [], OldActionList, NumberOfThrows, FirstCatch) :- 
-	nextPeriodActionList(OldActionList, Period, NewActionList),
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, NewActionList, NewActionList, NumberOfThrows, FirstCatch),
-	!.
-numberOfThrowsUntilFirstCatch(Juggler, Hand, _, [Action|_ActionList], _OriginalAction, 0, FirstCatch) :- 
-	nonvar(FirstCatch),
-	nth1(1, Action, FirstCatch), % point of time is time of first catch
-	nth1(2, Action, Juggler), % Juggler is throwing
-	nth1(3, Action, ThrowingSiteswapPosition),
-	hand(ThrowingSiteswapPosition, Hand), % Juggler is throwing with this hand
-	!. 
-numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], OriginalAction, NumberOfThrows, FirstCatch) :-	
-	nth1(4, Action, p(0,_,_)), % throw is a 0
-	!,
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OriginalAction, NumberOfThrows, FirstCatch).
-numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], OriginalAction, NewNumberOfThrows, OldFirstCatch) :-	
-	nth1(2, Action, Juggler),   % Juggler is throwing
-	nth1(3, Action, ThrowingSiteswapPosition),
-	hand(ThrowingSiteswapPosition, Hand), % Juggler is throwing with this hand
-	nth1(6, Action, CatchingJugglers),   % Juggler is catching
-	memberOrEqual(Juggler, CatchingJugglers, Pos),
-	not(nth1(4, Action, p(0,_,_))),
-	nth1(7, Action, CatchingSiteswapPositions),
-	memberOrEqual(CatchingSiteswapPosition, CatchingSiteswapPositions, Pos),
-	hand(CatchingSiteswapPosition, Hand),
-	nth1(5, Action, Catches), % Juggler is catching with this hand
-	memberOrEqual(Catch, Catches, Pos),
-	!,
-	earlierCatch(OldFirstCatch, Catch, NewFirstCatch),
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OriginalAction, OldNumberOfThrows, NewFirstCatch),	
-	NewNumberOfThrows is OldNumberOfThrows + 1.
-numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], OriginalAction, NewNumberOfThrows, FirstCatch) :-	
-	nth1(2, Action, Juggler),   % Juggler is throwing
-	nth1(3, Action, ThrowingSiteswapPosition),
-	hand(ThrowingSiteswapPosition, Hand), % Juggler is throwing with this hand
-	!,
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OriginalAction, OldNumberOfThrows, FirstCatch),	
-	NewNumberOfThrows is OldNumberOfThrows + 1.
-numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [Action|ActionList], OriginalAction, NumberOfThrows, OldFirstCatch) :-	
-	nth1(6, Action, Juggler),   % Juggler is catching
-	not(nth1(4, Action, p(0,_,_))),
-	nth1(7, Action, CatchingSiteswapPositions),
-	memberOrEqual(CatchingSiteswapPosition, CatchingSiteswapPositions, Pos),
-	hand(CatchingSiteswapPosition, Hand),
-	nth1(5, Action, Catches), % Juggler is catching with this hand
-	memberOrEqual(Catch, Catches, Pos),
-	!,
-	earlierCatch(OldFirstCatch, Catch, NewFirstCatch),
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OriginalAction, NumberOfThrows, NewFirstCatch).
-numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, [_Action|ActionList], OriginalAction, NumberOfThrows, FirstCatch) :-	
-	numberOfThrowsUntilFirstCatch(Juggler, Hand, Period, ActionList, OriginalAction, NumberOfThrows, FirstCatch).
-	
-
-
-%% new !!
-
-
-%%%                 1              2                     3               4         5              6                    7
-%%%  Action = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition].
-
-clubsInHand(ActionList, Period, NumberOfJugglers, NumberOfClubs, ClubsInHand) :-
-	fill_lpt(ClubsInHandStart, 0, NumberOfJugglers),
-	fill_lpt(LandingSitesStart, [], NumberOfJugglers),
-	openActionList(ActionList, ActionListOpen),
-	clubsInHand(ActionListOpen, ActionListOpen, Period, NumberOfJugglers, ClubsInHandStart, ClubsInHand, LandingSitesStart, _, 0, NumberOfClubs).
-
-clubsInHand([], OriginalAction, Period, NumberOfJugglers, OldClubsInHand, NewClubsInHand, OldLandingSites, NewLandingSites, OldPIT, Clubs) :-
-	nextPeriodActionList(OriginalAction, Period, NewActionList),
-	clubsInHand(NewActionList, NewActionList, Period, NumberOfJugglers, OldClubsInHand, NewClubsInHand, OldLandingSites, NewLandingSites, OldPIT, Clubs).
-clubsInHand([Action|_ActionList], _OriginalAction, _Period, _NumberOfJugglers, ClubsInHand, ClubsInHand, LandingSites, LandingSites, OldPIT, Clubs) :- %%% ????
-	nth1(1, Action, PIT),
-	PIT > OldPIT,
-	ClubsInHand = [ClubsInHandA, ClubsInHandB],
-	sumlist(ClubsInHandA, SumA),
-	sumlist(ClubsInHandB, SumB),
-	Clubs is SumA + SumB, !.
-clubsInHand([Action|ActionList], OriginalAction, Period, NumberOfJugglers, OldClubsInHand, NewClubsInHand, OldLandingSites, NewLandingSites, _OldPIT, Clubs) :-
-	calculateThrows(Action, OldClubsInHand, OldLandingSites, NumberOfJugglers, ClubsInHand),
-	calculateCatches(Action, OldLandingSites, NumberOfJugglers, LandingSites),
-	nth1(1, Action, PIT),
-	clubsInHand(ActionList, OriginalAction, Period, NumberOfJugglers, ClubsInHand, NewClubsInHand, LandingSites, NewLandingSites, PIT, Clubs).
-
-
-calculateThrows(Action, ClubsInHand, LandingSites, NumberOfJugglers, NewClubsInHand) :-
-	Action = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, _, _, _],
-	hand(ThrowingSiteswapPosition, ThrowingHand),
-	clubsThrown(Throw, NumberOfThrows),
-	
-	lpt_nth0(LandingSites, ThisLandingSites, ThrowingJuggler, ThrowingHand), 
-	numberOfX(ThisLandingSites, PointInTime, NumberOfCatches),
-	
-	ThrowsMinusCatches is NumberOfThrows - NumberOfCatches,
-	lpt_add(ClubsInHand, ThrowsMinusCatches, ThrowingJuggler, ThrowingHand, NumberOfJugglers, NewClubsInHand).
-	
-calculateCatches(Action, LandingSites, NumberOfJugglers, NewLandingSites) :-
-	Action = [_, _, _, _, LandingTime, CatchingJuggler, LandingSiteswapPosition],
-	hand(LandingSiteswapPosition, CatchingHand),
-	lpt_append(LandingSites, LandingTime, CatchingJuggler, CatchingHand, NumberOfJugglers, NewLandingSites).
-
-openActionList([], []) :- !.
-openActionList([Action|ActionList], ActionListOpened) :-
-	nth0(6, Action, CatchingJuggler),
-	is_list(CatchingJuggler), !,
-	openAction(Action, ActionOpend),
-	openActionList(ActionList, ActionRestOpened), 
-	append(ActionOpend, ActionRestOpened, ActionListOpened).	
-openActionList([Action|ActionList], [Action|ActionListOpened]) :-
-	openActionList(ActionList, ActionListOpened).
-
-openAction(Action, ActionOpend) :-
-	Action = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, [Throw], [LandingTime], [CatchingJuggler], [LandingSiteswapPosition]],!,
-	ActionOpend = [[PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition]].
-openAction(Action, [NewAction|ActionOpend]) :-
-	Action = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throws, LandingTimes, CatchingJugglers, LandingSiteswapPositions],
-	Throws = [Throw|ThrowTail],
-	LandingTimes = [LandingTime|LandingTimeTail],
-	CatchingJugglers = [CatchingJuggler|CatchingJugglerTail],
-	LandingSiteswapPositions = [LandingSiteswapPosition|LandingSiteswapPositionTail],
-	NewAction = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition],
-	ActionRest = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, ThrowTail, LandingTimeTail, CatchingJugglerTail, LandingSiteswapPositionTail],
-	openAction(ActionRest, ActionOpend).
-
 
 clubsThrown(Multiplex, Clubs) :-
 	is_list(Multiplex), !,
@@ -399,20 +176,6 @@ earlierCatch(Catch1, Catch2, Catch1) :-
 	nonvar(Catch1),
 	var(Catch2),!.
 	
-%doesn't make sense anymore!!!	
-testClubDistribution(ActionList, NumberOfJugglers, Period, ClubsInPattern) :-
-	JugglerMax is NumberOfJugglers - 1,
-	findall(
-		ClubsInHand, 
-		(
-			between(0, JugglerMax, Juggler),
-			member(Hand, [a,b]),
-			clubsInHand(Juggler, Hand, Period, ActionList, ClubsInHand)
-		),
-		ListOfClubs
-	),
-	sumlist(ListOfClubs, ClubsInPattern).
-	
 	
 applyNewSwaps(OldSwapList, NewSwaps, SwapList) :-
 	intersection(OldSwapList, NewSwaps, Intersection),
@@ -421,13 +184,13 @@ applyNewSwaps(OldSwapList, NewSwaps, SwapList) :-
 	union(RemainingOld, RemainingNew, SwapList).
 	
 
-club_distribution(Pattern, NumberOfJugglers, ClubDistribution) :-
-	all_club_siteswap_positions_and_jugglers(Pattern, NumberOfJugglers, SiteswapPositions),
+club_distribution(ActionList, OrbitPattern, NumberOfClubs, NumberOfJugglers, Period, ClubDistribution) :-
+	club_siteswap_positions(ActionList, OrbitPattern, NumberOfClubs, Period, SiteswapPositions),
 	siteswapPosition2ClubDistribution(SiteswapPositions, NumberOfJugglers, ClubDistribution).
 
 siteswapPosition2ClubDistribution([], NumberOfJugglers, ClubDistribution) :-
 	listOf([0,0], NumberOfJugglers, ClubDistribution), !.
-siteswapPosition2ClubDistribution([[Juggler|Position]|SiteswapPositions], NumberOfJugglers, ClubDistribution) :-	
+siteswapPosition2ClubDistribution([[Juggler, Position]|SiteswapPositions], NumberOfJugglers, ClubDistribution) :-	
 	siteswapPosition2ClubDistribution(SiteswapPositions, NumberOfJugglers, OldClubDistribution),
 	Hand is Position mod 2,
 	nth0(Juggler, OldClubDistribution, OldHands),
@@ -436,8 +199,71 @@ siteswapPosition2ClubDistribution([[Juggler|Position]|SiteswapPositions], Number
 	changeOnePosition(OldHands, Hand, Clubs, NewHands),
 	changeOnePosition(OldClubDistribution, Juggler, NewHands, ClubDistribution).
 	
+
+
+
+%%%                 1              2                     3               4         5              6                    7
+%%%  Action = [PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTime, CatchingJuggler, LandingSiteswapPosition].
+
+club_siteswap_positions(ActionList, OrbitPattern, NumberOfClubs, Period, SiteswapPositions) :-
+	club_siteswap_positions(ActionList, ActionList, NumberOfClubs, SiteswapPositions, OrbitPattern, Period, []).
+
+club_siteswap_positions(_ActionList, _OldActionList, 0, [], _OrbitPattern, _Period, _ThrownTo) :- !.
+club_siteswap_positions([], OldActionList, ClubCount, SiteswapPositions, OrbitPattern, Period, ThrownTo) :- 
+	nextPeriodActionList(OldActionList, Period, NewActionList),
+	club_siteswap_positions(NewActionList, NewActionList, ClubCount, SiteswapPositions, OrbitPattern, Period, ThrownTo),
+	!.
+club_siteswap_positions([Action|ActionList], OldActionList, ClubCount, SiteswapPositions, OrbitPattern, Period, ThrownTo) :-
+	nth1(4, Action, p(0,0,0)),!,
+	club_siteswap_positions(ActionList, OldActionList, ClubCount, SiteswapPositions, OrbitPattern, Period, ThrownTo).
+club_siteswap_positions([Action|ActionList], OldActionList, ClubCount, SiteswapPositions, OrbitPattern, Period, ThrownTo) :-	
+	nth1(6, Action, CatchingJuggler),
+	number(CatchingJuggler), % no Multiplex
+	nth1(1, Action, PointInTime),
+	nth1(2, Action, ThrowingJuggler),
+	nth1(3, Action, ThrowingSiteswapPosition),
+	ThrowingSiteswapPositionMod is ThrowingSiteswapPosition mod Period,
+	nth0(ThrowingSiteswapPositionMod, OrbitPattern, Orbit),
+	member([ThrowingJuggler, PointInTime, Orbit], ThrownTo),!,
+	nth1(5, Action, LandingTime),
+	club_siteswap_positions(ActionList, OldActionList, ClubCount, SiteswapPositions, OrbitPattern, Period, [[CatchingJuggler, LandingTime, Orbit]|ThrownTo]).
+club_siteswap_positions([Action|ActionList], OldActionList, ClubCount, [[ThrowingJuggler, ClubSiteswapPosition]|SiteswapPositions], OrbitPattern, Period, ThrownTo) :-	
+	nth1(6, Action, CatchingJuggler), 
+	number(CatchingJuggler), !, % no Multiplex
+	nth1(3, Action, ClubSiteswapPosition), 
+	nth1(2, Action, ThrowingJuggler),
+	nth1(5, Action, LandingTime),
+	ClubSiteswapPositionMod is ClubSiteswapPosition mod Period,
+	nth0(ClubSiteswapPositionMod, OrbitPattern, Orbit),
+	NextClubCount is ClubCount - 1,
+	club_siteswap_positions(ActionList, OldActionList, NextClubCount, SiteswapPositions, OrbitPattern, Period, [[CatchingJuggler, LandingTime, Orbit]|ThrownTo]).
+club_siteswap_positions([Action|ActionList], OldActionList, ClubCount, NextSiteswapPositions, OrbitPattern, Period, ThrownTo) :-	
+	nth1(6, Action, CatchingJugglers),
+	is_list(CatchingJugglers), !, % Multiplex
+	nth1(1, Action, PointInTime),
+	nth1(2, Action, ThrowingJuggler),
+	nth1(3, Action, ThrowingSiteswapPosition),
+	nth1(4, Action, Throw),
+	ThrowingSiteswapPositionMod is ThrowingSiteswapPosition mod Period,
+	nth0(ThrowingSiteswapPositionMod, OrbitPattern, Orbits),
+	nth1(5, Action, LandingTimes),
+	club_siteswap_positions_MultiplexHelper(PointInTime, ThrowingJuggler, ThrowingSiteswapPosition, Throw, LandingTimes, CatchingJugglers, Orbits, ThrownTo, NewThrownTo, NewClubCount, NewSiteswapPositions),
+	append(NewSiteswapPositions, SiteswapPositions, NextSiteswapPositions),
+	append(ThrownTo, NewThrownTo, NextThrownTo),
+	NextClubCount is ClubCount - NewClubCount,
+	club_siteswap_positions(ActionList, OldActionList, NextClubCount, SiteswapPositions, OrbitPattern, Period, NextThrownTo).
 	
-	
+
+club_siteswap_positions_MultiplexHelper(_PointInTime, _ThrowingJuggler, _ThrowingSiteswapPosition, [], [], [], [], _ThrownTo, [], 0, []) :- !. % ??????
+club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, [p(0,0,0)|Multiplex], [_LandingTime|LandingTimes], [_CJuggler|CatchingJugglers], [_Orbit|Orbits], ThrownTo, NewThrownTo, NewClubCount, NewSiteswapPositions) :-
+	!,
+	club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, Multiplex, LandingTimes, CatchingJugglers, Orbits, ThrownTo, NewThrownTo, NewClubCount, NewSiteswapPositions).
+club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, [_Throw|Multiplex], [LandingTime|LandingTimes], [CJuggler|CatchingJugglers], [Orbit|Orbits], ThrownTo, [[CJuggler, LandingTime, Orbit]|NewThrownTo], NewClubCount, NewSiteswapPositions) :-
+	member([Juggler, PointInTime, Orbit], ThrownTo), !,
+	club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, Multiplex, LandingTimes, CatchingJugglers, Orbits, ThrownTo, NewThrownTo, NewClubCount, NewSiteswapPositions).
+club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, [_Throw|Multiplex], [LandingTime|LandingTimes], [CJuggler|CatchingJugglers], [Orbit|Orbits], ThrownTo, [[CJuggler, LandingTime, Orbit]|NewThrownTo], NewClubCount, [[Juggler, SiteswapPosition]|NewSiteswapPositions]) :-
+	club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, Multiplex, LandingTimes, CatchingJugglers, Orbits, ThrownTo, NewThrownTo, NextNewClubCount, NewSiteswapPositions), 
+	NewClubCount is NextNewClubCount + 1.
 	
 %%% --- print ---
 
@@ -454,13 +280,14 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwa
 	writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
 	writePatternInfo(PatternWithShortPasses, PointsInTime, ActionList, NumberOfJugglers, Period, BackURL),
 	writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
-	%averageNumberOfClubs(Pattern, AverageNumberOfClubs),
-	%NumberOfClubs is AverageNumberOfClubs * NumberOfJugglers,
+	averageNumberOfClubs(Pattern, AverageNumberOfClubs),
+	NumberOfClubs is AverageNumberOfClubs * NumberOfJugglers,
 	%(testClubDistribution(ActionList, NumberOfJugglers, Period, NumberOfClubs) ->
 	%	true;
 	%	format("<p class='info_clubdistri'>Not a possible starting point without extra throws ahead.<br>Number of clubs not correct!<br>Try to turn pattern.</p>\n\n")
 	%),
-	club_distribution(Pattern, NumberOfJugglers, ClubDistribution),
+	orbits(Pattern, OrbitPattern),
+	club_distribution(ActionList, OrbitPattern, NumberOfClubs, NumberOfJugglers, Period, ClubDistribution),
 	JugglerMax is NumberOfJugglers - 1,
 	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, PatternWithShortPasses, BackURL)),
 	writeJoepassLink(PatternWithShortPasses, NumberOfJugglers, SwapList).
