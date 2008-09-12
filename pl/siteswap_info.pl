@@ -354,14 +354,17 @@ writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJuggle
 	format("<td class='info_lable'>cross/tramline:</td>\n"),
 	forall(member(Action, ActionList), print_cross_tramline(Juggler, Action, SwapList)),
 	format("</tr>\n"),
+/*
 	format("<tr>\n"),
 	format("<td class='info_lable'>catching juggler:</td>\n"),
 	forall(member(Action, ActionList), print_catching_juggler(Juggler, Action)),
 	format("</tr>\n"),
+*/
 	format("<tr>\n"),
 	format("<td class='info_lable'>catching hand:</td>\n"),
 	forall(member(Action, ActionList), print_catching_hand(Juggler, Action, SwapList)),
 	format("</tr>\n"),
+
 /*
 	format("<tr>\n"),
 	format("<td class='info_lable'>throwing time:</td>\n"),
