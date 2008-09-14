@@ -230,6 +230,7 @@ dcg_throw_or_constraint(Constraint) -->
 	
 dcg_throws_or_constraints(NewConstraint) -->
 	dcg_whitespace,
+	dcg_whitespaces,
 	dcg_throw_or_constraint(Constraint),
 	dcg_throws_or_constraints(Constraints),
 	{
@@ -378,6 +379,10 @@ dcg_p -->
 	"p".
 dcg_p -->
 	"P".
+dcg_p -->
+	"r".
+dcg_p -->
+	"R".
 	
 
 dcg_s -->
