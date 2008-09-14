@@ -332,16 +332,14 @@ writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJuggle
 	writeSwapLink(Juggler, SwapList, NumberOfJugglers, Pattern, BackURL),
 	format("<th class='info_title' colspan=~w>juggler ~w</th>\n", [ColspanLong, JugglerShown]),
 	format("</tr>\n"),
-	format("<tr>\n"),
-	format("<td class='info_lable'>clubs in ~w hand:</td>\n", [HandShownALong]),	
-	format("<td class='info_clubs'>~w</td>\n", [ClubsHandA]),
-	format("<td class='info_clubs' colspan=~w>&nbsp;</th>\n", [ColspanShort]),
-	format("</tr>\n"),
-	format("<tr>\n"),
-	format("<td class='info_lable'>clubs in ~w hand:</td>\n", [HandShownBLong]),	
-	format("<td class='info_clubs'>~w</td>\n", [ClubsHandB]),
-	format("<td class='info_clubs' colspan=~w>&nbsp;</th>\n", [ColspanShort]),
-	format("</tr>\n"),
+	(
+		writeClubsPerHand(HandShownALong, ClubsHandA, ColspanShort, right);
+		writeClubsPerHand(HandShownBLong, ClubsHandB, ColspanShort, right)
+	),
+	(
+		writeClubsPerHand(HandShownALong, ClubsHandA, ColspanShort, left);
+		writeClubsPerHand(HandShownBLong, ClubsHandB, ColspanShort, left)
+	),
 	format("<tr>\n"),
 	format("<td class='info_lable'>throwing hand:</td>\n"),
 	forall(member(Action, ActionList), print_throwing_hand(Juggler, Action, SwapList)),
@@ -376,7 +374,17 @@ writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJuggle
 	format("</tr>\n"),
 */
 	format("</table>\n\n").
-	
+
+
+writeClubsPerHand(HandShownLong, ClubsPerHand, Colspan, HandShownLong) :-
+	writeClubsPerHand(HandShownLong, ClubsPerHand, Colspan).
+writeClubsPerHand(HandShownLong, ClubsPerHand, Colspan) :-	
+	format("<tr>\n"),
+	format("<td class='info_lable'>clubs in ~w hand:</td>\n", [HandShownLong]),	
+	format("<td class='info_clubs'>~w</td>\n", [ClubsPerHand]),
+	format("<td class='info_clubs' colspan=~w>&nbsp;</th>\n", [Colspan]),
+	format("</tr>\n").
+
 writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
 	format("<table class='info_bigSwap_table' align='center'>\n"),
 	writePrechacThisLinks(Pattern, up, NumberOfJugglers, BackURL),
