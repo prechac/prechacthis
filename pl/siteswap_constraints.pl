@@ -3,9 +3,7 @@ siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, _NumberOfM
 	initConstraintCheck,
 	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainString, ClubDoesString, ReactString, ContainMagic),
 	preprocessMultiplexes(Pattern),
-	siteswap(NumberOfJugglers, Objects, MaxHeight, Pattern),
-	(passesMin(Pattern, PassesMin); NumberOfJugglers=1),
-	passesMax(Pattern, PassesMax),
+	siteswap(NumberOfJugglers, Objects, MaxHeight, PassesMin, PassesMax, Pattern),
 	catch(
 		preprocessConstraint(DontContainString, negativ, Length, NumberOfJugglers, MaxHeight, DontContain),
 		constraint_unclear,
@@ -122,6 +120,7 @@ amountOfPasses([FirstThrow|RestThrows], Passes) :-
    isPass(FirstThrow, ThisThrowIsPass),
    Passes is ThisThrowIsPass + RestPasses.
 
+isPass(Var, 0) :- var(Var), !.
 isPass(p(_,Index,_), 1) :- Index > 0, !.
 isPass(p(_,Index,_), 0) :- Index = 0, !.
 isPass(Multiplex, NumberOfPasses) :- 
