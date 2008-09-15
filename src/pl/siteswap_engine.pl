@@ -7,39 +7,32 @@
 % 
 
 
-siteswap(Jugglers, Objects, MaxHeight, Pattern) :-
+siteswap(Jugglers, Objects, MaxHeight, PassesMin, PassesMax, Pattern) :-
    length(Pattern, Period),
    landingSites1(Pattern, LandingSites),
    possibleLandingSites1(Pattern, PossibleLandingSites), 
    fillPermutation(PossibleLandingSites, LandingSites),
    landingSites2Pattern(LandingSites, BasePattern),
-   fillInAndCopy(Pattern, BasePattern, ObjectsPattern),  % Pattern to calculate the Objects of the Constraints 
+   fillInAndCopy(Pattern, BasePattern, ObjectsPattern),	 % Pattern to calculate the Objects of the Constraints 
    objects(ObjectsPattern, Jugglers, ObjectsFromConstraints),
    MissingObjects is Objects - ObjectsFromConstraints,
    Prechator is Period rdiv Jugglers,
-   addObjects(BasePattern, MissingObjects, Jugglers, 0, MaxHeight, Prechator, Pattern),
+   addObjects(BasePattern, MissingObjects, Jugglers, PassesMax, 0, MaxHeight, Prechator, Pattern),	
+   (passesMin(Pattern, PassesMin); Jugglers=1),
+   %passesMax(Pattern, PassesMax),
    checkMultiplexes(Pattern).
 
-addObjects([], 0, _Jugglers, _MinHeight, _MaxHeight, _Prechator, []) :- !.
-addObjects([BaseMultiplex|BaseRest], MissingObjects, Jugglers, MinHeight, MaxHeight, Prechator, [Multiplex|PatternRest]) :-
-   is_list(Multiplex),!,
-   between(0, MissingObjects, ObjectsForMultiplex),
-   ObjectsForRest is MissingObjects - ObjectsForMultiplex,
-   MinHeightForMultiplex is max(MinHeight, 1),
-   addObjects(BaseMultiplex, ObjectsForMultiplex, Jugglers, MinHeightForMultiplex, MaxHeight, Prechator, Multiplex),
-   (
-      is_set(Multiplex);
-      listOf(p(2,0,2), Multiplex)
-   ),
-   addObjects(BaseRest, ObjectsForRest, Jugglers, MinHeight, MaxHeight, Prechator, PatternRest).
-addObjects([_BaseHead|BaseRest], MissingObjects, Jugglers, MinHeight, MaxHeight, Prechator, [Throw|PatternRest]) :-
-   nonvar(Throw),!,
-   addObjects(BaseRest, MissingObjects, Jugglers, MinHeight, MaxHeight, Prechator, PatternRest).
-addObjects([BaseHead|BaseRest], MissingObjects, Jugglers, MinHeight, MaxHeight, Prechator, [p(Throw, Index, Original)|PatternRest]) :-
+addObjects([], 0, _Jugglers, _PassesMax, _MinHeight, _MaxHeight, _Prechator, []) :- !.
+addObjects([_BaseHead|BaseRest], MissingObjects, Jugglers, PassesMax, MinHeight, MaxHeight, Prechator, [Throw|PatternRest]) :-
+   ground(Throw),!,
+   addObjects(BaseRest, MissingObjects, Jugglers, PassesMax, MinHeight, MaxHeight, Prechator, PatternRest).
+addObjects([BaseHead|BaseRest], MissingObjects, Jugglers, PassesMax, MinHeight, MaxHeight, Prechator, [p(Throw, Index, Original)|PatternRest]) :-
    var(Throw),
    betweenRandom(0, MissingObjects, ObjectsToAdd),
+   Index is ObjectsToAdd mod Jugglers,
+   (PassesMax = 0 -> Index = 0; true),
+   (Index > 0 -> NextPassesMax is PassesMax - 1; NextPassesMax = PassesMax),
    Throw is BaseHead + ObjectsToAdd * Prechator,
-   Index is ObjectsToAdd mod Jugglers, 
    (
       (Throw = 0, Index = 0);
       Throw >= 1
@@ -57,7 +50,22 @@ addObjects([BaseHead|BaseRest], MissingObjects, Jugglers, MinHeight, MaxHeight, 
       Original is Throw + (Jugglers - Index) * Prechator
    ),
    NewMissingObjects is MissingObjects - ObjectsToAdd,
-   addObjects(BaseRest, NewMissingObjects, Jugglers, MinHeight, MaxHeight, Prechator, PatternRest).
+   addObjects(BaseRest, NewMissingObjects, Jugglers, NextPassesMax, MinHeight, MaxHeight, Prechator, PatternRest).
+addObjects([BaseMultiplex|BaseRest], MissingObjects, Jugglers, PassesMax, MinHeight, MaxHeight, Prechator, [Multiplex|PatternRest]) :-
+   is_list(Multiplex),
+   amountOfPasses(Multiplex, MultiplexPassesBevor),
+   between(0, MissingObjects, ObjectsForMultiplex),
+   ObjectsForRest is MissingObjects - ObjectsForMultiplex,
+   MinHeightForMultiplex is max(MinHeight, 1),
+   addObjects(BaseMultiplex, ObjectsForMultiplex, Jugglers, PassesMax, MinHeightForMultiplex, MaxHeight, Prechator, Multiplex),
+   (
+      is_set(Multiplex);
+      listOf(p(2,0,2), Multiplex)
+   ),
+   amountOfPasses(Multiplex, MultiplexPasses),
+   NextPassesMax is PassesMax - (MultiplexPasses - MultiplexPassesBevor),
+   NextPassesMax >= 0,
+   addObjects(BaseRest, ObjectsForRest, Jugglers, NextPassesMax, MinHeight, MaxHeight, Prechator, PatternRest).
 
 
 landingSites2Pattern(LandingSites, BasePattern) :-
