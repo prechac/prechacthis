@@ -8,11 +8,11 @@ jp_pattern_def(PatternShort, NumberOfJugglers, SwapList, Style) :-
 	jp_listOfJugglerStartLeft(Period, NumberOfJugglers, SwapList, LeftList),
 	jp_header(PatternShort, NumberOfJugglers),
 	jp_positions(NumberOfJugglers, Style),
-	jp_colors(ActionList, Pattern, NumberOfJugglers),
-	%(noMultiplex(Pattern) -> 
-	%	jp_colors(ActionList, Pattern, NumberOfJugglers);
-	%	true
-	%),
+	%jp_colors(ActionList, Pattern, NumberOfJugglers),
+	(noMultiplex(Pattern) -> 
+		jp_colors(ActionList, Pattern, NumberOfJugglers);
+		true
+	),
 	jp_jugglerStartLeft(LeftList),
 	jp_delay(NumberOfJugglers, Period, Delay),
 	jp_pattern(ActionList, SwapList, LeftList, PointsInTime, Delay, NumberOfJugglers),
@@ -28,7 +28,7 @@ jp_header(PatternShort, NumberOfJugglers) :-
 	),
 	concat_atom(Throws, ' ', PatternString),
 	format("!#####################################################\n"),
-	format("! ~w\n", [PatternString]),
+	format("! ~w  (~w Jugglers)\n", [PatternString, NumberOfJugglers]),
 	format("!#####################################################\n"),
 	format("#sx\n\n").
 
