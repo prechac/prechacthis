@@ -352,3 +352,8 @@ pre {
 #doc_main a:hover {
 	text-decoration: underline !important;
 }
+
+#doc_textedit {
+	width: 200px;
+	height: 200px;
+}

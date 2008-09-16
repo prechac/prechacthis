@@ -30,8 +30,8 @@ addObjects([BaseHead|BaseRest], MissingObjects, Jugglers, PassesMax, MinHeight, 
    var(Throw),
    betweenRandom(0, MissingObjects, ObjectsToAdd),
    Index is ObjectsToAdd mod Jugglers,
-   (PassesMax = 0 -> Index = 0; true),
-   (Index > 0 -> NextPassesMax is PassesMax - 1; NextPassesMax = PassesMax),
+   ((nonvar(PassesMax), PassesMax = 0) -> Index = 0; true),
+   ((Index > 0, nonvar(PassesMax)) -> NextPassesMax is PassesMax - 1; NextPassesMax = PassesMax),
    Throw is BaseHead + ObjectsToAdd * Prechator,
    (
       (Throw = 0, Index = 0);

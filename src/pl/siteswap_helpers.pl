@@ -304,6 +304,12 @@ rotateHighestFirst(Siteswap, Rotated) :-
 	findall(R,rotate(Siteswap,R), ListOfRotations),
 	is_biggest(ListOfRotations, Rotated).
 
+%compareSiteswap(Delta, p(Throw1, Index1, _Origen1), p(Throw2, Index2, _Origen2)) :-
+%	compare(Delta, [Throw1, Index1], [Throw2, Index2]), !.
+%compareSiteswap(Delta, Siteswap1, Siteswap2) :-
+%	amountOfPasses(Siteswap1, Passes1),
+%	amountOfPasses(Siteswap2, Passes2),
+	
 
 compare_swaps(Order, P1, P2) :-
 	siteswapKey(P1, Key1),

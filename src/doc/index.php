@@ -22,6 +22,9 @@
 			}else{
 				$doc_url = "doc.php";
 			}
+			if($_REQUEST["showedit"] == "on") {
+				$doc_url = $doc_url . "&showedit=on";			
+			}
 			echo "<frame src='./".$doc_url."' name='Doc'>";
 			echo "<frame src='../". $pt_url ."' name='PrechacThis'>";
 		?>
