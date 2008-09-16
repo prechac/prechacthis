@@ -9,21 +9,56 @@
 	</head>
 	<body>
 <?php
+if ($_REQUEST['showedit'] == "on") {
+	$DocEndSolo = "?showedit=on";
+	$DocEnd = "&showedit=on";
+} else {
+	$DocEndSolo = "";
+	$DocEnd = "";
+}
 if (isset($_REQUEST['section'])) {
-	echo "<div class='back'><a href='../index.php' target='_parent'>close</a>";
-	echo "&nbsp;|&nbsp;<a href='./doc.php' target='Doc'>up</a></div>\n";
-	//$filename = "./sections/".$_REQUEST['section']."inc";
-	$filename = $_REQUEST['section'];
-	$file = fopen($filename,"r");
-	$doc_title = fgets($file); // Read first line
-	$doc_url = fgets($file); // Read second line
-	echo "<h1>".$doc_title."</h1>\n";
-	echo "<div id='doc_main'>\n";
-	fpassthru($file);
-	echo "</div>\n";
-	echo "<div class='back'><a href='../index.php' target='_parent'>close</a>";
-	echo "&nbsp;|&nbsp;<a href='./doc.php' target='Doc'>up</a></div>\n";
-	fclose($file);
+	if ($_REQUEST['edit'] == "on") {
+		echo "<div class='back'><a href='../index.php' target='_parent'>close</a>";
+		echo "&nbsp;|&nbsp;<a href='./doc.php". $DocEndSolo ."' target='Doc'>up</a>";
+		echo "</div>\n";
+		$filename = $_REQUEST['section'];
+		$file = fopen($filename,"r");
+		echo "<form action='./doc.php' target='Doc' method='post'>";
+		echo "<input type='hidden' name='section' value='".$_REQUEST['section']."'>";
+		echo "<input type='hidden' name='showedit' value='on'>";
+		echo "<p>";
+	    echo "<textarea cols='40' rows='40' name='sectioncontent' wrap='off'>";
+		fpassthru($file);
+		echo "</textarea>";
+		echo "</p>";
+		echo "<p>";
+		echo "<input type='submit' value='save'>";
+		echo "</p>";
+		echo "</form>";
+		fclose($file);
+	} else {
+		//$filename = "./sections/".$_REQUEST['section']."inc";
+		$filename = $_REQUEST['section'];
+		if (isset($_REQUEST['sectioncontent'])) {
+			$file = fopen($filename,"w");
+			
+			fclose($file);
+		}
+		echo "<div class='back'><a href='../index.php' target='_parent'>close</a>";
+		echo "&nbsp;|&nbsp;<a href='./doc.php". $DocEndSolo ."' target='Doc'>up</a>";
+		if ($_REQUEST['showedit'] == "on") {
+			echo "&nbsp;|&nbsp;<a href='./doc.php?edit=on&section=".$_REQUEST['section']."' target='Doc'>edit</a>";
+		}
+		echo "</div>\n";
+		$file = fopen($filename,"r");
+		$doc_title = fgets($file); // Read first line
+		$doc_url = fgets($file); // Read second line
+		echo "<h1>".$doc_title."</h1>\n";
+		echo "<div id='doc_main'>\n";
+		fpassthru($file);
+		echo "</div>\n";
+		fclose($file);
+	}
 } else {
 	echo "<div class='back'><a href='../index.php' target='_parent'>close</a></div>\n";
 	echo "<h1>Documentation</h1>\n";
@@ -32,7 +67,7 @@ if (isset($_REQUEST['section'])) {
 	foreach (glob("./sections/*.inc") as $filename) {
 		$file = fopen($filename,"r");
 		$doc_title = fgets($file); // Read first line
-		$doc_url = "./doc.php?section=". $filename;
+		$doc_url = "./doc.php?section=". $filename . $DocEnd;
 		$doc_url_encoded = rawurlencode($doc_url);
 		$pt_url = fgets($file); // Read second line
 		$pt_url_encoded = rawurlencode($pt_url);
