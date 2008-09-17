@@ -17,9 +17,16 @@ siteswap(Jugglers, Objects, MaxHeight, PassesMin, PassesMax, Pattern) :-
    objects(ObjectsPattern, Jugglers, ObjectsFromConstraints),
    MissingObjects is Objects - ObjectsFromConstraints,
    Prechator is Period rdiv Jugglers,
-   addObjects(BasePattern, MissingObjects, Jugglers, PassesMax, 0, MaxHeight, Prechator, Pattern),	
+   (nonvar(PassesMax) -> 
+    	(
+			amountOfPasses(Pattern, PassesBevor),
+			PassesToAddMax is PassesMax - PassesBevor
+		); 
+		PassesToAddMax = PassesMax
+	),
+   addObjects(BasePattern, MissingObjects, Jugglers, PassesToAddMax, 0, MaxHeight, Prechator, Pattern),	
    (passesMin(Pattern, PassesMin); Jugglers=1),
-   %passesMax(Pattern, PassesMax),
+   passesMax(Pattern, PassesMax),
    checkMultiplexes(Pattern).
 
 addObjects([], 0, _Jugglers, _PassesMax, _MinHeight, _MaxHeight, _Prechator, []) :- !.
