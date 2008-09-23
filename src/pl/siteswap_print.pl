@@ -45,7 +45,7 @@ convertP(Throws, ThrowsP, Length, Persons) :-
 convertP([], [], _, _, _).
 convertP([p(FirstThrow,Index,Origen) | RestThrows ], [  FirstThrowP| RestThrowsP], Length, Persons, ThrowingJuggler) :- 
 	Index > 0,
-	pStyle(Length, Origen, Style),
+	pStyle(Length, Origen, Index, Style),
 	float_to_shortpass(FirstThrow,FirstThrowShort),
 	(number(ThrowingJuggler) ->
 		(
@@ -130,16 +130,26 @@ pattern_to_string(Pattern, PatternStr) :-
 	remove_whitespace(TempLst, PatternStr).
 
 
-pStyle(Length, Origen, classic) :- 
+pStyle(Length, Origen, _Index, classic) :- 
 	even(Length),
 	odd(Origen).
-pStyle(Length, Origen, equi) :-
+pStyle(Length, Origen, _Index, equi) :-
 	even(Length),
 	even(Origen).
-pStyle(Length, Origen, bi) :-
+pStyle(Length, Origen, Index, bi) :-
 	odd(Length),
-	even(Origen).
-pStyle(Length, Origen, instantbi) :-
+	even(Origen), 
+	odd(Index).
+pStyle(Length, Origen, Index, bi) :-
 	odd(Length),
-	odd(Origen).
+	odd(Origen), 
+	even(Index).
+pStyle(Length, Origen, Index, instantbi) :-
+	odd(Length),
+	even(Origen),
+	even(Index).
+pStyle(Length, Origen, Index, instantbi) :-
+	odd(Length),
+	odd(Origen),
+	odd(Index).
 
