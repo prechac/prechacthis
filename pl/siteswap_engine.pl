@@ -70,8 +70,15 @@ addObjects([BaseMultiplex|BaseRest], MissingObjects, Jugglers, PassesMax, MinHei
       listOf(p(2,0,2), Multiplex)
    ),
    amountOfPasses(Multiplex, MultiplexPasses),
-   NextPassesMax is PassesMax - (MultiplexPasses - MultiplexPassesBevor),
-   NextPassesMax >= 0,
+   (nonvar(PassesMax) ->
+      (
+         NextPassesMax is PassesMax - (MultiplexPasses - MultiplexPassesBevor),
+         NextPassesMax >= 0
+      );
+      (
+         NextPassesMax = PassesMax
+      )
+   ),
    addObjects(BaseRest, ObjectsForRest, Jugglers, NextPassesMax, MinHeight, MaxHeight, Prechator, PatternRest).
 
 
