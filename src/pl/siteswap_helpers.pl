@@ -1,3 +1,49 @@
+swapThrows(Pattern, PosA, PosB, NewPattern) :-
+	posList(Pattern, PosList),
+	nth0(PosA, PosList, Pos1),
+	nth0(PosB, PosList, Pos2),
+	distanceOfThrows(Pos1, Pos2, Diff),
+	Diff >= 0, !,
+	length(Pattern, Length),
+	length(NewPattern, Length),
+	nth0ListOfLists(Pos1, Pattern, p(Throw1, Index1, Origen1)),
+	nth0ListOfLists(Pos2, Pattern, p(Throw2, Index2, Origen2)),
+	NewThrow1 is Throw2 + Diff,
+	NewIndex1 is Index2,
+	(NewIndex1 = 0 -> 
+		(NewThrow1 >= 0);
+		(NewThrow1 >= 1)
+	),
+	NewOrigen1 is Origen2 + Diff,
+	NewThrow2 is Throw1 - Diff,
+	NewIndex2 is Index1,
+	(NewIndex2 = 0 -> 
+		(NewThrow2 >= 0);
+		(NewThrow2 >= 1)
+	),
+	NewOrigen2 is Origen1 - Diff,
+	changeOnePosition(Pattern, Pos1, p(NewThrow1, NewIndex1, NewOrigen1), TmpPattern),
+	changeOnePosition(TmpPattern, Pos2, p(NewThrow2, NewIndex2, NewOrigen2), NewPattern).
+swapThrows(Pattern, Pos2, Pos1, NewPattern) :-
+	swapThrows(Pattern, Pos1, Pos2, NewPattern).
+
+print_swaped_pattern(Pattern, Pos1, Pos2) :-
+	swapThrows(Pattern, Pos1, Pos2, NewPattern),!,
+	pattern_to_string(NewPattern, PatternString),
+	format(PatternString).
+print_swaped_pattern(_,_,_) :-
+	format("-2").
+
+	
+distanceOfThrows(Pos1, Pos2, Diff) :-
+	number(Pos1),
+	number(Pos2), !,
+	Diff is Pos2 - Pos1.
+distanceOfThrows([Pos1|_], Pos2, Diff) :-
+	!, distanceOfThrows(Pos1, Pos2, Diff).
+distanceOfThrows(Pos1, [Pos2|_], Diff) :-
+	!, distanceOfThrows(Pos1, Pos2, Diff).
+
 
 addKey(Pattern, Heights-Pattern) :-
 	listOfHeights(Pattern, Heights).

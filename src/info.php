@@ -1,55 +1,75 @@
+<?php
+	if($_REQUEST["back"]) {
+		$back_url = $_REQUEST["back"];
+		$back_url_decoded = rawurldecode($back_url);
+		$back_url_encoded = rawurlencode($back_url_decoded);
+	}
+	if (!isset($_REQUEST["ajax"])) {
+?>		
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 	<title>PrechacThis - Pattern Info</title>
 	<link rel="shortcut icon" href="./images/favicon.png">
 	<link rel="stylesheet" type="text/css" href="./css/prechacthis.css">
+	<script type="text/javascript" src="./js/prototype/prototype.js"></script>
+	<script type="text/javascript" src="./js/scriptaculous/scriptaculous.js"></script>
+	<script type="text/javascript" src="./js/ajax.js"></script>
 </head>
 <body>
 <?php
+	if($_REQUEST["back"]) {
+		echo "<p class='back'><a href='./?".$back_url_decoded."'>back to results</a></p>";
+	}	
+?>
+	<table align='center' cellpadding='0'><tr><td><div id='content' align='center'>
+<?php
+
+}
 $debug = false;
 
-if ($_GET){
+if ($_REQUEST){
 	
-	//foreach($_GET as $oneGET) {
+	//foreach($_REQUEST as $oneGET) {
 	//	echo "<p>$oneGET</p>";
 	//}
 	
-	if($_GET["swap"]) {
-		$swaplist = $_GET["swap"];
+	if($_REQUEST["swap"]) {
+		$swaplist = $_REQUEST["swap"];
 	}else{
 		$swaplist = "[]";
 	}
 	
-	if($_GET["newswap"]) {
-		$newswap = $_GET["newswap"];
+	if($_REQUEST["newswap"]) {
+		$newswap = $_REQUEST["newswap"];
 	} else {
 		$newswap = "[]";
 	}
 	
-	if($_GET["debug"]=="on") $debug = true;
-
-	if($_GET["back"]) {
-		$back_url = $_GET["back"];
-		$back_url_decoded = rawurldecode($back_url);
-		$back_url_encoded = rawurlencode($back_url_decoded);
-		
-		echo "<p class='back'><a href='./?".$back_url_decoded."'>back to results</a></p>";
+	
+	if($_REQUEST["hreftype"] == "ajax") {
+		$hreftype = $_REQUEST["hreftype"];
+	} else {
+		$hreftype = "html";
 	}
 	
+	if($_REQUEST["debug"]=="on") $debug = true;
+
+	//$browser = get_browser();
+	//echo ($browser['javascript']);
 	
-	if($_GET["pattern"] && $_GET["persons"]) {
-	    echo "\n<table align='center' cellpadding='0'><tr><td><div align='center'>\n";
+	if($_REQUEST["pattern"] && $_REQUEST["persons"]) {
 
 		$errorlogfile = tempnam("/tmp", "siteswap_info");
-
+		
 		$plquery  = "swipl -q "
 		          . "-f " . dirname($_SERVER["SCRIPT_FILENAME"]) . "/pl/siteswap.pl "
 		          . "-g \"print_pattern_info("
-		          . $_GET["pattern"] . ", "
-		          . $_GET["persons"] . ", "
+		          . $_REQUEST["pattern"] . ", "
+		          . $_REQUEST["persons"] . ", "
 				  . $swaplist . ", "
-				  . $newswap . ","
+				  . $newswap . ", "
+				  . $hreftype . ", "
 		          . "'$back_url_encoded'"
 		          . "), halt.\" "
 		          . "2> $errorlogfile";
@@ -58,17 +78,25 @@ if ($_GET){
 		echo `$plquery`;
 		readfile($errorlogfile);
 		unlink($errorlogfile);
-
-		echo "\n</div></td></tr></table>";
-	}else{
-		echo "<p>pattern or number of jugglers not specified :-(</p>";
+	} else {
+		echo "<p>pattern or number of jugglers not specified!</p>";
 	}
 	
-	if($_GET["back"]) {
-		echo "<br><p class='back'><a href='./?".$back_url_decoded."'>back to results</a></p>";
+}	
+	
+if (!isset($_REQUEST["ajax"])) {
+	
+	echo "\n</div></td></tr></table>\n";	
+	echo "<br><p class='back'>";
+	if($_REQUEST["back"]) {
+		echo "<a href='./?".$back_url_decoded."'>back to results</a>";
 	}
-}
-?>
-
+	echo "<span id='linkhere'></span>";
+	echo "</p>";
+?>	
+<script type="text/javascript" src="./js/swap.js"></script>
 </body>
 </html>
+<?php
+}
+?>
