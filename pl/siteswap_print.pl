@@ -81,6 +81,22 @@ convertP(Throw, ThrowP, Length, Persons, Juggler) :-
 	number(Throw),
 	convertP([Throw], [ThrowP], Length, Persons, Juggler).
 
+	
+identifyThrows(Throws, ThrowsID) :-
+	identifyThrows(Throws, 0, ThrowsID).
+identifyThrows([], _, []) :- !.
+identifyThrows([Multiplex|Throws], ID, [MultiplexID|ThrowsID]) :-
+	is_list(Multiplex),
+	identifyThrows(Multiplex, ID, MultiplexID),
+	flatten(Multiplex, MultiplexFlat),
+	length(MultiplexFlat, Length),
+	NextID is ID + Length,
+	identifyThrows(Throws, NextID, ThrowsID).
+identifyThrows([Throw|Throws], ID, [ThrowID|ThrowsID]) :-
+	format(string(ThrowID), "<span id='throw~w'>~s</span>", [ID, Throw]),
+	NextID is ID + 1,
+	identifyThrows(Throws, NextID, ThrowsID).
+
 
 convertMagic(Pattern, [], Pattern) :- !.
 convertMagic(Pattern, [Pos|MagicPositions], MagicPattern) :- 
@@ -125,9 +141,12 @@ writeCompletedSiteswap(Pattern, Persons, Objects, Length, Max, NumberOfMultiplex
 
 
 pattern_to_string(Pattern, PatternStr) :-
+	list_to_string(Pattern, PatternStr).
+list_to_string(Pattern, PatternStr) :-
 	format(atom(TempStr), "~w", [Pattern]),
 	string_to_list(TempStr, TempLst),
 	remove_whitespace(TempLst, PatternStr).
+
 
 
 pStyle(Length, Origen, _Index, classic) :- 

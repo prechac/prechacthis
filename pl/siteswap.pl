@@ -6,4 +6,5 @@
    [siteswap_info],
    [siteswap_helpers],
    [helpers],
-   [joepass].
+   [joepass],
+   [ajax_helpers].
