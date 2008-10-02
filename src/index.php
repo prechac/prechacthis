@@ -10,7 +10,7 @@
 <?php
 $debug = false;
 
-if ($_REQUEST){
+if ($_GET){
 	if($_GET["debug"]=="on") $debug = true;
 	
 	$doku = doku($_GET["doku"]);
