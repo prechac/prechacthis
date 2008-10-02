@@ -291,7 +291,7 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwa
 	orbits(Pattern, OrbitPattern),
 	club_distribution(ActionList, OrbitPattern, NumberOfClubs, NumberOfJugglers, Period, ClubDistribution),
 	JugglerMax is NumberOfJugglers - 1,
-	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, PatternWithShortPasses, BackURL)),
+	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, PatternWithShortPasses, Pattern, BackURL)),
 	writeJoepassLink(PatternWithShortPasses, NumberOfJugglers, SwapList, JoePass_Cookies), 
 	writeHiddenInfo(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL).
 
@@ -324,7 +324,7 @@ writePatternInfo(PatternWithShortPasses, PointsInTime, ActionList, NumberOfJuggl
 	format("</table>\n\n").
 
 
-writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, Pattern, BackURL) :-
+writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, PatternWithShortPasses, Pattern, BackURL) :-
 	ColspanLong is Period,
 	ColspanShort is Period - 1,
 	jugglerShown(Juggler, JugglerShown),
@@ -335,7 +335,7 @@ writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJuggle
 	handShownLong(HandShownB, HandShownBLong),
 	format("<table class='info_juggler_table'>"),
 	format("<tr>\n"),
-	writeSwapLink(Juggler, SwapList, NumberOfJugglers, Pattern, BackURL),
+	writeSwapLink(Juggler, SwapList, NumberOfJugglers, PatternWithShortPasses, BackURL),
 	format("<th class='info_title' colspan=~w>juggler ~w</th>\n", [ColspanLong, JugglerShown]),
 	format("</tr>\n"),
 	(
@@ -379,6 +379,19 @@ writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJuggle
 	forall(member(Action, ActionList), print_landing_time(Juggler, Action)),
 	format("</tr>\n"),
 */
+	(noMultiplex(Pattern) ->
+		(
+		format("<tr>\n"),
+		format("<td class='info_lable'>was:</td>\n"),
+		forall(member(Action, ActionList), print_throw_was(Juggler, Action, NumberOfJugglers, Period, Pattern)),
+		format("</tr>\n"),
+		format("<tr>\n"),
+		format("<td class='info_lable'>reacts to:</td>\n"),
+		forall(member(Action, ActionList), print_reacts_to(Juggler, Action, NumberOfJugglers, Period, Pattern)),
+		format("</tr>\n")
+		);
+		true
+	),
 	format("</table>\n\n").
 
 
@@ -722,7 +735,27 @@ print_landing_time(ThrowingJuggler, Action) :-
 print_landing_time(_, _).
 
 
+print_throw_was(ThrowingJuggler, Action, NumberOfJugglers, Period, Pattern) :-	
+	nth1(2, Action, ThrowingJuggler),!,
+	nth1(3, Action, SiteswapPosition),
+	throw_was(Pattern, SiteswapPosition, ThrowPosition),
+	nth0(ThrowPosition, Pattern, Throw),	
+	convertP(Throw, ThrowP, Period, NumberOfJugglers, ThrowingJuggler),
+	format("<td class='info_throw'>"),
+	format_list(ThrowP),
+	format("</td>\n").
+print_throw_was(_, _, _, _, _).
 
+print_reacts_to(ThrowingJuggler, Action, NumberOfJugglers, Period, Pattern) :-	
+	nth1(2, Action, ThrowingJuggler),!,
+	nth1(3, Action, SiteswapPosition),
+	throw_reacts_to(Pattern, SiteswapPosition, ThrowPosition),
+	nth0(ThrowPosition, Pattern, Throw),	
+	convertP(Throw, ThrowP, Period, NumberOfJugglers, ThrowingJuggler),
+	format("<td class='info_throw'>"),
+	format_list(ThrowP),
+	format("</td>\n").
+print_reacts_to(_, _, _, _, _).
 
 
 jugglerShown([], []) :- !.
