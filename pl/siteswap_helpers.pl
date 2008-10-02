@@ -588,3 +588,32 @@ killOrbit(Pattern, Orbit, NewPattern) :-
 	orbits(Pattern, OrbitPattern),
 	orbitPositions(Orbit, OrbitPattern, Positions),
 	changePositions(Pattern, Positions, p(0,0,0), NewPattern).
+
+orbitOrder(Pattern, SiteswapPosition, OrbitPositions) :-
+	length(Pattern, Length),
+	FirstPos is SiteswapPosition mod Length,!,
+	orbitOrder(Pattern, Length, FirstPos, OrbitPositions, FirstPos, juststarted).
+orbitOrder(_Pattern, Length, SiteswapPosition, [], FirstPos, notjuststarted) :-
+	FirstPos is SiteswapPosition mod Length, !.
+orbitOrder(Pattern, Length, SiteswapPosition, [Pos|OrbitPositions], FirstPos, _) :-
+	Pos is SiteswapPosition mod Length,
+	nth0(Pos, Pattern, Throw),
+	not(is_list(Throw)),!,
+	landingSite(Pos, Throw, Length, LandingPos),
+	orbitOrder(Pattern, Length, LandingPos, OrbitPositions, FirstPos, notjuststarted).
+orbitOrderx(Pattern, Length, SiteswapPosition, [[Pos,MPos]|OrbitPositions], FirstPos, _) :-
+	Pos is SiteswapPosition mod Length,
+	nth0(Pos, Pattern, Multiplex),
+	is_list(Multiplex),  % Multiplex
+	nth0(MPos, Multiplex, Throw),
+	landingSite(Pos, Throw, Length, LandingPos),
+	orbitOrder(Pattern, Length, LandingPos, OrbitPositions, FirstPos, notjuststarted).
+	
+throw_was(Pattern, SiteswapPosition, ThrowPosition) :-
+	orbitOrder(Pattern, SiteswapPosition, OrbitPositions),
+	append(_, [ThrowPosition], OrbitPositions).
+	
+throw_reacts_to(Pattern, SiteswapPosition, ThrowPosition) :-
+	ReactPosition is SiteswapPosition + 2,
+	throw_was(Pattern, ReactPosition, ThrowPosition).
+
