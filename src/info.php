@@ -46,12 +46,31 @@ if ($_REQUEST){
 		$newswap = "[]";
 	}
 	
-	
+		
 	if($_REQUEST["hreftype"] == "ajax") {
 		$hreftype = $_REQUEST["hreftype"];
 	} else {
 		$hreftype = "html";
 	}
+	
+	$joepass_cookies = "[";
+	if(isset($_COOKIE["joepass_download"])) {
+		$joepass_cookies .= "'".$_COOKIE["joepass_download"]."'";
+	} else {
+		$joepass_cookies .= "''";
+	}
+	if(isset($_COOKIE["joepass_style"])) {
+		$joepass_cookies .= ", '".$_COOKIE["joepass_style"]."'";
+	} else {
+		$joepass_cookies .= ", ''";
+	}
+	if(isset($_COOKIE["joepass_file"])) {
+		$joepass_cookies .= ", '".$_COOKIE["joepass_file"]."'";
+	} else {
+		$joepass_cookies .= ", ''";
+	}
+	$joepass_cookies .= "]";
+	//echo $joepass_cookies;
 	
 	if($_REQUEST["debug"]=="on") $debug = true;
 
@@ -70,6 +89,7 @@ if ($_REQUEST){
 				  . $swaplist . ", "
 				  . $newswap . ", "
 				  . $hreftype . ", "
+				  . $joepass_cookies . ", "
 		          . "'$back_url_encoded'"
 		          . "), halt.\" "
 		          . "2> $errorlogfile";

@@ -269,7 +269,7 @@ club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, 
 
 print_pattern_info(Pattern, NumberOfJugglers) :-
 	print_pattern_info(Pattern, NumberOfJugglers, [], [], html, '').
-print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwaps, HrefType, BackURL) :-
+print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwaps, HrefType, JoePass_Cookies, BackURL) :-
 	retractall(href_type(_)),
 	asserta(href_type(HrefType)),
 	applyNewSwaps(OldSwapList, NewSwaps, SwapList),
@@ -279,9 +279,9 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwa
 	convertShortPasses(PatternWithShortPasses,Period,NumberOfJugglers,MaxHeight,Pattern),
 	all_points_in_time(PointsInTime, NumberOfJugglers, Period),
 	what_happens(PointsInTime, Pattern, NumberOfJugglers, ActionList),
-	writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
-	writePatternInfo(PatternWithShortPasses, PointsInTime, ActionList, NumberOfJugglers, Period, BackURL),
-	writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
+	writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL),
+	writePatternInfo(PatternWithShortPasses, PointsInTime, ActionList, NumberOfJugglers, Period, SwapList, BackURL),
+	writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL),
 	averageNumberOfClubs(Pattern, AverageNumberOfClubs),
 	NumberOfClubs is AverageNumberOfClubs * NumberOfJugglers,
 	%(testClubDistribution(ActionList, NumberOfJugglers, Period, NumberOfClubs) ->
@@ -292,11 +292,11 @@ print_pattern_info(PatternWithShortPasses, NumberOfJugglers, OldSwapList, NewSwa
 	club_distribution(ActionList, OrbitPattern, NumberOfClubs, NumberOfJugglers, Period, ClubDistribution),
 	JugglerMax is NumberOfJugglers - 1,
 	forall(between(0, JugglerMax, Juggler), writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, PatternWithShortPasses, BackURL)),
-	writeJoepassLink(PatternWithShortPasses, NumberOfJugglers, SwapList), 
+	writeJoepassLink(PatternWithShortPasses, NumberOfJugglers, SwapList, JoePass_Cookies), 
 	writeHiddenInfo(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL).
 
 	
-writePatternInfo(PatternWithShortPasses, PointsInTime, ActionList, NumberOfJugglers, Period, BackURL) :-
+writePatternInfo(PatternWithShortPasses, PointsInTime, ActionList, NumberOfJugglers, Period, SwapList, BackURL) :-
 	format("<table class='info_pattern_table' align='center'>\n"),
 /*	
 	format("<td class='info_lable_swap'>point in time:</td>\n"),
@@ -309,16 +309,13 @@ writePatternInfo(PatternWithShortPasses, PointsInTime, ActionList, NumberOfJuggl
 		(
 			NumberOfJugglersPlus is NumberOfJugglers + 1,
 			NumberOfJugglersMinus is NumberOfJugglers - 1,
-			pattern_to_string(PatternWithShortPasses, PatternString),
 			format("<tr>"),
 			format("<td class='info_lable'><a href="),
-			format(atom(HrefA), './info.php?pattern=~s&persons=~w&back=~w', [PatternString, NumberOfJugglersPlus, BackURL]),
-			format_href(HrefA),
+			format_href(Pattern, NumberOfJugglersPlus, SwapList, BackURL),
 			format(" class='small'>add</a>\n"),
 			format("&nbsp;|&nbsp;"),
 			format("<a href="),
-			format(atom(HrefS), './info.php?pattern=~s&persons=~w&back=~w', [PatternString, NumberOfJugglersMinus, BackURL]),
-			format_href(HrefS),
+			format_href(Pattern, NumberOfJugglersMinus, SwapList, BackURL),
 			format(" class='small'>sub</a>\n"),
 			format("<td colspan='~w'>&nbsp;</td>", [Period]),
 			format("</tr>")
@@ -394,38 +391,32 @@ writeClubsPerHand(HandShownLong, ClubsPerHand, Colspan) :-
 	format("<td class='info_clubs' colspan=~w>&nbsp;</th>\n", [Colspan]),
 	format("</tr>\n").
 
-writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
+writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL) :-
 	format("<table class='info_bigSwap_table' align='center'>\n"),
-	writePrechacThisLinks(Pattern, up, NumberOfJugglers, BackURL),
-	writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL),
-	writePrechacThisLinks(Pattern, down, NumberOfJugglers, BackURL),
+	writePrechacThisLinks(Pattern, up, NumberOfJugglers, SwapList, BackURL),
+	writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL),
+	writePrechacThisLinks(Pattern, down, NumberOfJugglers, SwapList, BackURL),
 	format("</table>\n\n").
 	
 writeSwapLink(Juggler, SwapList, NumberOfJugglers, Pattern, BackURL) :-
 	NewSwaps = [Juggler],
-	pattern_to_string(Pattern, PatternStr),
-	list_to_string(SwapList, SwapListStr),
-	format(atom(Href), "./info.php?pattern=~s&persons=~w&swap=~s&newswap=~w&back=~w", [PatternStr, NumberOfJugglers, SwapListStr, NewSwaps, BackURL]),
+	applyNewSwaps(SwapList, NewSwaps, NewSwapList),
 	format("<td class='info_swaplink'><a href="),
-	format_href(Href),	
+	format_href(Pattern, NumberOfJugglers, NewSwapList, BackURL),
 	format(" class='small'>swap hands</a></td>\n").
 
-writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
+writeBigSwapAndRotations(Pattern, PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL) :-
 	rotate_left(PatternWithShortPasses, PatternRotatedLeft),
-	pattern_to_string(PatternRotatedLeft, PatternRotatedLeftStr),
 	rotate_right(PatternWithShortPasses, PatternRotatedRight),
-	pattern_to_string(PatternRotatedRight, PatternRotatedRightStr),
 	format(string(ArrowLeft), "<img src='./images/left_arrow.png' alt='rotate left' border=0>", []),
 	format(string(ArrowRight), "<img src='./images/right_arrow.png' alt='rotate right' border=0>", []),
 	format("<tr>\n"),
 	format("<td class='info_left_arrow'><a href="),
-	format(atom(HrefL), "./info.php?pattern=~s&persons=~w&back=~w", [PatternRotatedLeftStr,NumberOfJugglers,BackURL]),
-	format_href(HrefL),
+	format_href(PatternRotatedLeft, NumberOfJugglers, SwapList, BackURL),
 	format(" title='rotate left'>~w</a></td>\n", [ArrowLeft]),
 	writeBigSwap(Pattern, NumberOfJugglers),	
 	format("<td class='info_right_arrow'><a href="),
-	format(atom(HrefR), "./info.php?pattern=~s&persons=~w&back=~w", [PatternRotatedRightStr,NumberOfJugglers,BackURL]),
-	format_href(HrefR),
+	format_href(PatternRotatedRight, NumberOfJugglers, SwapList, BackURL),
 	format(" title='rotate left'>~w</a></td>\n", [ArrowRight]),
 	format("</tr>\n").
 	
@@ -447,30 +438,28 @@ writeBigSwap(Throws, Persons) :-
     writeBigSwap_throws(ThrowsPMM).
 	
 
-writePrechacThisLinks(Pattern, UpDown, NumberOfJugglers, BackURL) :-
+writePrechacThisLinks(Pattern, UpDown, NumberOfJugglers, SwapList, BackURL) :-
 	posList(Pattern, PosList),
 	format("<tr><td>&nbsp;</td>\n"),
 	forall(member(Pos, PosList), 
 		(
 			prechacThis(Pattern, Pos, UpDown, NumberOfJugglers, NewPattern),
-			writePrechacThisLink(NewPattern, UpDown, NumberOfJugglers, BackURL)
+			writePrechacThisLink(NewPattern, UpDown, NumberOfJugglers, SwapList, BackURL)
 		)
 	),
 	format("<td>&nbsp;</td></tr>\n").
 	
-writePrechacThisLink(false, _UpDown, _NumberOfJugglers, _BackURL) :-
+writePrechacThisLink(false, _UpDown, _NumberOfJugglers, _SwapList, _BackURL) :-
 	!,
 	format("<td class='prechacthis_link'>"),
 	format("&nbsp;"),
 	format("</td>\n").
-writePrechacThisLink(Pattern, UpDown, NumberOfJugglers, BackURL) :-
+writePrechacThisLink(Pattern, UpDown, NumberOfJugglers, SwapList, BackURL) :-
 	float_to_shortpass(Pattern, PatternShort),
-	pattern_to_string(PatternShort, PatternString),
 	arrowUpDown(UpDown, ArrowUpDown),
 	format("<td class='prechacthis_link'>"),
 	format("<a href="),
-	format(atom(Href), './info.php?pattern=~s&persons=~w&back=~w', [PatternString, NumberOfJugglers, BackURL]),
-	format_href(Href),
+	format_href(PatternShort, NumberOfJugglers, SwapList, BackURL),
 	format(" title='PrechacThis ~w'>~s</a>", [UpDown, ArrowUpDown]),
 	format("</td>\n").
 
@@ -480,7 +469,7 @@ arrowUpDown(down, String) :-
 	format(string(String), "<img src='./images/down.png' alt='down' border=0>", []).
 	
 
-writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
+writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL) :-
 	orbits(Pattern, OrbitPattern),
 	magicPositions(Pattern, NumberOfJugglers, MagicPositions),
 	length(Pattern, Period),
@@ -494,10 +483,10 @@ writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers, BackURL) :-
 	averageNumberOfClubs(Pattern, AVClubs),
 	Clubs is AVClubs * NumberOfJugglers,
 	format("<td class='info_title' colspan=~w>orbits</td><td class='info_right_info'>~w clubs</td><td>&nbsp;</td>\n", [Colspan, Clubs]),
-	forall(member(Orbit, Orbits), writeThisOrbitInfo(OrbitPattern, Orbit, Pattern, NumberOfJugglers, PatternPM, BackURL)),
+	forall(member(Orbit, Orbits), writeThisOrbitInfo(OrbitPattern, Orbit, Pattern, NumberOfJugglers, PatternPM, SwapList, BackURL)),
 	format("</table>\n\n").
 	
-writeThisOrbitInfo(OrbitPattern, Orbit, Pattern, NumberOfJugglers, PatternPM, BackURL) :-	
+writeThisOrbitInfo(OrbitPattern, Orbit, Pattern, NumberOfJugglers, PatternPM, SwapList, BackURL) :-	
 	clubsInOrbit(Pattern, OrbitPattern, Orbit, ClubsAV),
 	Clubs is ClubsAV * NumberOfJugglers,
 	justThisOrbit(PatternPM, OrbitPattern, Orbit, PatternPrint, print),
@@ -511,10 +500,8 @@ writeThisOrbitInfo(OrbitPattern, Orbit, Pattern, NumberOfJugglers, PatternPM, Ba
 		(
 			killOrbit(Pattern, Orbit, PatternK),
 			float_to_shortpass(PatternK, PatternKShort),
-			pattern_to_string(PatternKShort, PatternKString),
 			format("<td><a href="),
-			format(atom(Href), './info.php?pattern=~s&persons=~w&back=~w', [PatternKString, NumberOfJugglers, BackURL]),
-			format_href(Href),
+			format_href(PatternKShort, NumberOfJugglers, SwapList, BackURL),
 			format(" class='small'>kill</a></td>\n")
 		);
 		format("<td>&nbsp;</td>\n")
@@ -536,31 +523,65 @@ writeOrbits(Pattern, NumberOfJugglers) :-
 	print(Clubs),
 	format("</td></tr>\n").
 	
-writeJoepassLink(Pattern, NumberOfJugglers, SwapList) :-
+writeJoepassLink(Pattern, NumberOfJugglers, SwapList, JoePass_Cookies) :-
 	pattern_to_string(Pattern, PatternStr),
 	jp_filename(Pattern, FileName),
+	JoePass_Cookies = [JoePass_Download, JoePass_Style, JoePass_File],
 	format("<div class='jp_link'>\n"),
 	format("<form id='joepass_form' action='./joepass.php' method='post'>\n"),
 	format("<input type='hidden' name='pattern' value='~s'>\n", [PatternStr]),
 	format("<input type='hidden' name='persons' value='~w'>\n", [NumberOfJugglers]),
 	format("<input type='hidden' name='file' value='~w'>\n", [FileName]),
 	format("<input type='hidden' name='swap' value='~w'>\n", [SwapList]),
-	format("JoePass! file:&nbsp;\n"),
+	format("<a href='http://www.koelnvention.de/software' target='_blank'>JoePass!</a> file:&nbsp;\n"),
 	format("<select name='download' size='1'>"),
-	format("<option value='on'>download</option>"),
-	format("<option value='off'>show</option>"),
+	format("<option value='on'"),
+	print_selected('on', JoePass_Download),
+	format(">download</option>"),
+	format("<option value='off'"),
+	print_selected('off', JoePass_Download),
+	format(">show</option>"),
 	format("</select>\n"),
 	format("&nbsp;"),
 	format("<select name='style' size='1'>"),
-	format("<option value='normal'>face to face</option>"),
-	format("<option value='shortdistance'>short distance</option>"),
-	format("<option value='sidebyside'>side by side</option>"),
+	format("<option value='normal'"),
+	print_selected('normal', JoePass_Style),
+	format(">face to face</option>"),
+	format("<option value='shortdistance'"),
+	print_selected('shortdistance', JoePass_Style),
+	format(">short distance</option>"),
+	format("<option value='sidebyside'"),
+	print_selected('sidebyside', JoePass_Style),
+	format(">side by side</option>"),
+	format("<option value='backtoback'"),
+	print_selected('backtoback', JoePass_Style),
+	format(">back to back</option>"),
+	format("<option value='line'"),
+	print_selected('line', JoePass_Style),
+	format(">line</option>"),
+	format("<option value='dropbackline'"),
+	print_selected('dropbackline', JoePass_Style),
+	format(">drop back line</option>"),
+	format("<option value='none'"),
+	print_selected('none', JoePass_Style),
+	format(">&nbsp;</option>"),
+	format("</select>\n"),
+	format("&nbsp;"),
+	format("<select name='filename' size='1'>"),
+	format("<option value='joe'"),
+	print_selected('joe', JoePass_File),
+	format(">joe.pass</option>"),
+	format("<option value='numbers'"),
+	print_selected('numbers', JoePass_File),
+	format(">~w_~w.pass</option>", [NumberOfJugglers, FileName]),
 	format("</select>\n"),
 	format("&nbsp;"),
 	format("<input type='submit' value='go'>\n"),
 	format("</form>\n"),
 	format("</div>\n").
 	
+print_selected(Value, Value) :- nonvar(Value), format(" selected='selected'"), !.
+print_selected(_, _).
 	
 writeHiddenInfo(Pattern, NumberOfJugglers, SwapList, BackURL) :-
 	list_to_string(Pattern, PatternStr),
@@ -699,6 +720,9 @@ print_landing_time(ThrowingJuggler, Action) :-
 	shortPointInTime(Time, ShortTime),
 	format("<td class='info_pointintime'>~w</td>\n", [ShortTime]).
 print_landing_time(_, _).
+
+
+
 
 
 jugglerShown([], []) :- !.
