@@ -311,11 +311,11 @@ writePatternInfo(PatternWithShortPasses, PointsInTime, ActionList, NumberOfJuggl
 			NumberOfJugglersMinus is NumberOfJugglers - 1,
 			format("<tr>"),
 			format("<td class='info_lable'><a href="),
-			format_href(Pattern, NumberOfJugglersPlus, SwapList, BackURL),
+			format_href(PatternWithShortPasses, NumberOfJugglersPlus, SwapList, BackURL),
 			format(" class='small'>add</a>\n"),
 			format("&nbsp;|&nbsp;"),
 			format("<a href="),
-			format_href(Pattern, NumberOfJugglersMinus, SwapList, BackURL),
+			format_href(PatternWithShortPasses, NumberOfJugglersMinus, SwapList, BackURL),
 			format(" class='small'>sub</a>\n"),
 			format("<td colspan='~w'>&nbsp;</td>", [Period]),
 			format("</tr>")
@@ -386,7 +386,7 @@ writeJugglerInfo(Juggler, ActionList, SwapList, ClubDistribution, NumberOfJuggle
 		forall(member(Action, ActionList), print_throw_was(Juggler, Action, NumberOfJugglers, Period, Pattern)),
 		format("</tr>\n"),
 		format("<tr>\n"),
-		format("<td class='info_lable'>reacts to:</td>\n"),
+		format("<td class='info_lable'>caused by:</td>\n"),
 		forall(member(Action, ActionList), print_reacts_to(Juggler, Action, NumberOfJugglers, Period, Pattern)),
 		format("</tr>\n")
 		);

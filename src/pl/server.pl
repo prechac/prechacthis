@@ -5,16 +5,23 @@
 server(Port) :-
         http_server(http_dispatch, [port(Port)]).
 
-:- http_handler('/', myroot, []).
+:- http_handler('/', root, []).
 :- http_handler('/hello/world', hello_world, []).
 
 myroot(_Request) :- 
-	reply("Hallo Du").
+	format("Hello World").
 
 root(_Request) :-
-        reply_html_page([ title('Demo server')
+        reply_html_page([
+							title('Demo server')
                         ],
-                        [ p(a(href('hello/world'), hello))
+                        [
+							p(
+								a(
+									href('hello/world'), 
+									hello
+								)
+							)
                         ]).
 
 hello_world(_Request) :-
