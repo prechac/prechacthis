@@ -603,7 +603,7 @@ writeHiddenInfo(Pattern, NumberOfJugglers, SwapList, BackURL) :-
 	list_to_string(SwapList, SwapListStr),
 	flatten(Pattern, PatternFlat),
 	length(PatternFlat, NumberOfNumbers),
-	format("<form id='info_form'>\n"),
+	format("<form id='info_form' action='.' method='post'>\n"),
 	format("<input type='hidden' name='pattern' value='~s'>\n", [PatternStr]),
 	format("<input type='hidden' name='persons' value='~w'>\n", [NumberOfJugglers]),
 	format("<input type='hidden' name='swap' value='~s'>\n", [SwapListStr]),
