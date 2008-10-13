@@ -7,22 +7,22 @@ server(Port) :-
 
 :- http_handler('/', root, []).
 :- http_handler('/hello/world', hello_world, []).
-
-myroot(_Request) :- 
-	format("Hello World").
+:- http_handler('/reply/', reply, []).
 
 root(_Request) :-
-        reply_html_page([
-							title('Demo server')
-                        ],
-                        [
-							p(
-								a(
-									href('hello/world'), 
-									hello
-								)
-							)
-                        ]).
+	Body = p(
+		a(
+			href('reply'), 
+			hello
+		)
+	),
+	reply_html_page(
+	[
+		title('Demo server')
+	],
+	[
+		Body
+	]).
 
 hello_world(_Request) :-
         reply_html_page([ title('Hello World')

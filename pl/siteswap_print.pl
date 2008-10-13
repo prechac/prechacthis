@@ -1,5 +1,8 @@
 
 allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, MaxNumberOfResults, BackURL) :-
+   HrefType = html,
+   retractall(href_type(_)),
+   asserta(href_type(HrefType)),
    catch(
    (
       get_time(Start),
@@ -123,8 +126,9 @@ convertMultiplex([Throw | Rest], [Throw | RestNew], Space) :-
 writeSwap(ThrowsPM, Throws, Persons, BackURL) :-
    concat_atom(ThrowsPM, ' ', Swap),
    float_to_shortpass(Throws,ThrowsShort),
-   pattern_to_string(ThrowsShort, URLPattern),
-   format("<a href='./info.php?pattern=~s&persons=~w&back=~w'>~w</a><br>\n", [URLPattern,Persons,BackURL,Swap]),!.
+   format("<a href="),
+   format_href(ThrowsShort, Persons, [], BackURL),
+   format(">~w</a><br>\n", [Swap]),!.
 
 writePassingSwap(Throws, Persons, BackURL) :-
 	length(Throws, Length),
