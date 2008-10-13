@@ -401,7 +401,7 @@ writeClubsPerHand(HandShownLong, ClubsPerHand, Colspan) :-
 	format("<tr>\n"),
 	format("<td class='info_lable'>clubs in ~w hand:</td>\n", [HandShownLong]),	
 	format("<td class='info_clubs'>~w</td>\n", [ClubsPerHand]),
-	format("<td class='info_clubs' colspan=~w>&nbsp;</th>\n", [Colspan]),
+	format("<td class='info_clubs' colspan=~w>&nbsp;</td>\n", [Colspan]),
 	format("</tr>\n").
 
 writePattern(Pattern, PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL) :-
@@ -495,7 +495,9 @@ writeOrbitInfo(Pattern, PatternWithShortPasses, NumberOfJugglers, SwapList, Back
 	Colspan is Period,
 	averageNumberOfClubs(Pattern, AVClubs),
 	Clubs is AVClubs * NumberOfJugglers,
+	format("<tr>\n"),
 	format("<td class='info_title' colspan=~w>orbits</td><td class='info_right_info'>~w clubs</td><td>&nbsp;</td>\n", [Colspan, Clubs]),
+	format("</tr>\n"),
 	forall(member(Orbit, Orbits), writeThisOrbitInfo(OrbitPattern, Orbit, Pattern, NumberOfJugglers, PatternPM, SwapList, BackURL)),
 	format("</table>\n\n").
 	

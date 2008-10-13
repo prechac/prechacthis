@@ -12,6 +12,7 @@
 	<title>PrechacThis - Pattern Info</title>
 	<link rel="shortcut icon" href="./images/favicon.png">
 	<link rel="stylesheet" type="text/css" href="./css/prechacthis.css">
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 	<script type="text/javascript" src="./js/prototype/prototype.js"></script>
 	<script type="text/javascript" src="./js/scriptaculous/scriptaculous.js"></script>
 	<script type="text/javascript" src="./js/ajax.js"></script>
