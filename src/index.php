@@ -243,7 +243,7 @@ echo "<form action='./index.php' method='get'>
   </tr>
   <tr>
    <td class='lable'>&nbsp;</td>
-   <td class='input'><a href='./index.php?persons=2&objects=4%3B5&lengths=4%3B5%3B6&max=4&passesmin=1&passesmax=4&jugglerdoes=3+%283p+or+4p%29+or+3+%3Fp&exclude=0+and+1+1+and+2+2&clubdoes=%281+or+2%29+%281p+or+1.5p%29+or+%281p+or+1.5p%29+%281+or+2%29&react=2p+3+or+4p+4+or+3+1.5p&results=42&doku=on'>documented example</a></td>
+   <td class='input'><a href='./index.php?persons=2&amp;objects=4%3B5&amp;lengths=4%3B5%3B6&amp;max=4&amp;passesmin=1&amp;passesmax=4&amp;jugglerdoes=3+%283p+or+4p%29+or+3+%3Fp&amp;exclude=0+and+1+1+and+2+2&amp;clubdoes=%281+or+2%29+%281p+or+1.5p%29+or+%281p+or+1.5p%29+%281+or+2%29&amp;react=2p+3+or+4p+4+or+3+1.5p&amp;results=42&amp;doku=on'>documented example</a></td>
   </tr>
   <tr>
    <td class='lable'>&nbsp;</td>
@@ -261,7 +261,7 @@ echo "<form action='./index.php' method='get'>
 
 function correctPasses($passes){
 	if (!is_numeric($passes)){
-		return "_"; //pass to prolog as unspecified
+		return "_"; // pass to prolog as unspecified.
 	}
 	return $passes;
 }
