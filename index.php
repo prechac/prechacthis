@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>PrechacThis</title>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 	<link rel="shortcut icon" href="./images/favicon.png">
 	<link rel="stylesheet" type="text/css" href="./css/prechacthis.css">
 </head>
@@ -49,7 +50,7 @@ if ($_GET){
 	if (!$_GET["magic"]){$_GET["magic"] = 0;}
 	else {$magicChecked = "'checked'";}
 	
-	$back_url = rawurlencode($_SERVER["QUERY_STRING"]);
+	$back_url = rawurlencode(htmlspecialchars($_SERVER["QUERY_STRING"]));
 	
 	foreach($objects as $object){
 		foreach($lengths as $length){
@@ -123,16 +124,16 @@ echo "<form action='./index.php' method='get'>
    <td class='lable'>Jugglers:</td>
    <td class='input'>
     <select name='persons' size='1'>
-     <option $personsSelected[1]>1</option>
-     <option $personsSelected[2]>2</option>
-     <option $personsSelected[3]>3</option>
-     <option $personsSelected[4]>4</option>
-     <option $personsSelected[5]>5</option>
-     <option $personsSelected[6]>6</option>
-     <option $personsSelected[7]>7</option>
-     <option $personsSelected[8]>8</option>
-     <option $personsSelected[9]>9</option>
-     <option $personsSelected[10]>10</option>
+     <option value='1' $personsSelected[1]>1</option>
+     <option value='2' $personsSelected[2]>2</option>
+     <option value='3' $personsSelected[3]>3</option>
+     <option value='4' $personsSelected[4]>4</option>
+     <option value='5' $personsSelected[5]>5</option>
+     <option value='6' $personsSelected[6]>6</option>
+     <option value='7' $personsSelected[7]>7</option>
+     <option value='8' $personsSelected[8]>8</option>
+     <option value='9' $personsSelected[9]>9</option>
+     <option value='10' $personsSelected[10]>10</option>
     </select>
    </td>
    $doku[persons]
@@ -151,14 +152,14 @@ echo "<form action='./index.php' method='get'>
    <td class='lable'>Max height:</td>
    <td class='input'>
     <select name='max' size='1'>
-     <option $maxSelected[1]>1</option>
-     <option $maxSelected[2]>2</option>
-     <option $maxSelected[3]>3</option>
-     <option $maxSelected[4]>4</option>
-     <option $maxSelected[5]>5</option>
-     <option $maxSelected[6]>6</option>
-     <option $maxSelected[7]>7</option>
-     <option $maxSelected[8]>8</option>
+     <option value='1' $maxSelected[1]>1</option>
+     <option value='2' $maxSelected[2]>2</option>
+     <option value='3' $maxSelected[3]>3</option>
+     <option value='4' $maxSelected[4]>4</option>
+     <option value='5' $maxSelected[5]>5</option>
+     <option value='6' $maxSelected[6]>6</option>
+     <option value='7' $maxSelected[7]>7</option>
+     <option value='8' $maxSelected[8]>8</option>
     </select>
    </td>
    $doku[max]
@@ -168,27 +169,27 @@ echo "<form action='./index.php' method='get'>
    <td class='input'>
     min:
     <select name='passesmin' size='1'>
-     <option $minPassSelected[0]>0</option>
-     <option $minPassSelected[1]>1</option>
-     <option $minPassSelected[2]>2</option>
-     <option $minPassSelected[3]>3</option>
-     <option $minPassSelected[4]>4</option>
-     <option $minPassSelected[5]>5</option>
-     <option $minPassSelected[6]>6</option>
-     <option $minPassSelected[7]>7</option>
-     <option $minPassSelected[8]>8</option>
+     <option value='0' $minPassSelected[0]>0</option>
+     <option value='1' $minPassSelected[1]>1</option>
+     <option value='2' $minPassSelected[2]>2</option>
+     <option value='3' $minPassSelected[3]>3</option>
+     <option value='4' $minPassSelected[4]>4</option>
+     <option value='5' $minPassSelected[5]>5</option>
+     <option value='6' $minPassSelected[6]>6</option>
+     <option value='7' $minPassSelected[7]>7</option>
+     <option value='8' $minPassSelected[8]>8</option>
     </select>
     max:
     <select name='passesmax' size='1'>
-     <option $maxPassSelected[1]>1</option>
-     <option $maxPassSelected[2]>2</option>
-     <option $maxPassSelected[3]>3</option>
-     <option $maxPassSelected[4]>4</option>
-     <option $maxPassSelected[5]>5</option>
-     <option $maxPassSelected[6]>6</option>
-     <option $maxPassSelected[7]>7</option>
-     <option $maxPassSelected[8]>8</option>
-     <option $maxPassSelected[0]>&nbsp;</option>
+     <option value='1' $maxPassSelected[1]>1</option>
+     <option value='2' $maxPassSelected[2]>2</option>
+     <option value='3' $maxPassSelected[3]>3</option>
+     <option value='4' $maxPassSelected[4]>4</option>
+     <option value='5' $maxPassSelected[5]>5</option>
+     <option value='6' $maxPassSelected[6]>6</option>
+     <option value='7' $maxPassSelected[7]>7</option>
+     <option value='8' $maxPassSelected[8]>8</option>
+     <option value='_' $maxPassSelected[0]>&nbsp;</option>
     </select>
    </td>
   </tr>".
