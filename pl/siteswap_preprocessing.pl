@@ -2,6 +2,13 @@
 preprocessConstraint(ConstraintString, Period, NumberOfJugglers, MaxHeight, Constraint) :-
 	preprocessConstraint(ConstraintString, positiv, Period, NumberOfJugglers, MaxHeight, Constraint).
 	
+
+preprocessConstraint(ConstraintAtom, ConstraintType, Period, NumberOfJugglers, MaxHeight, Constraint) :-
+	atom(ConstraintAtom), !,
+	name(ConstraintAtom, ConstraintString),
+	preprocessConstraint(ConstraintString, ConstraintType, Period, NumberOfJugglers, MaxHeight, Constraint).
+	
+
 preprocessConstraint(ConstraintString, ConstraintType, Period, NumberOfJugglers, MaxHeight, Constraint) :-
 	string2Constraint(ConstraintString, ConstraintBagShort),
 	member(ConstraintShort, ConstraintBagShort),
@@ -49,6 +56,28 @@ calcThe2(Distance, MultiplexLength, The2) :-
 	Length is MultiplexLength - Distance + 1,
 	listOf(p(2,0,2), Length, The2).
 	
+% --- preprocess numbers --- %
+
+preprocess_number(Var, Var) :-
+	var(Var), !.
+preprocess_number(Number, Number) :-
+	number(Number), !.
+preprocess_number(Number, Number) :-
+	rational(Number), !.
+preprocess_number(Atom, Number) :-
+	atom(Atom),
+	atom_number(Atom, Number), !.
+preprocess_number(Constraint, Number) :-
+	string2Numbers(Constraint, ListOfNumbers),
+	member(Number, ListOfNumbers).
+
+
+string2Numbers(ConstraintString, Constraint) :-
+	(
+		dcg_n_Numbers(Constraint, ConstraintString, []);
+		throw(constraint_unclear)
+	),!.
+
 
 
 %%% --- short passes ---

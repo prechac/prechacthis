@@ -1,11 +1,13 @@
 
-allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, MaxNumberOfResults, BackURL) :-
+allSiteswaps(PersonsPre, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, MaxNumberOfResultsPre, BackURL) :-
    HrefType = html,
    retractall(href_type(_)),
    asserta(href_type(HrefType)),
    catch(
    (
       get_time(Start),
+      preprocess_number(MaxNumberOfResultsPre, MaxNumberOfResults),
+      preprocess_number(PersonsPre, Persons),
       findAtMostNUnique(Throws, 
          siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic),
          MaxNumberOfResults, 
@@ -24,22 +26,16 @@ allSiteswaps(Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, Pass
       ),
       get_time(End),
       Time is End - Start,
-      format("<p class='time'>(~w seconds)</p>\n", [Time]),
+      format("<p class='time'>(~w seconds)</p>\n", [Time]),	
       forall(member(T, Swaps),  writePassingSwap(T, Persons, BackURL))
    ),
-   Exception,
-   print_exception(Exception)
+   constraint_unclear(Constraint),
+   print_exception(Constraint)
    ).
 
-print_exception(constraint_unclear(Constraint)) :-
+print_exception(Constraint) :-
   format("<p class='exception'>Sorry, your constraint ~w is unclear.</p>", [Constraint]),
   !,fail.
-print_exception(constraint_unclear) :-
-  format("<p class='exception'>Sorry, your constraints are unclear.</p>"),
-  !,fail.
-print_exception(Exception) :-
-	format(Exception),
-	!,fail.
 
 
 convertP(Throws, ThrowsP, Length, Persons) :-
