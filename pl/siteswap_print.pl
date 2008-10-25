@@ -1,37 +1,5 @@
 
-allSiteswaps(PersonsPre, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, MaxNumberOfResultsPre, BackURL) :-
-   HrefType = html,
-   retractall(href_type(_)),
-   asserta(href_type(HrefType)),
-   catch(
-   (
-      get_time(Start),
-      preprocess_number(MaxNumberOfResultsPre, MaxNumberOfResults),
-      preprocess_number(PersonsPre, Persons),
-      findAtMostNUnique(Throws, 
-         siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic),
-         MaxNumberOfResults, 
-         Bag,
-         Flag
-      ),
-      !,
-      sortListOfSiteswaps(Bag,Swaps),
-      length(Swaps, NumberOfResults),
-      (Flag = some -> 
-         format("<p class='some'>Just a selection of patterns is shown!</p>");
-         (NumberOfResults is 1 ->	
-            format("<p class='all'>The only possible pattern has been found!</p>");
-            format("<p class='all'>All ~w patterns have been found!</p>", [NumberOfResults])
-         )		
-      ),
-      get_time(End),
-      Time is End - Start,
-      format("<p class='time'>(~w seconds)</p>\n", [Time]),	
-      forall(member(T, Swaps),  writePassingSwap(T, Persons, BackURL))
-   ),
-   constraint_unclear(Constraint),
-   print_exception(Constraint)
-   ).
+
 
 print_exception(Constraint) :-
   format("<p class='exception'>Sorry, your constraint ~w is unclear.</p>", [Constraint]),
@@ -126,13 +94,77 @@ writeSwap(ThrowsPM, Throws, Persons, BackURL) :-
    format_href(ThrowsShort, Persons, [], BackURL),
    format(">~w</a><br>\n", [Swap]),!.
 
-writePassingSwap(Throws, Persons, BackURL) :-
-	length(Throws, Length),
-	magicPositions(Throws, Persons, MagicPositions),
-    convertP(Throws, ThrowsP, Length, Persons),
-	convertMagic(ThrowsP, MagicPositions, ThrowsPM),
-	convertMultiplex(ThrowsPM,ThrowsPMM),
-    writeSwap(ThrowsPMM, Throws, Persons, BackURL).
+
+mainPage_list_of_siteswaps([], _Persons, _BackURL) -->
+	[],!.
+mainPage_list_of_siteswaps([Siteswap|Siteswaps], Persons, BackURL) -->	
+	mainPage_siteswap_link(Siteswap, Persons, BackURL),
+	mainPage_list_of_siteswaps(Siteswaps, Persons, BackURL).
+
+mainPage_siteswap_link(Throws, Persons, BackURL) -->
+	{
+		length(Throws, Length),
+		float_to_shortpass(Throws, ThrowsShort)
+		%magicPositions(Throws, Persons, MagicPositions)
+	},	
+	html([
+		p([],[
+			\html_href(ThrowsShort, Persons, [], BackURL, [], \mainPage_siteswap(ThrowsShort, Length, Persons, []))
+		])
+	]).
+    %convertP(Throws, ThrowsP, Length, Persons),
+	%convertMagic(ThrowsP, MagicPositions, ThrowsPM),
+	%convertMultiplex(ThrowsPM,ThrowsPMM),
+    %writeSwap(ThrowsPMM, Throws, Persons, BackURL).
+
+mainPage_siteswap([], _Length, _Persons, _MagicPositions) --> [],!.
+mainPage_siteswap([Throw], Length, Persons, MagicPositions) -->
+	{
+		Position is Length - 1, !
+	},
+	html_throw(Throw, Position, Length, Persons, MagicPositions, relative),!.
+mainPage_siteswap([Throw|RestThrows], Length, Persons, MagicPositions) -->
+	{
+		length(RestThrows, RestLength),
+		Position is Length - RestLength - 1
+	},
+	html_throw(Throw, Position, Length, Persons, MagicPositions, relative),
+	html(&(nbsp)),
+	mainPage_siteswap(RestThrows, Length, Persons, MagicPositions).
+	
+	
+html_throw(Throw, _Position, _Length, _Persons, _MagicPositions, _ThrowingJuggler) -->
+	{
+		is_list(Throw), !
+	},
+	html('multiplex').
+html_throw(Throw, _Position, _Length, Persons, _MagicPositions, ThrowingJuggler) -->
+	html_throw_Content(Throw, Persons, ThrowingJuggler).
+	
+
+html_throw_Content(p(Throw, 0, _Origen), _Persons, _ThrowingJuggler) -->
+	html(Throw), !.
+html_throw_Content(p(Throw, _Index, _Origen), Persons, _ThrowingJuggler) -->
+	{
+		number(Persons),
+		Persons < 3, !,
+		float_to_shortpass(Throw, ThrowShort),
+		a2Atom(ThrowShort, ThrowAtom)
+	},
+	html([ThrowAtom, 'p']).
+html_throw_Content(p(Throw, Index, _Origen), Persons, ThrowingJuggler) -->
+	{
+		number(ThrowingJuggler), !,
+		CatchingJuggler is (ThrowingJuggler + Index) mod Persons,
+		jugglerShown(CatchingJuggler, PrintIndex),
+		float_to_shortpass(Throw, ThrowShort),
+		a2Atom(ThrowShort, ThrowAtom)
+	},
+	html([ThrowAtom, 'p', sub([], [PrintIndex])]).
+
+
+
+%%  4 <span class='magic' title='it&#39;s&nbsp;magic'><span class='equi'>2p</span></span> 0 <span class='magic' title='it&#39;s&nbsp;magic'><span class='equi'>2p</span></span>
 
 writeCompletedSiteswap(Pattern, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, BackURL) :-
    siteswap(Throws, Persons, Objects, Length, Max, NumberOfMultiplexes, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React),

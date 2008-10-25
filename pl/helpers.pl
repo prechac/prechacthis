@@ -510,3 +510,46 @@ keysort(List, Keys, Sorted) :-
 keys([], [], []) :- !.
 keys([Head|Tail], [Key|Keys], [Key-Head|TailWithKeys]) :-
 	keys(Tail, Keys, TailWithKeys).
+
+
+
+%%% convert types %%%
+
+a2Number(Number, Number) :- 
+	number(Number), !.
+a2Number(Atom, Number) :-
+	atom(Atom), !,
+	atom_number(Atom, Number).
+a2Number(String, Number) :-
+	string(String), !,
+	string_to_atom(String, Atom),
+	atom_number(Atom, Number).
+
+a2Atom(List, Atom) :-
+	is_list(List), !,
+	a2Atom_list(List, ListOfAtoms),
+	concat_atom(ListOfAtoms, ',', InnerAtom),
+	format(atom(Atom), "[~w]", [InnerAtom]).
+a2Atom(Atom, Atom) :-
+	atom(Atom), !.
+a2Atom(Number, Atom) :-
+	number(Number), !,
+	atom_number(Atom, Number).
+a2Atom(String, Atom) :-
+	string(String), !,
+	string_to_atom(String, Atom).
+	
+a2Atom_list([], []) :- !.
+a2Atom_list([A|List], [Atom|ListOfAtoms]) :-
+	a2Atom(A, Atom),
+	a2Atom_list(List, ListOfAtoms).
+
+a2String(String, String) :-
+	string(String), !.
+a2String(Atom, String) :-
+	atom(Atom), !,
+	string_to_atom(String, Atom).
+a2String(Number, String) :-
+	number(Number), !,
+	format(string(String), "~w", [Number]).
+	

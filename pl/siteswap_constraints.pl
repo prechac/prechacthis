@@ -1,5 +1,5 @@
 
-siteswap(OutputPattern, NumberOfJugglersPre, ObjectsPre, LengthPre, MaxHeightPre, _NumberOfMultiplexes, PassesMinPre, PassesMaxPre, ContainString, DontContainString, ClubDoesString, ReactString, ContainMagicPre) :-
+siteswap(OutputPattern, NumberOfJugglersPre, ObjectsPre, LengthPre, MaxHeightPre, PassesMinPre, PassesMaxPre, ContainString, DontContainString, ClubDoesString, ReactString, ContainMagicPre) :-
 	preprocess_number(NumberOfJugglersPre, NumberOfJugglers),
 	preprocess_number(ObjectsPre, Objects),
 	preprocess_number(LengthPre, Length),

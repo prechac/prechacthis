@@ -6,6 +6,7 @@
 :- [html_helpers].
 :- [html_main_page].
 :- [html_info_page].
+:- [siteswap].
 
 
 server(Port) :-
@@ -17,10 +18,14 @@ server_reload(Port) :-
 	
 
 % ------ pages ------ %
+
+http_main_page_path('/list').
+http_info_page_path('/info').
+
+:- http_main_page_path(Path), http_handler(Path, main_page, []).
+:- http_info_page_path(Path), http_handler(Path, info_page, []).
 :- http_handler('/', main_page, []).
-:- http_handler('/list', main_page, []).
 :- http_handler('/index.php', main_page, []).
-:- http_handler('/info', info_page, []).
 :- http_handler('/info.php', info_page, []).
 
 
@@ -33,7 +38,7 @@ file_search_path(css, Path) :-
 	server_location(ServerPath),
 	atom_concat(ServerPath, '/css', Path).
 	
-:- http_handler(prefix('/css/'), serve_css, []).
+:- http_handler('/css/', serve_css, [prefix]).
 
 serve_css(Request) :-
 	memberchk(path(Path), Request),
@@ -49,7 +54,7 @@ file_search_path(images, Path) :-
 		server_location(ServerPath),
 		atom_concat(ServerPath, '/images', Path).
 
-:- http_handler(prefix('/images/'), serve_images, []).
+:- http_handler('/images/', serve_images, [prefix]).
 
 serve_images(Request) :-
 	memberchk(path(Path), Request),
@@ -65,7 +70,7 @@ file_search_path(js, Path) :-
 			server_location(ServerPath),
 			atom_concat(ServerPath, '/js', Path).
 
-:- http_handler(prefix('/js/'), serve_js, []).
+:- http_handler('/js/', serve_js, [prefix]).
 
 serve_js(Request) :-
 	memberchk(path(Path), Request),
