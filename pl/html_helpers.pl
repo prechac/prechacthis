@@ -5,10 +5,9 @@ html_numbered_option([Value|List], Selected) -->
 	html_numbered_option(List, Selected).
 html_numbered_option(Value, Selected) -->
 	{
-		number(Value),
-		term_to_atom(Value, ValueA)
+		number(Value)
 	},
-	html_option(ValueA, Selected, ValueA).
+	html_option(Value, Selected, Value).
 
 html_numbered_options(Min, Max, Selected) -->
 	{
@@ -20,7 +19,9 @@ html_numbered_options(Min, Max, Selected) -->
 html_option(Value, Selected, Text) -->
 	{
 		nonvar(Selected),
-		Value = Selected, !
+		a2Atom(Value, ValueA),
+		a2Atom(Selected, SelectedA),
+		ValueA = SelectedA, !
 	},
 	html(option([value(Value), selected(selected)],[Text])).
 html_option(Value, _Selected, Text) -->
@@ -30,11 +31,22 @@ html_option(Value, _Selected, Text) -->
 html_checkbox(Value, Name, Checked) -->
 	{
 		nonvar(Checked),
-		Value = Checked, !
+		a2Atom(Value, ValueA),
+		a2Atom(Checked, CheckedA),
+		ValueA = CheckedA, !
 	},
 	html(input([type(checkbox), name(Name), value(Value), checked(checked)])).
 html_checkbox(Value, Name, _Checked) -->
 	html(input([type(checkbox), name(Name), value(Value)])).
+
+
+%html_wrap_in_spans([], Content) -->
+%	html(Content), !.
+%html_wrap_in_spans([Attributes|ListOfAttributes], Content) -->
+%	html(
+%		span([Attributes],[\html_wrap_in_spans(ListOfAttributes, Content)])
+%	).
+
 
 
 css(URL) -->
@@ -48,11 +60,22 @@ css(URL) -->
 
 
 js_script(URL) -->
-	html_post(head, script([ 
-		src(URL),
-		type('text/javascript')
+	html_post(head, 
+		script([ 
+			src(URL),
+			type('text/javascript')
 		], [])
 	).
+
+ajax_script -->
+	{
+		href_type(ajax), !
+	},
+	js_script('./js/ajax.js').
+ajax_script -->
+	[].
+
+
 
 
 

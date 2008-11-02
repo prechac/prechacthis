@@ -1,5 +1,4 @@
 
-
 main_page(Request) :-
 	http_main_page_path(MainPagePath),
 	html_set_options([
@@ -10,31 +9,44 @@ main_page(Request) :-
 	http_parameters(
 		Request,
 		[ 
-			persons(Persons, [default('2')]),
-			objects(Objects, [default('')]),
-			period(Period, [default('')]),
-			max(Max, [default('4')]),
-			passesmin(PassesMin, [default('1')]),
-			passesmax(PassesMax, [default('-1')]),
-			contain(Contain, [default('')]),
-			exclude(Exclude, [default('')]),
-			clubdoes(ClubDoes, [default('')]),
-			react(React, [default('')]),
-			magic(Magic, [default('0')]),
-			results(Results, [default('42')]),
-			hreftype(HrefType, [default('html')])
+			persons(ReqPersons, [integer, default(2)]),
+			objects(ReqObjects, [default('')]),
+			period(ReqPeriod, [default('')]),
+			max(ReqMax, [integer, default(4)]),
+			passesmin(ReqPassesMin, [integer, default(1)]),
+			passesmax(ReqPassesMax, [integer, default(-1)]),
+			contain(ReqContain, [default('')]),
+			exclude(ReqExclude, [default('')]),
+			clubdoes(ReqClubDoes, [default('')]),
+			react(ReqReact, [default('')]),
+			magic(ReqMagic, [integer, default(0)]),
+			results(ReqResults, [integer, default(42)])
+			%hreftype(ReqHrefType, [default('html')])
 		]
 	),
 	retractall(href_type(_)),
-	asserta(href_type(HrefType)),
-	preprocess_number(Persons, PersonsN),
-	%atom_number(Objects, ObjectsN),
-	%atom_number(Period, PeriodN),
+	%asserta(href_type(ReqHrefType)),
+	(a2Number(ReqPassesMax, -1) -> ReqPassesMaxVar = _Var; ReqPassesMaxVar = ReqPassesMax),
 	(
 		(
 			memberchk(path(MainPagePath), Request),
 			get_time(Start),
-			find_siteswaps(Siteswaps, Flag, Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Exclude, ClubDoes, React, Magic, Results),
+			find_siteswaps(
+				Siteswaps,
+				Flag,
+				ReqPersons,
+				ReqObjects,
+				ReqPeriod,
+				ReqMax,
+				ReqPassesMin,
+				ReqPassesMaxVar,
+				ReqContain,
+				ReqExclude,
+				ReqClubDoes,
+				ReqReact,
+				ReqMagic,
+				ReqResults
+			),
 			get_time(End),
 			Time is End - Start
 		);
@@ -46,10 +58,96 @@ main_page(Request) :-
 			meta(['http-equiv'('Content-Type'), content('text/html;charset=utf-8')]),
 			link([type('text/css'), rel('stylesheet'), href('./css/prechacthis.css')]),
 			link([rel('shortcut icon'), href('./images/favicon.png')])
-			
+			%\ajax_script
 		],
 		[
-			\mainPage_all_lists_of_siteswaps(Siteswaps, Flag, Request, PersonsN, Objects, Period, Time),
+			\mainPage_all_lists_of_siteswaps(
+				Siteswaps, 
+				Flag, 
+				Request, 
+				ReqPersons, 
+				ReqObjects, 
+				ReqPeriod, 
+				Time
+			),
+			\mainPage_form(
+				MainPagePath,
+				ReqPersons, 
+				ReqObjects, 
+				ReqPeriod, 
+				ReqMax, 
+				ReqPassesMin, 
+				ReqPassesMax, 
+				ReqContain, 
+				ReqExclude, 
+				ReqClubDoes, 
+				ReqReact, 
+				ReqMagic, 
+				ReqResults
+			)
+		]
+	).
+	
+	
+	
+	find_siteswaps(Siteswaps, Flag, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, Results) :-
+		findAtMostNUnique(Throws, 
+		   siteswap(Throws, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic),
+		   Results, 
+		   Bag,
+		   Flag
+		),
+		!,
+		sortListOfSiteswaps(Bag, Siteswaps).
+	
+	
+	
+	mainPage_all_lists_of_siteswaps(Siteswaps, Flag, Request, Persons, Objects, Period, Time) -->
+		{
+			http_main_page_path(MainPagePath),
+			memberchk(path(MainPagePath), Request),!,
+			length(Siteswaps, NumberOfResults),
+			(Flag = some -> 
+				HowMany = p([class(some)],['Just a selection of patterns is shown!']);
+				(NumberOfResults is 1 ->	
+					HowMany = p([class(all)],['The only possible pattern has been found!']);
+					HowMany = p([class(all)],['All ', NumberOfResults, ' patterns have been found!'])
+				)		
+			),
+			memberchk(search(BackURLSearchList), Request),
+			parse_url_search(BackURLSearch, BackURLSearchList),
+			format(atom(BackURL), ".~w?~s", [MainPagePath, BackURLSearch])
+		},
+		html(
+			table([align(center), cellpadding(0)],[
+				tr([],[
+					td([],[
+						div([class(inline)],[
+							div([class(swaps)],[
+								h2([],[
+									Persons,
+									' Jugglers'
+								]),
+								h3([],[
+									Objects, 
+									' objects, period ', 
+									Period
+								]),
+								HowMany,
+								p([class(time)],['(', Time, ' seconds)']),
+								\mainPage_list_of_siteswaps(Siteswaps, Persons, BackURL)
+							])
+						])
+					])
+				])
+			])
+		).
+	mainPage_all_lists_of_siteswaps(_Siteswaps, _Flag, _Request, _Persons, _Objects, _Period, _Time) -->
+		[].
+		
+		
+	mainPage_form(MainPagePath, Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Exclude, ClubDoes, React, Magic, Results) -->
+		html(
 			form([action(MainPagePath), method(get)],[
 				table([class(form_table), align(center), cellpadding(0)],[
 					tr([],[
@@ -76,7 +174,7 @@ main_page(Request) :-
 						]),
 						td([class(input)],[
 							input([type(text), name(period), value(Period)])
-				
+			
 						])
 					]),
 					tr([],[
@@ -176,66 +274,8 @@ main_page(Request) :-
 					])
 				])
 			])
-		]
-	).
-	
-	find_siteswaps(Siteswaps, Flag, PersonsPre, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, MaxNumberOfResultsPre) :-
-		preprocess_number(MaxNumberOfResultsPre, MaxNumberOfResults),
-		preprocess_number(PersonsPre, Persons),
-		findAtMostNUnique(Throws, 
-		   siteswap(Throws, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic),
-		   MaxNumberOfResults, 
-		   Bag,
-		   Flag
-		),
-		!,
-		sortListOfSiteswaps(Bag, Siteswaps).
-	
-	
-	
-	mainPage_all_lists_of_siteswaps(Siteswaps, Flag, Request, Persons, Objects, Period, Time) -->
-		{
-			http_main_page_path(MainPagePath),
-			memberchk(path(MainPagePath), Request),!,
-			length(Siteswaps, NumberOfResults),
-			(Flag = some -> 
-				HowMany = p([class(some)],['Just a selection of patterns is shown!']);
-				(NumberOfResults is 1 ->	
-					HowMany = p([class(all)],['The only possible pattern has been found!']);
-					HowMany = p([class(all)],['All ', NumberOfResults, ' patterns have been found!'])
-				)		
-			),
-			memberchk(search(BackURLSearch), Request)
-			%concat_atom([_,URIDec], MainPagePath, BackURLDec),
-			%www_form_encode(URIDec, BackURLEnc)
-		},
-		html(
-			table([align(center), cellpadding(0)],[
-				tr([],[
-					td([],[
-						div([class(inline)],[
-							div([class(swaps)],[
-								h2([],[
-									Persons,
-									' Jugglers'
-								]),
-								h3([],[
-									Objects, 
-									' objects, period ', 
-									Period
-								]),
-								HowMany,
-								p([class(time)],['(', Time, ' seconds)']),
-								\mainPage_list_of_siteswaps(Siteswaps, Persons, BackURLSearch)
-							])
-						])
-					])
-				])
-			])
-		).
-	mainPage_all_lists_of_siteswaps(_Siteswaps, _Flag, _Request, _Persons, _Objects, _Period, _Time) -->
-		[].
-	
+		).	
+
 		
 mainPage_form_tr(Lable, Input) -->
 	html(

@@ -10,29 +10,29 @@ html_href(Href, Attributes, Content) -->
 
 html_href(Href, Attributes, Content, ajax) -->
 	{
-		concat_atom(['javascript:loadContent(', Href, ');'], '', JSHref)
+		concat_atom(['javascript:loadContent("', Href, '");'], '', JSHref)
 	},
 	html_href(JSHref, Attributes, Content, html).
 html_href(Href, Attributes, Content, html) -->
 	html(a([href(Href)|Attributes], Content)).
 
 
-html_href(Pattern, NumberOfJugglers, SwapList, BackURL, Attributes, Content) -->
+html_href(Pattern, Persons, SwapList, BackURL, Attributes, Content) -->
 	{
-	%	www_form_encode(Pattern, PatternEnc),
-		a2Atom(NumberOfJugglers, NumberOfJugglersA),
-		www_form_encode_all(NumberOfJugglersA, NumberOfJugglersEnc)
-	%	www_form_encode(SwapList, SwapListEnc),
-	%	www_form_encode(BackURL, BackURLEnc)
-	%	parse_url_search(Search, [pattern(PatternEnc), persons(NumberOfJugglersEnc), swap(SwapListEnc), back(BackURLEnc)]),
-	%	http_info_page_path(Path),
-	%	concat_atom(['.', Path, '?', Search], Href)
+		float_to_shortpass(Pattern, PatternShort),
+		www_form_encode_all(PatternShort, PatternEnc),	
+		www_form_encode_all(Persons, PersonsEnc),
+		www_form_encode_all(SwapList, SwapListEnc),
+		www_form_encode_all(BackURL, BackURLEnc),
+		parse_url_search(Search, [pattern(PatternEnc), persons(PersonsEnc), swap(SwapListEnc), back(BackURLEnc)]),
+		http_info_page_path(Path),
+		format(atom(Href), ".~w?~s", [Path, Search])
 	},
-	html_href(NumberOfJugglersEnc, Attributes, Content).
+	html_href(Href, Attributes, Content).
 
 www_form_encode_all(Decoded, Encoded) :-
-	atom(Decoded), !,
-	www_form_encode(Decoded, Encoded).
+	a2Atom(Decoded, DecodedAtom),
+	www_form_encode(DecodedAtom, Encoded).
 
 
 format_href(Href) :-
@@ -46,10 +46,10 @@ format_href(Href, ajax) :-
 format_href(Href, html) :-
 	format("'~w'", [Href]).
 	
-format_href(Pattern, NumberOfJugglers, SwapList, BackURL) :-
+format_href(Pattern, Persons, SwapList, BackURL) :-
 	a2Atom(Pattern, PatternStr),
 	a2Atom(SwapList, SwapListStr),
-	format(atom(Href), "./info.php?pattern=~w&amp;persons=~w&amp;swap=~w&amp;back=~w", [PatternStr, NumberOfJugglers, SwapListStr, BackURL]),
+	format(atom(Href), "./info.php?pattern=~w&amp;persons=~w&amp;swap=~w&amp;back=~w", [PatternStr, Persons, SwapListStr, BackURL]),
 	format_href(Href).
 	
 	

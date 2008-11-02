@@ -186,10 +186,29 @@ th {
 	white-space: nowrap;
 }
 
+
+
+
 .info_bigSwap_table {
 	margin: 4ex 0 4ex 0;
 	white-space: nowrap;
 }
+
+td.bigSwap {
+	margin: 0;
+	padding: 0 0.3em 0 0.3em;
+	vertical-align: top;
+	text-align: center;
+	font-family: 'Courier New', Courier, monospace !important;
+	font-weight: bold;
+	font-size: 300%;
+	white-space: nowrap;
+	border: 0px dotted black;
+}
+
+
+
+
 .info_juggler_table {
 	display: inline;
 }
@@ -270,22 +289,6 @@ td.info_title {
 	text-align: right !important;
 }
 
-h1.big_swap {
-	text-align: center;
-	font-family: 'Courier New', Courier, monospace !important;
-	font-weight: bold;
-	font-size: 300%;
-	white-space: nowrap;
-	margin: 0;
-	padding: 0;
-	white-space: nowrap;
-}
-td.big_swap {
-	margin: 0;
-	padding: 0 1em 0 1em;
-	vertical-align: top;
-	text-align: center;
-}
 
 .info_orbits {
 	text-align: center;

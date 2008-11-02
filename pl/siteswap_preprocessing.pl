@@ -403,6 +403,9 @@ dcg_plus -->
 
 dcg_minus -->
 	"-".
+	
+dcg_comma -->
+	",".
 
 dcg_p -->
 	"p".

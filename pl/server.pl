@@ -21,12 +21,15 @@ server_reload(Port) :-
 
 http_main_page_path('/list').
 http_info_page_path('/info').
+http_joepass_page_path('/joe.pass').
 
 :- http_main_page_path(Path), http_handler(Path, main_page, []).
 :- http_info_page_path(Path), http_handler(Path, info_page, []).
+:- http_joepass_page_path(Path), http_handler(Path, joepass_page, []).
 :- http_handler('/', main_page, []).
 :- http_handler('/index.php', main_page, []).
 :- http_handler('/info.php', info_page, []).
+:- http_handler('/joepass.php', joepass_page, []).
 
 
 % ------ files ------ %

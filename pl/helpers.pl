@@ -525,11 +525,6 @@ a2Number(String, Number) :-
 	string_to_atom(String, Atom),
 	atom_number(Atom, Number).
 
-a2Atom(List, Atom) :-
-	is_list(List), !,
-	a2Atom_list(List, ListOfAtoms),
-	concat_atom(ListOfAtoms, ',', InnerAtom),
-	format(atom(Atom), "[~w]", [InnerAtom]).
 a2Atom(Atom, Atom) :-
 	atom(Atom), !.
 a2Atom(Number, Atom) :-
@@ -538,6 +533,13 @@ a2Atom(Number, Atom) :-
 a2Atom(String, Atom) :-
 	string(String), !,
 	string_to_atom(String, Atom).
+a2Atom(List, Atom) :-
+	is_list(List), !,
+	a2Atom_list(List, ListOfAtoms),
+	concat_atom(ListOfAtoms, ',', InnerAtom),
+	format(atom(Atom), "[~w]", [InnerAtom]).
+a2Atom(X, Atom) :-
+	format(atom(Atom), "~w", [X]).
 	
 a2Atom_list([], []) :- !.
 a2Atom_list([A|List], [Atom|ListOfAtoms]) :-
@@ -546,10 +548,6 @@ a2Atom_list([A|List], [Atom|ListOfAtoms]) :-
 
 a2String(String, String) :-
 	string(String), !.
-a2String(Atom, String) :-
-	atom(Atom), !,
-	string_to_atom(String, Atom).
-a2String(Number, String) :-
-	number(Number), !,
-	format(string(String), "~w", [Number]).
+a2String(X, String) :-
+	format(string(String), "~w", [X]).
 	

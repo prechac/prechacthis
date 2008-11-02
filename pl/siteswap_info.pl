@@ -792,17 +792,17 @@ handShown([], [], _, []) :- !.
 handShown([Juggler|Jugglers], [Hand|Hands], SwapList, [Shown|ShownList]) :-
 	handShown(Juggler, Hand, SwapList, Shown),
 	handShown(Jugglers, Hands, SwapList, ShownList).
-handShown(Juggler, a, SwapList, l) :-
+handShown(Juggler, a, SwapList, 'L') :-
 	member(Juggler, SwapList), !.
-handShown(Juggler, a, SwapList, r) :-	
+handShown(Juggler, a, SwapList, 'R') :-	
 	not(member(Juggler, SwapList)), !.
-handShown(Juggler, b, SwapList, r) :-
+handShown(Juggler, b, SwapList, 'R') :-
 	member(Juggler, SwapList), !.
-handShown(Juggler, b, SwapList, l) :- 
+handShown(Juggler, b, SwapList, 'L') :- 
 	not(member(Juggler, SwapList)), !.
 
-handShownLong(r, right) :- !.
-handShownLong(l, left) :- !.
+handShownLong('R', right) :- !.
+handShownLong('L', left) :- !.
 
 format_list(List) :- format_list(List, w).
 
