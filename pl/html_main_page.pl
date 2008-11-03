@@ -30,10 +30,8 @@ main_page(Request) :-
 	(
 		(
 			memberchk(path(MainPagePath), Request),
-			get_time(Start),
-			find_siteswaps(
-				Siteswaps,
-				Flag,
+			find_siteswap_lists(
+				SiteswapLists,
 				ReqPersons,
 				ReqObjects,
 				ReqPeriod,
@@ -46,9 +44,7 @@ main_page(Request) :-
 				ReqReact,
 				ReqMagic,
 				ReqResults
-			),
-			get_time(End),
-			Time is End - Start
+			)
 		);
 		true
 	),
@@ -62,13 +58,9 @@ main_page(Request) :-
 		],
 		[
 			\mainPage_all_lists_of_siteswaps(
-				Siteswaps, 
-				Flag, 
+				SiteswapLists, 
 				Request, 
-				ReqPersons, 
-				ReqObjects, 
-				ReqPeriod, 
-				Time
+				ReqPersons
 			),
 			\mainPage_form(
 				MainPagePath,
@@ -89,202 +81,235 @@ main_page(Request) :-
 	).
 	
 	
-	
-	find_siteswaps(Siteswaps, Flag, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, Results) :-
-		findAtMostNUnique(Throws, 
-		   siteswap(Throws, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic),
-		   Results, 
-		   Bag,
-		   Flag
+
+find_siteswap_lists(SiteswapLists, PersonsInt, ObjectsAtom, LengthAtom, MaxInt, PassesMinInt, PassesMaxInt, ContainAtom, DontContainAtom, ClubDoesAtom, ReactAtom, MagicInt, ResultsInt) :-
+	name(ContainAtom, ContainList),
+	name(DontContainAtom, DontContainList),
+	name(ClubDoesAtom, ClubDoesList),
+	name(ReactAtom, ReactList),
+	findall(
+		Siteswaps,
+		(
+			preprocess_number(ObjectsAtom, ObjectsInt),
+			preprocess_number(LengthAtom, LengthInt),
+			find_siteswaps(Siteswaps, PersonsInt, ObjectsInt, LengthInt, MaxInt, PassesMinInt, PassesMaxInt, ContainList, DontContainList, ClubDoesList, ReactList, MagicInt, ResultsInt)
 		),
-		!,
-		sortListOfSiteswaps(Bag, Siteswaps).
-	
-	
-	
-	mainPage_all_lists_of_siteswaps(Siteswaps, Flag, Request, Persons, Objects, Period, Time) -->
-		{
-			http_main_page_path(MainPagePath),
-			memberchk(path(MainPagePath), Request),!,
-			length(Siteswaps, NumberOfResults),
-			(Flag = some -> 
-				HowMany = p([class(some)],['Just a selection of patterns is shown!']);
-				(NumberOfResults is 1 ->	
-					HowMany = p([class(all)],['The only possible pattern has been found!']);
-					HowMany = p([class(all)],['All ', NumberOfResults, ' patterns have been found!'])
-				)		
-			),
-			memberchk(search(BackURLSearchList), Request),
-			parse_url_search(BackURLSearch, BackURLSearchList),
-			format(atom(BackURL), ".~w?~s", [MainPagePath, BackURLSearch])
-		},
-		html(
-			table([align(center), cellpadding(0)],[
-				tr([],[
-					td([],[
-						div([class(inline)],[
-							div([class(swaps)],[
-								h2([],[
-									Persons,
-									' Jugglers'
-								]),
-								h3([],[
-									Objects, 
-									' objects, period ', 
-									Period
-								]),
-								HowMany,
-								p([class(time)],['(', Time, ' seconds)']),
-								\mainPage_list_of_siteswaps(Siteswaps, Persons, BackURL)
-							])
-						])
-					])
+		SiteswapLists
+	).
+
+
+find_siteswaps(SiteswapList, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, Results) :-
+	get_time(Start),
+	findAtMostNUnique(Throws, 
+	   siteswap(Throws, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic),
+	   Results, 
+	   Bag,
+	   Flag
+	),
+	length(Bag, NumberOfSiteswaps),
+	NumberOfSiteswaps > 0, !,
+	sortListOfSiteswaps(Bag, Siteswaps),
+	get_time(End),
+	Time is End - Start,
+	SiteswapList = [
+		flag(Flag),
+		time(Time),
+		objects(Objects), 
+		length(Length),
+		siteswaps(Siteswaps)
+	].
+
+
+
+mainPage_all_lists_of_siteswaps(SiteswapLists, Request, Persons) -->
+	{
+		
+		http_main_page_path(MainPagePath),
+		memberchk(path(MainPagePath), Request)
+	},
+	html(
+		table([align(center), cellpadding(0)],[
+			tr([],[
+				td([],[
+					h2([],[
+						Persons,
+						' Jugglers'
+					]),
+					\mainPage_walk_list_of_siteswapLists(SiteswapLists, Request, Persons)
 				])
 			])
-		).
-	mainPage_all_lists_of_siteswaps(_Siteswaps, _Flag, _Request, _Persons, _Objects, _Period, _Time) -->
-		[].
+		])
+	).
+mainPage_all_lists_of_siteswaps(_Siteswaps, _Request, _Persons) -->
+	[].		
+
+mainPage_walk_list_of_siteswapLists([], _Request, _Persons) --> [], !.
+mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons) -->
+	{
+		memberchk(path(MainPagePath), Request),!,
+		memberchk(flag(Flag), SiteswapList),
+		memberchk(time(Time), SiteswapList),
+		memberchk(objects(Objects), SiteswapList),
+		memberchk(length(Length), SiteswapList),
+		memberchk(siteswaps(Siteswaps), SiteswapList),
+		length(Siteswaps, NumberOfResults),
+		(Flag = some -> 
+			HowMany = p([class(some)],['Just a selection of patterns is shown!']);
+			(NumberOfResults is 1 ->	
+				HowMany = p([class(all)],['The only possible pattern has been found!']);
+				HowMany = p([class(all)],['All ', NumberOfResults, ' patterns have been found!'])
+			)		
+		),
+		memberchk(search(BackURLSearchList), Request),
+		parse_url_search(BackURLSearch, BackURLSearchList),
+		format(atom(BackURL), ".~w?~s", [MainPagePath, BackURLSearch])
+	},
+	html(
+		div([class(inline)],[
+			div([class(swaps)],[
+				h3([],[
+					Objects, 
+					' objects, period ', 
+					Length
+				]),
+				HowMany,
+				p([class(time)],['(', Time, ' seconds)']),
+				\mainPage_list_of_siteswaps(Siteswaps, Persons, BackURL)
+			])
+		])
+	),
+	mainPage_walk_list_of_siteswapLists(Rest, Request, Persons).
+	
+	
+	
+mainPage_form(MainPagePath, Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Exclude, ClubDoes, React, Magic, Results) -->
+	html(
+		form([action(MainPagePath), method(get)],[
+			table([class(form_table), align(center), cellpadding(0)],[
+				tr([],[
+					td([class(lable)],[
+						'Jugglers:'
+					]),
+					td([class(input)],[
+						select([name(persons), size(1)],[
+							\html_numbered_options(1, 10, Persons)
+						])
+					])	
+				]),	
+				tr([],[
+					td([class(lable)],[
+						'Objects:'
+					]),
+					td([class(input)],[
+						input([type(text), name(objects), value(Objects)])
+					])
+				]),
+				tr([],[
+					td([class(lable)],[
+						'Period:'
+					]),
+					td([class(input)],[
+						input([type(text), name(period), value(Period)])
 		
-		
-	mainPage_form(MainPagePath, Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Exclude, ClubDoes, React, Magic, Results) -->
-		html(
-			form([action(MainPagePath), method(get)],[
-				table([class(form_table), align(center), cellpadding(0)],[
-					tr([],[
-						td([class(lable)],[
-							'Jugglers:'
-						]),
-						td([class(input)],[
-							select([name(persons), size(1)],[
-								\html_numbered_options(1, 10, Persons)
-							])
-						])	
-					]),	
-					tr([],[
-						td([class(lable)],[
-							'Objects:'
-						]),
-						td([class(input)],[
-							input([type(text), name(objects), value(Objects)])
-						])
+					])
+				]),
+				tr([],[
+					td([class(lable)],[
+						'Max height:'
 					]),
-					tr([],[
-						td([class(lable)],[
-							'Period:'
-						]),
-						td([class(input)],[
-							input([type(text), name(period), value(Period)])
-			
+					td([class(input)],[
+						select([name(max), size(1)],[
+							\html_numbered_options(1, 10, Max)
 						])
+					])
+				]),
+				tr([],[
+					td([class(lable)],[
+						'Passes:'
 					]),
-					tr([],[
-						td([class(lable)],[
-							'Max height:'
-						]),
-						td([class(input)],[
-							select([name(max), size(1)],[
-								\html_numbered_options(1, 10, Max)
-							])
-						])
-					]),
-					tr([],[
-						td([class(lable)],[
-							'Passes:'
-						]),
-						td([class(input)],[
-							table([align(left), cellpadding(0)],[
-								tr([],[
-									td([class(lable)],[
-										'min:'
-									]),
-									td([class(input)],[
-										select([name(passesmin), size(1)],[
-											\html_numbered_options(0, 9, PassesMin)
-										])
-									])
+					td([class(input)],[
+						table([align(left), cellpadding(0)],[
+							tr([],[
+								td([class(lable)],[
+									'min:'
 								]),
-								tr([],[
-									td([class(lable)],[
-										'max:'
-									]),
-									td([class(input)],[
-										select([name(passesmax), size(1)],[
-											\html_numbered_options(0, 9, PassesMax),
-											\html_option('-1', PassesMax, &(nbsp))
-										])
+								td([class(input)],[
+									select([name(passesmin), size(1)],[
+										\html_numbered_options(0, 9, PassesMin)
+									])
+								])
+							]),
+							tr([],[
+								td([class(lable)],[
+									'max:'
+								]),
+								td([class(input)],[
+									select([name(passesmax), size(1)],[
+										\html_numbered_options(0, 9, PassesMax),
+										\html_option('-1', PassesMax, &(nbsp))
 									])
 								])
 							])
 						])
+					])
+				]),
+				tr([],[
+					td([class(lable)],[
+						'Contain:'
 					]),
-					tr([],[
-						td([class(lable)],[
-							'Contain:'
-						]),
-						td([class(input)],[
-							input([type(text), name(contain), value(Contain)])
-						])
+					td([class(input)],[
+						input([type(text), name(contain), value(Contain)])
+					])
+				]),
+				tr([],[
+					td([class(lable)],[
+						'Exclude:'
 					]),
-					tr([],[
-						td([class(lable)],[
-							'Exclude:'
-						]),
-						td([class(input)],[
-							input([type(text), name(exclude), value(Exclude)])
-						])
+					td([class(input)],[
+						input([type(text), name(exclude), value(Exclude)])
+					])
+				]),
+				tr([],[
+					td([class(lable)],[
+						'Club does:'
 					]),
-					tr([],[
-						td([class(lable)],[
-							'Club does:'
-						]),
-						td([class(input)],[
-							input([type(text), name(clubdoes), value(ClubDoes)])
-						])
+					td([class(input)],[
+						input([type(text), name(clubdoes), value(ClubDoes)])
+					])
+				]),
+				tr([],[
+					td([class(lable)],[
+						'React:'
 					]),
-					tr([],[
-						td([class(lable)],[
-							'React:'
-						]),
-						td([class(input)],[
-							input([type(text), name(react), value(React)])
-						])
+					td([class(input)],[
+						input([type(text), name(react), value(React)])
+					])
+				]),
+				tr([],[
+					td([class(lable)],[
+						'Contain magic:'
 					]),
-					tr([],[
-						td([class(lable)],[
-							'Contain magic:'
-						]),
-						td([class(input)],[
-							\html_checkbox('1', magic, Magic)
-						])
+					td([class(input)],[
+						\html_checkbox('1', magic, Magic)
+					])
+				]),
+				tr([],[
+					td([class(lable)],[
+						'Max results:'
 					]),
-					tr([],[
-						td([class(lable)],[
-							'Max results:'
-						]),
-						td([class(input)],[
-							input([type(text), name(results), value(Results)])
-						])
+					td([class(input)],[
+						input([type(text), name(results), value(Results)])
+					])
+				]),
+				tr([],[
+					td([class(lable)],[
 					]),
-					tr([],[
-						td([class(lable)],[
-						]),
-						td([class(input)],[
-							input([type(submit), value('Generate')])
-						])
+					td([class(input)],[
+						input([type(submit), value('Generate')])
 					])
 				])
 			])
-		).	
+		])
+	).	
 
 		
-mainPage_form_tr(Lable, Input) -->
-	html(
-		tr([],[
-			td([class(lable)],[
-				Lable
-			]),
-			td([class(input)],[
-				Input
-			])
-		])
-	).

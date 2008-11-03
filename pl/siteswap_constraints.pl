@@ -1,12 +1,5 @@
 
-siteswap(OutputPattern, NumberOfJugglersPre, ObjectsPre, LengthPre, MaxHeightPre, PassesMinPre, PassesMaxPre, ContainString, DontContainString, ClubDoesString, ReactString, ContainMagicPre) :-
-	preprocess_number(NumberOfJugglersPre, NumberOfJugglers),
-	preprocess_number(ObjectsPre, Objects),
-	preprocess_number(LengthPre, Length),
-	preprocess_number(MaxHeightPre, MaxHeight),
-	preprocess_number(PassesMinPre, PassesMin),
-	preprocess_number(PassesMaxPre, PassesMax),
-	preprocess_number(ContainMagicPre, ContainMagic),
+siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, PassesMin, PassesMax, ContainString, DontContainString, ClubDoesString, ReactString, ContainMagic) :-
 	initConstraintCheck,
 	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainString, ClubDoesString, ReactString, ContainMagic),
 	preprocessMultiplexes(Pattern),
@@ -23,7 +16,11 @@ siteswap(OutputPattern, NumberOfJugglersPre, ObjectsPre, LengthPre, MaxHeightPre
 initConstraintCheck :- 
 	retractall(constraintChecked(_)),!.
 
+constraint(Constraint, Length, _Persons, _Max, [], [], [], 0) :-
+	length(Constraint, Length),!.
 constraint(Constraint, Length, _Persons, _Max, "", "", "", 0) :-
+	length(Constraint, Length),!.
+constraint(Constraint, Length, _Persons, _Max, '', '', '', 0) :-
 	length(Constraint, Length),!.
 constraint(Constraint, Length, Persons, Max, Contain, ClubDoes, React, ContainMagic) :-
 	mergeConstraints(Constraint, Length, Persons, Max, Contain, ClubDoes, React, ContainMagic),

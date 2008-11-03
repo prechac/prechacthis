@@ -203,6 +203,22 @@ copyList([_Head|List], [_HeadCopy|ListCopy]) :-
 	copyList(List, ListCopy).
 	
 	
+copyList_if_smaller([], _Sup, []) :- !.
+copyList_if_smaller([Head|Tail], Sup, [Head|TailCopy]) :-
+	Head < Sup, !,
+	copyList_if_smaller(Tail, Sup, TailCopy).
+copyList_if_smaller([_Head|Tail], Sup, TailCopy) :-
+	copyList_if_smaller(Tail, Sup, TailCopy).
+	
+	
+copyList_if_bigger([], _Min, []) :- !.
+copyList_if_bigger([Head|Tail], Min, [Head|TailCopy]) :-
+	Head >= Min, !,
+	copyList_if_bigger(Tail, Min, TailCopy).
+copyList_if_bigger([_Head|Tail], Min, TailCopy) :-
+	copyList_if_bigger(Tail, Min, TailCopy).
+	
+	
 numberOfX([], _, 0) :- !.
 numberOfX([Var|Tail], X, Number) :-
 	var(Var), !,
@@ -551,3 +567,10 @@ a2String(String, String) :-
 a2String(X, String) :-
 	format(string(String), "~w", [X]).
 	
+	
+%% generating integers
+
+integer_gen(Min, Min).
+integer_gen(Min, Number) :-
+	integer_gen(Min, Befor),
+	Number is Befor + 1.
