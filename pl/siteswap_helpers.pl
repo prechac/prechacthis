@@ -60,13 +60,20 @@ lengthK(Pattern, Length) :-
 averageNumberOfClubs(Pattern, Clubs) :- 
 	length(Pattern, Period),
 	flatten(Pattern, PatternFlat),
-	listOfThrows(PatternFlat, Throws),
+	listOfThrows0(PatternFlat, Throws),
 	sumlist(Throws, SumThrows),
 	Clubs is SumThrows rdiv Period.
 	
 listOfThrows([], []) :- !.
 listOfThrows([p(Throw,_Index,_Origen)|Pattern], [Throw|Throws]) :-
 	listOfThrows(Pattern, Throws).
+
+listOfThrows0([], []) :- !.
+listOfThrows0([Var|Pattern], [0|Throws]) :-
+	var(Var), !,
+	listOfThrows0(Pattern, Throws).
+listOfThrows0([p(Throw,_Index,_Origen)|Pattern], [Throw|Throws]) :-
+	listOfThrows0(Pattern, Throws).
 
 
 throw2list(Multiplex, Multiplex) :-

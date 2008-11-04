@@ -101,10 +101,11 @@ find_siteswap_lists(SiteswapLists, PersonsInt, ObjectsAtom, LengthAtom, MaxInt, 
 find_siteswaps(SiteswapList, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, Results) :-
 	get_time(Start),
 	findAtMostNUnique(Throws, 
-	   siteswap(Throws, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic),
-	   Results, 
-	   Bag,
-	   Flag
+		siteswap(Throws, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic),
+		Results,
+		1,
+		Bag,
+		Flag
 	),
 	length(Bag, NumberOfSiteswaps),
 	NumberOfSiteswaps > 0, !,
@@ -155,10 +156,13 @@ mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons) -->
 		length(Siteswaps, NumberOfResults),
 		(Flag = some -> 
 			HowMany = p([class(some)],['Just a selection of patterns is shown!']);
-			(NumberOfResults is 1 ->	
-				HowMany = p([class(all)],['The only possible pattern has been found!']);
-				HowMany = p([class(all)],['All ', NumberOfResults, ' patterns have been found!'])
-			)		
+			(Flag = time ->
+				HowMany = p([class(some)],['Time is over, that\'s what has been found!']);
+				(NumberOfResults is 1 ->	
+					HowMany = p([class(all)],['The only possible pattern has been found!']);
+					HowMany = p([class(all)],['All ', NumberOfResults, ' patterns have been found!'])
+				)	
+			)	
 		),
 		memberchk(search(BackURLSearchList), Request),
 		parse_url_search(BackURLSearch, BackURLSearchList),

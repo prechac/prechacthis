@@ -2,6 +2,7 @@
 siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, PassesMin, PassesMax, ContainString, DontContainString, ClubDoesString, ReactString, ContainMagic) :-
 	initConstraintCheck,
 	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainString, ClubDoesString, ReactString, ContainMagic),
+	constraint_fillable(Pattern, NumberOfJugglers, Objects, MaxHeight),
 	preprocessMultiplexes(Pattern),
 	siteswap(NumberOfJugglers, Objects, MaxHeight, PassesMin, PassesMax, Pattern),
 	catch(
@@ -30,6 +31,15 @@ constraint(Constraint, Length, Persons, Max, Contain, ClubDoes, React, ContainMa
 supConstraintChecked(Constraint) :-
 	constraintChecked(SupConstraint),
 	isRotatedSubConstraint(Constraint, SupConstraint).
+	
+constraint_fillable(Constraint, NumberOfJugglers, Objects, MaxHeight) :- 
+	averageNumberOfClubs(Constraint, ClubsInConstraintAV),
+	length(Constraint, Period),
+	numberOfVars(Constraint, NumberOfVars),
+	MaxToAddAV is NumberOfVars * MaxHeight / Period,
+	Objects =< (ClubsInConstraintAV + MaxToAddAV) * NumberOfJugglers.
+	
+	
 	
 %	cleanEqualConstraints(ListOfConstraints, SetOfConstraints).
 	

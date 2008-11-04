@@ -230,6 +230,20 @@ numberOfX([X|Tail], X, Number) :-
 numberOfX([_Y|Tail], X, Number) :-
 	numberOfX(Tail, X, Number).
 
+numberOfVars([], 0) :- !.
+numberOfVars([Head|Tail], Number) :-
+	var(Head), !,
+	numberOfVars(Tail, NumberTail),
+	Number is NumberTail + 1.
+numberOfVars([Head|Tail], Number) :-
+	is_list(Head), !,
+	numberOfVars(Head, NumberHead),
+	numberOfVars(Tail, NumberTail),
+	Number is NumberTail + NumberHead.
+numberOfVars([_Head|Tail], Number) :-
+	numberOfVars(Tail, Number).
+
+
 multiply(Var, _Factor, _Product) :-
 	var(Var), !.
 multiply(Number, Factor, Product) :-
@@ -454,41 +468,52 @@ fillInVars([Var|ListWithVars], [Gap|ListOfGaps], RemainingGaps) :-
 	Var = Gap,
 	fillInVars(ListWithVars, ListOfGaps, RemainingGaps).
 
-findAtMostNUnique(X, Goal, MaxNumberOfResults, Bag, Flag) :- 
+findAtMostNUnique(X, Goal, MaxNumberOfResults, Bag, Flag) :-
+	findAtMostNUnique(X, Goal, MaxNumberOfResults, _MaxTime, Bag, Flag), !.
+	
+findAtMostNUnique(X, Goal, MaxNumberOfResults, MaxTime, Bag, Flag) :- 
 	initFindAtMostNUnique,
-	post_it_unique(X, Goal, MaxNumberOfResults, Flag),
+	post_it_unique(X, Goal, MaxNumberOfResults, MaxTime, Flag),
 	gather([], Bag).
 
 initFindAtMostNUnique :-
 	retractall(counterNumberOfResults(_)),
 	retractall(dataResult(_)),
+	retractall(searchStartingTime(_)),
+	get_time(Time),
+	asserta(searchStartingTime(Time)),
 	asserta(counterNumberOfResults(0)),!.
+	
 
 findAllUnique(X, Goal, Bag) :- 
 	initFindAllUnique,
-	post_it_unique(X, Goal),
+	post_it_unique(X, Goal),!,
 	gather([], Bag). 
 	
 initFindAllUnique :-
 	retractall(dataResult(_)),!.
-		
-post_it_unique(X, Goal, MaxNumberOfResults, some) :- 
+
+post_it_unique(X, Goal, MaxNumberOfResults, MaxTime, Flag) :- 
 	call(Goal),
 	not(dataResult(X)),
 	counterNumberOfResults(NumberOfResults),
 	retract(counterNumberOfResults(NumberOfResults)),
 	(
 		(
-			NumberOfResults >= MaxNumberOfResults,!
+			NumberOfResults >= MaxNumberOfResults,!,
+			Flag = some
 		);
 		(
 			NewNumberOfResults is NumberOfResults + 1,
 			asserta(counterNumberOfResults(NewNumberOfResults)),
 			asserta(dataResult(X)),
-			fail  % force backtrack if not enough results
+			number(MaxTime),
+			searchStartingTime(Start), 
+			get_time(Now),
+			(MaxTime < Now - Start -> (Flag = time, !); fail)  % force backtrack if not enough results
 		)
 	).
-post_it_unique(_, _, _, all).
+post_it_unique(_, _, _, _, all).
 
 
 post_it_unique(X, Goal) :- 
