@@ -3,11 +3,6 @@
 :- use_module(library('http/html_write')).
 :- use_module(library('http/http_parameters')).
 
-:- [html_helpers].
-:- [html_main_page].
-:- [html_info_page].
-:- [siteswap].
-
 
 server(Port) :-
 	http_server(http_dispatch, [port(Port)]).

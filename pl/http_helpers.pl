@@ -1,4 +1,22 @@
-	
+
+
+html_href(Href, Attributes, Content) -->
+	{
+		href_type(ajax), !
+	},
+	html_href(Href, Attributes, Content, ajax).
+html_href(Href, Attributes, Content) -->
+	html_href(Href, Attributes, Content, html).
+
+html_href(Href, Attributes, Content, ajax) -->
+	{
+		concat_atom(['javascript:loadContent("', Href, '");'], '', JSHref)
+	},
+	html_href(JSHref, Attributes, Content, html).
+html_href(Href, Attributes, Content, html) -->
+	html(a([href(Href)|Attributes], Content)).
+
+
 html_numbered_option([], _Selected) --> [].
 html_numbered_option([Value|List], Selected) -->
 	html_numbered_option(Value, Selected),
@@ -76,6 +94,11 @@ ajax_script -->
 	[].
 
 
+
+
+www_form_encode_all(Decoded, Encoded) :-
+	a2Atom(Decoded, DecodedAtom),
+	www_form_encode(DecodedAtom, Encoded).
 
 
 

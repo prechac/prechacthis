@@ -184,7 +184,46 @@ mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons) -->
 	),
 	mainPage_walk_list_of_siteswapLists(Rest, Request, Persons).
 	
-	
+
+mainPage_list_of_siteswaps([], _Persons, _BackURL) -->
+	[],!.
+mainPage_list_of_siteswaps([Siteswap|Siteswaps], Persons, BackURL) -->	
+	mainPage_siteswap_link(Siteswap, Persons, BackURL),
+	mainPage_list_of_siteswaps(Siteswaps, Persons, BackURL).
+
+mainPage_siteswap_link(Throws, Persons, BackURL) -->
+	{
+		length(Throws, Length),
+		float_to_shortpass(Throws, ThrowsShort),
+		magicPositions(Throws, Persons, MagicPositions)
+	},	
+	html([
+		p([],[
+			\html_href(ThrowsShort, Persons, [], BackURL, [], \mainPage_siteswap(ThrowsShort, Length, Persons, MagicPositions))
+		])
+	]).
+    %convertP(Throws, ThrowsP, Length, Persons),
+	%convertMagic(ThrowsP, MagicPositions, ThrowsPM),
+	%convertMultiplex(ThrowsPM,ThrowsPMM),
+    %writeSwap(ThrowsPMM, Throws, Persons, BackURL).
+
+mainPage_siteswap([], _Length, _Persons, _MagicPositions) --> [],!.
+mainPage_siteswap([Throw], Length, Persons, MagicPositions) -->
+	{
+		Position is Length - 1, !
+	},
+	html_throw(Throw, [hideIndex(Persons), colorThrow(Length), magic(Position, MagicPositions)]).
+mainPage_siteswap([Throw|RestThrows], Length, Persons, MagicPositions) -->
+	{
+		length(RestThrows, RestLength),
+		Position is Length - RestLength - 1
+	},
+	html_throw(Throw, [hideIndex(Persons), colorThrow(Length), magic(Position, MagicPositions)]),
+	html(&(nbsp)),
+	mainPage_siteswap(RestThrows, Length, Persons, MagicPositions).
+
+
+
 	
 mainPage_form(MainPagePath, Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Exclude, ClubDoes, React, Magic, Results) -->
 	html(

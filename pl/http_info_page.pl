@@ -699,104 +699,26 @@ infoPage_dcg_more_integers([I|List]) -->
 	dcg_integer(I),
 	infoPage_dcg_more_integers(List).
 
-%infoPage_dcg_throw(p(Throw, Index, Origen))
-
-	
-	/*
-	
-		<table align='center' cellpadding='0'><tr><td><div id='content' align='center'>
-	<?php
-
-	}
-	$debug = false;
-
-	if ($_REQUEST){
-
-		//foreach($_REQUEST as $oneGET) {
-		//	echo "<p>$oneGET</p>";
-		//}
-
-		if($_REQUEST["swap"]) {
-			$swaplist = $_REQUEST["swap"];
-		}else{
-			$swaplist = "[]";
-		}
-
-		if($_REQUEST["newswap"]) {
-			$newswap = $_REQUEST["newswap"];
-		} else {
-			$newswap = "[]";
-		}
 
 
-		if($_REQUEST["hreftype"] == "ajax") {
-			$hreftype = $_REQUEST["hreftype"];
-		} else {
-			$hreftype = "html";
-		}
 
-		$joepass_cookies = "[";
-		if(isset($_COOKIE["joepass_download"])) {
-			$joepass_cookies .= "'".$_COOKIE["joepass_download"]."'";
-		} else {
-			$joepass_cookies .= "''";
-		}
-		if(isset($_COOKIE["joepass_style"])) {
-			$joepass_cookies .= ", '".$_COOKIE["joepass_style"]."'";
-		} else {
-			$joepass_cookies .= ", ''";
-		}
-		if(isset($_COOKIE["joepass_file"])) {
-			$joepass_cookies .= ", '".$_COOKIE["joepass_file"]."'";
-		} else {
-			$joepass_cookies .= ", ''";
-		}
-		$joepass_cookies .= "]";
-		//echo $joepass_cookies;
+%%% ------- %%%
 
-		if($_REQUEST["debug"]=="on") $debug = true;
 
-		//$browser = get_browser();
-		//echo ($browser['javascript']);
 
-		if($_REQUEST["pattern"] && $_REQUEST["persons"]) {
 
-			$errorlogfile = tempnam("/tmp", "siteswap_info");
+html_href(Pattern, Persons, SwapList, BackURL, Attributes, Content) -->
+	{
+		float_to_shortpass(Pattern, PatternShort),
+		www_form_encode_all(PatternShort, PatternEnc),	
+		www_form_encode_all(Persons, PersonsEnc),
+		www_form_encode_all(SwapList, SwapListEnc),
+		www_form_encode_all(BackURL, BackURLEnc),
+		parse_url_search(Search, [pattern(PatternEnc), persons(PersonsEnc), swap(SwapListEnc), back(BackURLEnc)]),
+		http_info_page_path(Path),
+		format(atom(Href), ".~w?~s", [Path, Search])
+	},
+	html_href(Href, Attributes, Content).
 
-			$plquery  = "swipl -q "
-			          . "-f " . dirname($_SERVER["SCRIPT_FILENAME"]) . "/pl/siteswap.pl "
-			          . "-g \"print_pattern_info("
-			          . $_REQUEST["pattern"] . ", "
-			          . $_REQUEST["persons"] . ", "
-					  . $swaplist . ", "
-					  . $newswap . ", "
-					  . $hreftype . ", "
-					  . $joepass_cookies . ", "
-			          . "'$back_url_encoded'"
-			          . "), halt.\" "
-			          . "2> $errorlogfile";
 
-			if ($debug) echo "$plquery<br>\n";
-			echo `$plquery`;
-			readfile($errorlogfile);
-			unlink($errorlogfile);
-		} else {
-			echo "<p>pattern or number of jugglers not specified!</p>";
-		}
 
-	}	
-
-	if (!isset($_REQUEST["ajax"])) {
-
-		echo "\n</div></td></tr></table>\n";	
-		echo "<br><p class='back'>";
-		if($_REQUEST["back"]) {
-			echo "<a href='./?".$back_url_decoded."'>back to results</a>";
-		}
-		echo "<span id='linkhere'></span>";
-		echo "</p>";
-	?>	
-	<script type="text/javascript" src="./js/swap.js"></script>
-	</body>
-	
-	*/
