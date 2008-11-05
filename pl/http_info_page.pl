@@ -14,6 +14,7 @@ info_page(Request) :-
 			swap(    ReqSwap,     [default('[]')]           ),
 			newswap( ReqNewSwap,  [default('[]')]           ),
 			back(    ReqBack,     [default('')]             ),
+			joepass_download(JoePass_Download, [optional(true)]),
 			hreftype(ReqHrefType, [default('html')]         )
 		]
 	),
@@ -35,7 +36,7 @@ info_page(Request) :-
 	
 	init_html_throw_id,
 	
-	% cookies
+	%get_cookies(Request, Cookies),
 	
 	
 	reply_html_page(
@@ -49,15 +50,16 @@ info_page(Request) :-
 			\js_script('./js/scriptaculous/scriptaculous.js')
 		],
 		[
+			pre([],[\[JoePass_Download]]),
 			\infoPage_back_link(BackURL),
-			\infoPage_info(Pattern, Persons, SwapList, BackURL),
+			\infoPage_info(Pattern, Persons, SwapList, BackURL, _Cookies),
 			\infoPage_back_link(BackURL),
 			script([src('./js/swap.js'), type('text/javascript')], [])
 		]
 	).
 	
 
-infoPage_info(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL) -->
+infoPage_info(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL, JoePass_Cookies) -->
 	{
 		length(PatternWithShortPasses, Period),
 		maxHeight(PatternWithShortPasses, ShortMaxHeight),
@@ -81,7 +83,7 @@ infoPage_info(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL) -->
 						\infoPage_pattern_info(Pattern, PointsInTime, ActionList, NumberOfJugglers, SwapList, BackURL),
 						\infoPage_orbit_info(Pattern, NumberOfJugglers),
 						\infoPage_juggler_info(ListOfJugglers, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, Pattern, BackURL),
-						%writeJoepassLink(PatternWithShortPasses, NumberOfJugglers, SwapList, JoePass_Cookies),
+						\infoPage_joepass_link(Pattern, NumberOfJugglers, SwapList, JoePass_Cookies),
 						\infoPage_hidden_info(Pattern, NumberOfJugglers, SwapList, BackURL)
 					])
 				])
@@ -609,7 +611,58 @@ infoPage_jugglers_throw_caused_by(ThrowingJuggler, [Action|ActionList], NumberOf
 infoPage_jugglers_throw_caused_by(ThrowingJuggler, [_Action|ActionList], NumberOfJugglers, Period, Pattern) -->
 	infoPage_jugglers_throw_caused_by(ThrowingJuggler, ActionList, NumberOfJugglers, Period, Pattern), !.
 
-		
+
+
+%%% --- joepass link --- %%%
+
+infoPage_joepass_link(Pattern, Persons, SwapList, JoePass_Cookies) -->
+	{
+		JoePass_Cookies = [JoePass_Download, JoePass_Style, JoePass_File],
+		float_to_shortpass(Pattern, PatternShort),
+		jp_filename(PatternShort, FileName),
+		atom_concat(FileName, '.pass', FileNamePass),
+		www_form_encode_all(PatternShort, PatternEnc),	
+		www_form_encode_all(Persons, PersonsEnc),
+		www_form_encode_all(FileName, FileNameEnc),
+		www_form_encode_all(SwapList, SwapListEnc)
+	},
+	html([
+		div([class(jp_link)],[
+			form([id(joepass_form), action('./joe.pass'), method(post)],[
+				input([type(hidden), name(pattern), value(PatternEnc)]),
+				input([type(hidden), name(persons), value(PersonsEnc)]),
+				input([type(hidden), name(filename), value(FileNameEnc)]),
+				input([type(hidden), name(swap), value(SwapListEnc)]),
+				a([href('http://www.koelnvention.de/software'), target('_blank')],['JoePass!']),
+				&(nbsp),
+				'file:',
+				&(nbsp),
+				select([name(download), size(1)],[
+					\html_option('on', JoePass_Download, 'download'),
+					\html_option('off', JoePass_Download, 'show')
+				]),
+				&(nbsp),
+				select([name(style), size(1)],[
+					\html_option('normal', JoePass_Style, 'face to face'),
+					\html_option('shortdistance', JoePass_Style, 'short distance'),
+					\html_option('sidebyside', JoePass_Style, 'side by side'),
+					\html_option('backtoback', JoePass_Style, 'back to back'),
+					\html_option('dropbackline', JoePass_Style, 'drop back line'),
+					\html_option('none', JoePass_Style, &(nbsp))
+				]),
+				&(nbsp),
+				select([name(nametype), size(1)],[
+					\html_option('joe', JoePass_File, 'joe.pass'),
+					\html_option('numbers', JoePass_File, FileNamePass)
+				]),
+				&(nbsp),
+				input([type(submit), value('go')])
+			])
+		])
+	]).
+
+
+
 %%% --- hidden js info --- %%%
 
 
@@ -720,5 +773,53 @@ html_href(Pattern, Persons, SwapList, BackURL, Attributes, Content) -->
 	},
 	html_href(Href, Attributes, Content).
 
+
+
+%%% ------ %%%
+
+
+jugglerShown([], []) :- !.
+jugglerShown([Juggler|ListJuggler], [Shown|ListShown]) :-
+!,
+jugglerShown(Juggler, Shown),
+jugglerShown(ListJuggler, ListShown).
+jugglerShown(Juggler, JugglerShown) :-
+JugglerList = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
+nth0(Juggler, JugglerList, JugglerShown).
+
+orbitShown([], []) :- !.
+orbitShown([Orbit|ListOrbit], [Shown|ListShown]) :-
+!,
+orbitShown(Orbit, Shown),
+orbitShown(ListOrbit, ListShown).
+orbitShown(Orbit, OrbitShown) :-
+OrbitList = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'],
+nth0(Orbit, OrbitList, OrbitShown).	
+
+
+%% handShown(number, char, _List, char)	  
+%% handShown(number, List, _List, List)  - throwing Juggler
+%% handShown(List, List, _List, List)    - catching Jugglers
+
+handShown(Juggler, [], _, []) :- number(Juggler), !.
+handShown(Juggler, [Hand|HandList], SwapList, [HandShown|ShownList]) :-
+number(Juggler),!,
+handShown(Juggler, Hand, SwapList, HandShown),
+handShown(Juggler, HandList, SwapList, ShownList).
+handShown([], [], _, []) :- !.
+handShown([Juggler|Jugglers], [Hand|Hands], SwapList, [Shown|ShownList]) :-
+handShown(Juggler, Hand, SwapList, Shown),
+handShown(Jugglers, Hands, SwapList, ShownList).
+handShown(Juggler, a, SwapList, 'L') :-
+member(Juggler, SwapList), !.
+handShown(Juggler, a, SwapList, 'R') :-	
+not(member(Juggler, SwapList)), !.
+handShown(Juggler, b, SwapList, 'R') :-
+member(Juggler, SwapList), !.
+handShown(Juggler, b, SwapList, 'L') :- 
+not(member(Juggler, SwapList)), !.
+
+handShownLong('R', right) :- !.
+handShownLong('L', left) :- !.
 
 

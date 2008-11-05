@@ -102,3 +102,5 @@ www_form_encode_all(Decoded, Encoded) :-
 
 
 
+get_cookies(Request, Cookies) :-
+	memberchk(cookie(Cookies), Request).

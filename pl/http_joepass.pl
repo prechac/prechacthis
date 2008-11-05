@@ -1,3 +1,49 @@
+joepass_page(Request) :-
+	%http_joepass_page_path(JoePassPagePath),
+	http_parameters(
+		Request,
+		[ 
+			pattern( ReqPattern,  [optional(false)]         ),
+			persons( ReqPersons,  [optional(false), integer]),
+			filename(ReqFilename, [default('joe')]          ),
+			swap(    ReqSwap,     [default('[]')]           ),
+			download(ReqDownload, [default('on')]           ),
+			style(   ReqStyle,    [default('normal')]       ),
+			nametype(ReqNameType, [default('joe')]     )
+		]
+	),
+	
+	www_form_encode(PatternAtom, ReqPattern),
+	Persons = ReqPersons,
+	www_form_encode(FilenameAtom, ReqFilename),
+	www_form_encode(SwapAtom, ReqSwap),
+	www_form_encode(DownloadAtom, ReqDownload),
+	www_form_encode(StyleAtom, ReqStyle),
+	www_form_encode(NameTypeAtom, ReqNameType),
+	
+	infoPage_atom2Pattern(PatternAtom, Pattern),
+	infoPage_atom2SwapList(SwapAtom, SwapList),
+	
+	jp_set_cookie('joepass_download', DownloadAtom),
+	
+	jp_file_header(DownloadAtom, NameTypeAtom, FilenameAtom),
+	jp_pattern_def(Pattern, Persons, SwapList, StyleAtom).
+	
+jp_set_cookie(Name, Value) :-
+	format('Set-Cookie: ~w=~w; path="/"~n', [Name, Value]).
+	
+jp_file_header(on, numbers, Filename) :-
+	format("Content-type: application/force-download~n"),
+   	format("Content-Transfer-Encoding: Binary~n"),
+   	format("Content-disposition: attachment; filename=\"~w.pass\"~n~n", [Filename]).
+jp_file_header(on, joe, _Filename) :-
+	format("Content-type: application/force-download~n"),
+   	format("Content-Transfer-Encoding: Binary~n"),
+   	format("Content-disposition: attachment; filename=\"joe.pass\"~n~n").
+jp_file_header(off, _, _) :-
+	format("Content-type: text/plain~n~n").
+	
+
 jp_pattern_def(PatternShort, NumberOfJugglers, SwapList, Style) :-
 	length(PatternShort, Period),
 	maxHeight(PatternShort, ShortMaxHeight),

@@ -9,7 +9,7 @@ server(Port) :-
 
 server_reload :- server_reload(4211), !.
 server_reload(Port) :-
-	http_stop_server(Port, []), consult('pl/server'), server(Port).
+	http_stop_server(Port, []), consult('pl/prechacthis'), server(Port).
 	
 
 % ------ pages ------ %
