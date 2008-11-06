@@ -1,31 +1,49 @@
 
 main_page(Request) :-
 	http_main_page_path(MainPagePath),
-	html_set_options([
-			dialect(html), 
-			doctype('HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"'),
-			content_type('text/html; charset=UTF-8')
-	]),
+	get_cookie(main_persons, Request, CookiePersons, 2),	
+	get_cookie(main_max, Request, CookieMax, 4),
+	get_cookie(main_passesmin, Request, CookiePassesMin, 1),
+	get_cookie(main_passesmax, Request, CookiePassesMax, -1),
+	get_cookie(main_results, Request, CookieResults, 42),
+	
+	a2Number(CookiePersons, CookiePersonsInt),
+	a2Number(CookieMax, CookieMaxInt),
+	a2Number(CookiePassesMin, CookiePassesMinInt),
+	a2Number(CookiePassesMax, CookiePassesMaxInt),
+	a2Number(CookieResults, CookieResultsInt),
+	
 	http_parameters(
 		Request,
 		[ 
-			persons(ReqPersons, [integer, default(2)]),
+			persons(ReqPersons, [integer, default(CookiePersonsInt)]),
 			objects(ReqObjects, [default('')]),
 			period(ReqPeriod, [default('')]),
-			max(ReqMax, [integer, default(4)]),
-			passesmin(ReqPassesMin, [integer, default(1)]),
-			passesmax(ReqPassesMax, [integer, default(-1)]),
+			max(ReqMax, [integer, default(CookieMaxInt)]),
+			passesmin(ReqPassesMin, [integer, default(CookiePassesMinInt)]),
+			passesmax(ReqPassesMax, [integer, default(CookiePassesMaxInt)]),
 			contain(ReqContain, [default('')]),
 			exclude(ReqExclude, [default('')]),
 			clubdoes(ReqClubDoes, [default('')]),
 			react(ReqReact, [default('')]),
 			magic(ReqMagic, [integer, default(0)]),
-			results(ReqResults, [integer, default(42)])
-			%hreftype(ReqHrefType, [default('html')])
+			results(ReqResults, [integer, default(CookieResultsInt)]),
+			debug(Debug, [default('off')]),
+			infopage(GoToInfoPage, [default('true')])
 		]
 	),
+	
 	retractall(href_type(_)),
-	%asserta(href_type(ReqHrefType)),
+	asserta(href_type(html)),
+	
+	set_cookie(main_persons, ReqPersons),
+	set_cookie(main_max, ReqMax),
+	set_cookie(main_passesmin, ReqPassesMin),
+	set_cookie(main_passesmax, ReqPassesMax),
+	set_cookie(main_results, ReqResults),
+	
+	(Debug = on -> DebugHTML = pre([],[\[Request]]); DebugHTML = ''),
+	
 	(a2Number(ReqPassesMax, -1) -> ReqPassesMaxVar = _Var; ReqPassesMaxVar = ReqPassesMax),
 	(
 		(
@@ -46,38 +64,60 @@ main_page(Request) :-
 				ReqResults
 			)
 		);
-		true
+		SiteswapLists = false
 	),
-	reply_html_page(
-		[
-			title('PrechacThis'),
-			meta(['http-equiv'('Content-Type'), content('text/html;charset=utf-8')]),
-			link([type('text/css'), rel('stylesheet'), href('./css/prechacthis.css')]),
-			link([rel('shortcut icon'), href('./images/favicon.png')])
-			%\ajax_script
-		],
-		[
-			\mainPage_all_lists_of_siteswaps(
-				SiteswapLists, 
-				Request, 
-				ReqPersons
-			),
-			\mainPage_form(
-				MainPagePath,
-				ReqPersons, 
-				ReqObjects, 
-				ReqPeriod, 
-				ReqMax, 
-				ReqPassesMin, 
-				ReqPassesMax, 
-				ReqContain, 
-				ReqExclude, 
-				ReqClubDoes, 
-				ReqReact, 
-				ReqMagic, 
-				ReqResults
+	(
+		(
+			GoToInfoPage = true,
+			SiteswapLists = [SiteswapList], 
+			memberchk(siteswaps(Siteswaps), SiteswapList),
+			Siteswaps = [Pattern]
+		) -> 
+		(
+			memberchk(search(BackURLSearchList), Request),
+			parse_url_search(BackURLSearch, BackURLSearchList),
+			format(atom(BackURL), '.~w?~s&infopage=false', [MainPagePath, BackURLSearch]),
+			infoPage_html_page(Pattern, ReqPersons, [], BackURL, Request)
+		) ;
+		(
+			html_set_options([
+					dialect(html), 
+					doctype('HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"'),
+					content_type('text/html; charset=UTF-8')
+			]),
+			reply_html_page(
+				[
+					title('PrechacThis'),
+					meta(['http-equiv'('Content-Type'), content('text/html;charset=utf-8')]),
+					link([type('text/css'), rel('stylesheet'), href('./css/prechacthis.css')]),
+					link([rel('shortcut icon'), href('./images/favicon.png')])
+					%\ajax_script
+				],
+				[
+					DebugHTML,
+					\mainPage_all_lists_of_siteswaps(
+						SiteswapLists, 
+						Request, 
+						ReqPersons
+					),
+					\mainPage_form(
+						MainPagePath,
+						ReqPersons, 
+						ReqObjects, 
+						ReqPeriod, 
+						ReqMax, 
+						ReqPassesMin, 
+						ReqPassesMax, 
+						ReqContain, 
+						ReqExclude, 
+						ReqClubDoes, 
+						ReqReact, 
+						ReqMagic, 
+						ReqResults
+					)
+				]
 			)
-		]
+		)	
 	).
 	
 	

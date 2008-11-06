@@ -10,7 +10,7 @@ html_href(Href, Attributes, Content) -->
 
 html_href(Href, Attributes, Content, ajax) -->
 	{
-		concat_atom(['javascript:loadContent("', Href, '");'], '', JSHref)
+		concat_atom(['javascript:loadContent("', Href, '&hreftype=ajax");'], '', JSHref)
 	},
 	html_href(JSHref, Attributes, Content, html).
 html_href(Href, Attributes, Content, html) -->
@@ -101,6 +101,16 @@ www_form_encode_all(Decoded, Encoded) :-
 	www_form_encode(DecodedAtom, Encoded).
 
 
+	
+	
+set_cookie(Name, Value) :-
+	format('Set-Cookie: ~w=~w; path="/"~n', [Name, Value]).
 
-get_cookies(Request, Cookies) :-
-	memberchk(cookie(Cookies), Request).
+
+get_cookie(Name, Request, Cookie) :-
+	get_cookie(Name, Request, Cookie, _Var), !.
+get_cookie(Name, Request, Cookie, _Default) :-
+	memberchk(cookie(Cookies), Request),
+	memberchk(Name=Cookie, Cookies), !.
+get_cookie(_Name, _Request, Default, Default) :- !.
+	

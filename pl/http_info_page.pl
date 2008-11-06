@@ -1,11 +1,6 @@
 
 info_page(Request) :-
 	%http_info_page_path(InfoPagePath),
-	html_set_options([
-			dialect(html), 
-			doctype('HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"'),
-			content_type('text/html; charset=UTF-8')
-	]),
 	http_parameters(
 		Request,
 		[ 
@@ -14,7 +9,8 @@ info_page(Request) :-
 			swap(    ReqSwap,     [default('[]')]           ),
 			newswap( ReqNewSwap,  [default('[]')]           ),
 			back(    ReqBack,     [default('')]             ),
-			hreftype(ReqHrefType, [default('html')]         )
+			hreftype(ReqHrefType, [default('html')]         ),
+			ajax(    Ajax,        [default('off')]           )
 		]
 	),
 	retractall(href_type(_)),
@@ -32,13 +28,22 @@ info_page(Request) :-
 	
 	applyNewSwaps(OldSwapList, NewSwapList, SwapList),
 	
+	(Ajax = 'on' ->
+		infoPage_html_page_just_content(Pattern, Persons, SwapList, BackURL, Request);
+		infoPage_html_page(Pattern, Persons, SwapList, BackURL, Request)
+	).
 	
+infoPage_html_page_just_content(Pattern, Persons, SwapList, BackURL, Request) :-
+	reply_html_page([],[\infoPage_info(Pattern, Persons, SwapList, BackURL, Request)]).
+	
+	
+infoPage_html_page(Pattern, Persons, SwapList, BackURL, Request) :-
 	init_html_throw_id,
-	
-	get_cookies(Request, Cookies),
-	memberchk(joepass_download=JoePass_Download, Cookies); true
-	
-	
+	html_set_options([
+			dialect(html), 
+			doctype('HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"'),
+			content_type('text/html; charset=UTF-8')
+	]),
 	reply_html_page(
 		[
 			title('PrechacThis - Pattern Information'),
@@ -50,11 +55,17 @@ info_page(Request) :-
 			\js_script('./js/scriptaculous/scriptaculous.js')
 		],
 		[
-			pre([],[\[JoePass_Download]]),
 			\infoPage_back_link(BackURL),
-			\infoPage_info(Pattern, Persons, SwapList, BackURL, _Cookies),
-			\infoPage_back_link(BackURL),
-			script([src('./js/swap.js'), type('text/javascript')], [])
+			table([align(center), cellpadding(0)],[
+				tr([],[
+					td([],[
+						div([id(content), align(center)],[
+							\infoPage_info(Pattern, Persons, SwapList, BackURL, Request)
+						])
+					])
+				])
+			]),						
+			\infoPage_back_link(BackURL)
 		]
 	).
 	
@@ -74,22 +85,13 @@ infoPage_info(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL, JoePa
 		JugglerMax is NumberOfJugglers - 1,
 		numlist(0, JugglerMax, ListOfJugglers)
 	},
-	html([
-		table([align(center), cellpadding(0)],[
-			tr([],[
-				td([],[
-					div([id(content), align(center)],[
-						\infoPage_pattern(Pattern, NumberOfJugglers, SwapList, BackURL),
-						\infoPage_pattern_info(Pattern, PointsInTime, ActionList, NumberOfJugglers, SwapList, BackURL),
-						\infoPage_orbit_info(Pattern, NumberOfJugglers),
-						\infoPage_juggler_info(ListOfJugglers, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, Pattern, BackURL),
-						\infoPage_joepass_link(Pattern, NumberOfJugglers, SwapList, JoePass_Cookies),
-						\infoPage_hidden_info(Pattern, NumberOfJugglers, SwapList, BackURL)
-					])
-				])
-			])
-		])
-	]).
+	infoPage_pattern(Pattern, NumberOfJugglers, SwapList, BackURL),
+	infoPage_pattern_info(Pattern, PointsInTime, ActionList, NumberOfJugglers, SwapList, BackURL),
+	infoPage_orbit_info(Pattern, NumberOfJugglers),
+	infoPage_juggler_info(ListOfJugglers, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, Pattern, BackURL),
+	infoPage_joepass_link(Pattern, NumberOfJugglers, SwapList, JoePass_Cookies),
+	infoPage_hidden_info(Pattern, NumberOfJugglers, SwapList, BackURL),		
+	html([script([src('./js/swap.js'), type('text/javascript')], [])]).
 	
 
 
@@ -108,13 +110,13 @@ infoPage_back_link(BackURL) -->
 	
 
 infoPage_pattern(Pattern, NumberOfJugglers, SwapList, BackURL) -->
-	html(
+	html([
 		table([class(info_bigSwap_table), align(center)],[
 			\infoPage_PrechacThis_links(Pattern, up, NumberOfJugglers, SwapList, BackURL),
 			\infoPage_bigSwap_and_rotations(Pattern, NumberOfJugglers, SwapList, BackURL),
 			\infoPage_PrechacThis_links(Pattern, down, NumberOfJugglers, SwapList, BackURL)
 		])
-	).
+	]).
 
 
 infoPage_bigSwap_and_rotations(Pattern, NumberOfJugglers, SwapList, BackURL) -->
@@ -615,9 +617,11 @@ infoPage_jugglers_throw_caused_by(ThrowingJuggler, [_Action|ActionList], NumberO
 
 %%% --- joepass link --- %%%
 
-infoPage_joepass_link(Pattern, Persons, SwapList, JoePass_Cookies) -->
+infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
 	{
-		JoePass_Cookies = [JoePass_Download, JoePass_Style, JoePass_File],
+		get_cookie(joepass_download, Request, JoePass_Download),
+		get_cookie(joepass_style, Request, JoePass_Style),
+		get_cookie(joepass_file, Request, JoePass_File),
 		float_to_shortpass(Pattern, PatternShort),
 		jp_filename(PatternShort, FileName),
 		atom_concat(FileName, '.pass', FileNamePass),
