@@ -14,7 +14,6 @@ info_page(Request) :-
 			swap(    ReqSwap,     [default('[]')]           ),
 			newswap( ReqNewSwap,  [default('[]')]           ),
 			back(    ReqBack,     [default('')]             ),
-			joepass_download(JoePass_Download, [optional(true)]),
 			hreftype(ReqHrefType, [default('html')]         )
 		]
 	),
@@ -36,7 +35,8 @@ info_page(Request) :-
 	
 	init_html_throw_id,
 	
-	%get_cookies(Request, Cookies),
+	get_cookies(Request, Cookies),
+	memberchk(joepass_download=JoePass_Download, Cookies); true
 	
 	
 	reply_html_page(
