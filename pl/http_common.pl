@@ -266,3 +266,71 @@ pStyle(Length, Origen, Index, instantbi) :-
 	odd(Index).
 
 
+
+
+
+
+atom2Pattern(Atom, Pattern) :-
+	atom_codes(Atom, String),
+	a2P_dcg_pattern(Pattern, String, []), !.
+
+atom2SwapList(Atom, SwapList) :-
+	atom_codes(Atom, String),
+	a2S_dcg_swap_list(SwapList, String, []), !.
+
+
+a2P_dcg_pattern([Throw|Pattern]) -->
+	dcg_left_bracket,
+	a2P_dcg_throw(Throw),
+	a2P_dcg_more_throws(Pattern),
+	dcg_right_bracket.
+
+a2P_dcg_throw(p(Throw, Index, Origen)) -->
+	dcg_p,
+	dcg_left_parenthesis,
+	dcg_number(Throw),
+	dcg_comma,
+	dcg_whitespaces,
+	dcg_integer(Index),
+	dcg_comma,
+	dcg_whitespaces,
+	dcg_integer(Origen),
+	dcg_right_parenthesis.
+a2P_dcg_throw(Multiplex) -->
+	a2P_dcg_multiplex(Multiplex).
+
+a2P_dcg_more_throws([]) -->
+	[].
+a2P_dcg_more_throws([Throw|Pattern]) -->
+	dcg_whitespaces,
+	dcg_comma,
+	dcg_whitespaces,
+	a2P_dcg_throw(Throw),
+	a2P_dcg_more_throws(Pattern).
+
+
+a2P_dcg_multiplex([Throw|Multiplex]) -->
+	dcg_left_bracket,
+	a2P_dcg_throw(Throw),
+	a2P_dcg_more_throws(Multiplex),
+	dcg_right_bracket.
+
+a2S_dcg_swap_list([]) -->
+	dcg_left_bracket,
+	dcg_right_bracket.
+a2S_dcg_swap_list([I|List]) -->
+	dcg_left_bracket,
+	dcg_integer(I),
+	a2S_dcg_more_integers(List),
+	dcg_right_bracket.
+
+a2S_dcg_more_integers([]) -->
+	[].
+a2S_dcg_more_integers([I|List]) -->
+	dcg_whitespaces,
+	dcg_comma,
+	dcg_whitespaces,
+	dcg_integer(I),
+	a2S_dcg_more_integers(List).
+
+

@@ -27,13 +27,6 @@ swapThrows(Pattern, PosA, PosB, NewPattern) :-
 swapThrows(Pattern, Pos2, Pos1, NewPattern) :-
 	swapThrows(Pattern, Pos1, Pos2, NewPattern).
 
-print_swaped_pattern(Pattern, Pos1, Pos2) :-
-	swapThrows(Pattern, Pos1, Pos2, NewPattern),!,
-	pattern_to_string(NewPattern, PatternString),
-	format(PatternString).
-print_swaped_pattern(_,_,_) :-
-	format("-2").
-
 	
 distanceOfThrows(Pos1, Pos2, Diff) :-
 	number(Pos1),

@@ -22,9 +22,9 @@ info_page(Request) :-
 	www_form_encode(NewSwapAtom, ReqNewSwap),
 	www_form_encode(BackURL, ReqBack),
 	
-	infoPage_atom2Pattern(PatternAtom, Pattern),
-	infoPage_atom2SwapList(SwapAtom, OldSwapList),
-	infoPage_atom2SwapList(NewSwapAtom, NewSwapList),
+	atom2Pattern(PatternAtom, Pattern),
+	atom2SwapList(SwapAtom, OldSwapList),
+	atom2SwapList(NewSwapAtom, NewSwapList),
 	
 	applyNewSwaps(OldSwapList, NewSwapList, SwapList),
 	
@@ -34,11 +34,10 @@ info_page(Request) :-
 	).
 	
 infoPage_html_page_just_content(Pattern, Persons, SwapList, BackURL, Request) :-
-	reply_html_page([],[\infoPage_info(Pattern, Persons, SwapList, BackURL, Request)]).
-	
+	phrase(infoPage_info(Pattern, Persons, SwapList, BackURL, Request), HTML),
+	print_html(HTML).
 	
 infoPage_html_page(Pattern, Persons, SwapList, BackURL, Request) :-
-	init_html_throw_id,
 	html_set_options([
 			dialect(html), 
 			doctype('HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"'),
@@ -64,14 +63,16 @@ infoPage_html_page(Pattern, Persons, SwapList, BackURL, Request) :-
 						])
 					])
 				])
-			]),						
-			\infoPage_back_link(BackURL)
+			]),					
+			\infoPage_back_link(BackURL),
+			script([src('./js/swap.js'), type('text/javascript')], [])
 		]
 	).
 	
 
 infoPage_info(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL, JoePass_Cookies) -->
 	{
+		init_html_throw_id,
 		length(PatternWithShortPasses, Period),
 		maxHeight(PatternWithShortPasses, ShortMaxHeight),
 		MaxHeight is truncate(ShortMaxHeight) + 1,
@@ -90,8 +91,7 @@ infoPage_info(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL, JoePa
 	infoPage_orbit_info(Pattern, NumberOfJugglers),
 	infoPage_juggler_info(ListOfJugglers, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, Pattern, BackURL),
 	infoPage_joepass_link(Pattern, NumberOfJugglers, SwapList, JoePass_Cookies),
-	infoPage_hidden_info(Pattern, NumberOfJugglers, SwapList, BackURL),		
-	html([script([src('./js/swap.js'), type('text/javascript')], [])]).
+	infoPage_hidden_info(Pattern, NumberOfJugglers, SwapList, BackURL).
 	
 
 
@@ -691,76 +691,6 @@ infoPage_hidden_info(Pattern, NumberOfJugglers, SwapList, BackURL) -->
 	]).
 
 % --------- %
-
-
-infoPage_atom2Pattern(Atom, Pattern) :-
-	atom_codes(Atom, String),
-	infoPage_dcg_pattern(Pattern, String, []), !.
-	
-infoPage_atom2SwapList(Atom, SwapList) :-
-	atom_codes(Atom, String),
-	infoPage_dcg_swap_list(SwapList, String, []), !.
-
-
-infoPage_dcg_pattern([Throw|Pattern]) -->
-	dcg_left_bracket,
-	infoPage_dcg_throw(Throw),
-	infoPage_dcg_more_throws(Pattern),
-	dcg_right_bracket.	      
-	
-infoPage_dcg_throw(p(Throw, Index, Origen)) -->
-	dcg_p,
-	dcg_left_parenthesis,
-	dcg_number(Throw),
-	dcg_comma,
-	dcg_whitespaces,
-	dcg_integer(Index),
-	dcg_comma,
-	dcg_whitespaces,
-	dcg_integer(Origen),
-	dcg_right_parenthesis.
-infoPage_dcg_throw(Multiplex) -->
-	infoPage_dcg_multiplex(Multiplex).
-		
-infoPage_dcg_more_throws([]) -->
-	[].
-infoPage_dcg_more_throws([Throw|Pattern]) -->
-	dcg_whitespaces,
-	dcg_comma,
-	dcg_whitespaces,
-	infoPage_dcg_throw(Throw),
-	infoPage_dcg_more_throws(Pattern).
-
-	
-infoPage_dcg_multiplex([Throw|Multiplex]) -->
-	dcg_left_bracket,
-	infoPage_dcg_throw(Throw),
-	infoPage_dcg_more_throws(Multiplex),
-	dcg_right_bracket.
-	
-infoPage_dcg_swap_list([]) -->
-	dcg_left_bracket,
-	dcg_right_bracket.
-infoPage_dcg_swap_list([I|List]) -->
-	dcg_left_bracket,
-	dcg_integer(I),
-	infoPage_dcg_more_integers(List),
-	dcg_right_bracket.
-
-infoPage_dcg_more_integers([]) -->
-	[].
-infoPage_dcg_more_integers([I|List]) -->
-	dcg_whitespaces,
-	dcg_comma,
-	dcg_whitespaces,
-	dcg_integer(I),
-	infoPage_dcg_more_integers(List).
-
-
-
-
-%%% ------- %%%
-
 
 
 

@@ -422,15 +422,18 @@ dcg_numbers([list(List)]) -->
 	}.
 
 
+dcg_float(I) -->
+	dcg_integer(I).
 dcg_float(R) -->
+	{
+		var(R), !
+	},
 	dcg_integer(I),
 	dcg_dot,
 	dcg_integer(F),
 	{
 		R is I + F/10
 	}.
-dcg_float(I) -->
-	dcg_integer(I).
 
 dcg_rational(Z) -->
 	dcg_integer(N1),
@@ -550,11 +553,20 @@ dcg_whitespace -->
 
 
 dcg_integer(I) -->
+	{
+		var(I), !
+	},
 	dcg_digit(D0),
 	dcg_digits(D),
     { 
 		number_chars(I, [D0|D])
     }.
+dcg_integer(I) -->
+    { 
+		number_chars(I, [D0|D])
+    },
+	dcg_digit(D0),
+	dcg_digits(D).
 
 dcg_digits([D0|D]) -->
 	dcg_digit(D0), !,
@@ -563,10 +575,18 @@ dcg_digits([]) -->
 	[].
 
 dcg_digit(D) -->
+	{
+		var(D), !
+	},
 	[D],
 	{ 
 		code_type(D, digit)
 	}.
+dcg_digit(D) -->	
+	{ 
+		code_type(D, digit)
+	},
+	[D].
 
 
 

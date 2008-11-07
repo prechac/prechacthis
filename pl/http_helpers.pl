@@ -10,7 +10,7 @@ html_href(Href, Attributes, Content) -->
 
 html_href(Href, Attributes, Content, ajax) -->
 	{
-		concat_atom(['javascript:loadContent("', Href, '&hreftype=ajax");'], '', JSHref)
+		concat_atom(['javascript:loadContent("', Href, '");'], '', JSHref)
 	},
 	html_href(JSHref, Attributes, Content, html).
 html_href(Href, Attributes, Content, html) -->

@@ -21,8 +21,8 @@ joepass_page(Request) :-
 	www_form_encode(StyleAtom, ReqStyle),
 	www_form_encode(NameTypeAtom, ReqNameType),
 	
-	infoPage_atom2Pattern(PatternAtom, Pattern),
-	infoPage_atom2SwapList(SwapAtom, SwapList),
+	atom2Pattern(PatternAtom, Pattern),
+	atom2SwapList(SwapAtom, SwapList),
 	
 	set_cookie('joepass_download', DownloadAtom),
 	set_cookie('joepass_style', StyleAtom),

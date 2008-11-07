@@ -15,3 +15,4 @@
 :- [http_main_page].
 :- [http_info_page].
 :- [http_joepass].
+:- [http_swap_page].
