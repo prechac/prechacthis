@@ -209,6 +209,7 @@ height( [],  0) :- !.
 height( Throw, Throw) :- number(Throw),!.
 height( Throw, Height) :- rational_to_number(Throw,Height),!.
 height(p(Throw,_,_), Height) :- height(Throw,Height),!.
+height(p(Throw, _), Height) :- height(Throw,Height), !.
 height(List,Height) :-
 	is_list(List),!,
 	maxHeight(List,Height).

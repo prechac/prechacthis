@@ -8,8 +8,7 @@ swap_page(Request) :-
 		]
 	),
 
-	www_form_encode(PatternAtom, ReqPattern),
-	atom2Pattern(PatternAtom, Pattern),
+	www_siteswap_encode(Pattern, ReqPattern),
 
 	swapPage_file_header,
 	swapPage_swaped_pattern(Pattern, ReqPos1, ReqPos2).
@@ -19,8 +18,7 @@ swapPage_file_header :-
 	
 swapPage_swaped_pattern(Pattern, Pos1, Pos2) :-
 	swapThrows(Pattern, Pos1, Pos2, NewPattern),!,
-	float_to_shortpass(NewPattern, PatternShort),
-	www_form_encode_all(PatternShort, PatternEnc),
+	www_siteswap_encode(NewPattern, PatternEnc),
 	format(PatternEnc).
 swapPage_swaped_pattern(_,_,_) :-
 	format("-2").

@@ -267,14 +267,51 @@ pStyle(Length, Origen, Index, instantbi) :-
 
 
 
+www_siteswap_encode(Pattern, Encoded) :-
+	nonvar(Pattern),
+	var(Encoded),
+	float_to_shortpass(Pattern, PatternShort),
+	atom2Pattern(Decoded, PatternShort),
+	www_form_encode(Decoded, Encoded).
+www_siteswap_encode(Pattern, Encoded) :-
+	var(Pattern),
+	nonvar(Encoded),
+	www_form_encode(Decoded, Encoded),
+	atom2Pattern(Decoded, Pattern).
+
+
+www_swaplist_encode(SwapList, Encoded) :-
+	nonvar(SwapList),
+	var(Encoded),
+	atom2SwapList(Decoded, SwapList),
+	www_form_encode(Decoded, Encoded).
+www_swaplist_encode(SwapList, Encoded) :-
+	var(SwapList),
+	nonvar(Encoded),
+	www_form_encode(Decoded, Encoded),
+	atom2SwapList(Decoded, SwapList).
 
 
 
 atom2Pattern(Atom, Pattern) :-
+	var(Pattern),
+	nonvar(Atom),
 	atom_codes(Atom, String),
 	a2P_dcg_pattern(Pattern, String, []), !.
+atom2Pattern(Atom, Pattern) :-
+	nonvar(Pattern),
+	var(Atom),
+	a2P_dcg_pattern(Pattern, String, []), !,
+	atom_codes(Atom, String).
 
 atom2SwapList(Atom, SwapList) :-
+	var(Atom),
+	nonvar(SwapList),
+	a2S_dcg_swap_list(SwapList, String, []), !,
+	atom_codes(Atom, String).
+atom2SwapList(Atom, SwapList) :-
+	nonvar(Atom),
+	var(SwapList),
 	atom_codes(Atom, String),
 	a2S_dcg_swap_list(SwapList, String, []), !.
 
@@ -285,15 +322,21 @@ a2P_dcg_pattern([Throw|Pattern]) -->
 	a2P_dcg_more_throws(Pattern),
 	dcg_right_bracket.
 
+a2P_dcg_throw(Throw) -->
+	{
+		var(Throw)
+	},
+	dcg_throw(Throw).
 a2P_dcg_throw(p(Throw, Index, Origen)) -->
+	{
+		nonvar(Throw)
+	},
 	dcg_p,
 	dcg_left_parenthesis,
-	dcg_number(Throw),
+	dcg_float(Throw),
 	dcg_comma,
-	dcg_whitespaces,
 	dcg_integer(Index),
 	dcg_comma,
-	dcg_whitespaces,
 	dcg_integer(Origen),
 	dcg_right_parenthesis.
 a2P_dcg_throw(Multiplex) -->
@@ -302,9 +345,7 @@ a2P_dcg_throw(Multiplex) -->
 a2P_dcg_more_throws([]) -->
 	[].
 a2P_dcg_more_throws([Throw|Pattern]) -->
-	dcg_whitespaces,
 	dcg_comma,
-	dcg_whitespaces,
 	a2P_dcg_throw(Throw),
 	a2P_dcg_more_throws(Pattern).
 
@@ -327,9 +368,7 @@ a2S_dcg_swap_list([I|List]) -->
 a2S_dcg_more_integers([]) -->
 	[].
 a2S_dcg_more_integers([I|List]) -->
-	dcg_whitespaces,
 	dcg_comma,
-	dcg_whitespaces,
 	dcg_integer(I),
 	a2S_dcg_more_integers(List).
 

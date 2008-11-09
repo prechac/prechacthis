@@ -16,16 +16,12 @@ info_page(Request) :-
 	retractall(href_type(_)),
 	asserta(href_type(ReqHrefType)),
 	
-	www_form_encode(PatternAtom, ReqPattern),
+	www_siteswap_encode(Pattern, ReqPattern),
 	Persons = ReqPersons,
-	www_form_encode(SwapAtom, ReqSwap),
-	www_form_encode(NewSwapAtom, ReqNewSwap),
+	www_swaplist_encode(OldSwapList, ReqSwap),
+	www_swaplist_encode(NewSwapList, ReqNewSwap),
 	www_form_encode(BackURL, ReqBack),
-	
-	atom2Pattern(PatternAtom, Pattern),
-	atom2SwapList(SwapAtom, OldSwapList),
-	atom2SwapList(NewSwapAtom, NewSwapList),
-	
+		
 	applyNewSwaps(OldSwapList, NewSwapList, SwapList),
 	
 	(Ajax = 'on' ->
@@ -70,7 +66,7 @@ infoPage_html_page(Pattern, Persons, SwapList, BackURL, Request) :-
 	).
 	
 
-infoPage_info(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL, JoePass_Cookies) -->
+infoPage_info(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL, Request) -->
 	{
 		init_html_throw_id,
 		length(PatternWithShortPasses, Period),
@@ -90,7 +86,7 @@ infoPage_info(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL, JoePa
 	infoPage_pattern_info(Pattern, PointsInTime, ActionList, NumberOfJugglers, SwapList, BackURL),
 	infoPage_orbit_info(Pattern, NumberOfJugglers),
 	infoPage_juggler_info(ListOfJugglers, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, Pattern, BackURL),
-	infoPage_joepass_link(Pattern, NumberOfJugglers, SwapList, JoePass_Cookies),
+	infoPage_joepass_link(Pattern, NumberOfJugglers, SwapList, Request),
 	infoPage_hidden_info(Pattern, NumberOfJugglers, SwapList, BackURL).
 	
 
@@ -625,10 +621,11 @@ infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
 		float_to_shortpass(Pattern, PatternShort),
 		jp_filename(PatternShort, FileName),
 		atom_concat(FileName, '.pass', FileNamePass),
-		www_form_encode_all(PatternShort, PatternEnc),	
-		www_form_encode_all(Persons, PersonsEnc),
-		www_form_encode_all(FileName, FileNameEnc),
-		www_form_encode_all(SwapList, SwapListEnc)
+		
+		www_siteswap_encode(Pattern, PatternEnc),	
+		www_form_encode(Persons, PersonsEnc),
+		www_swaplist_encode(SwapList, SwapListEnc),
+		www_form_encode(FileName, FileNameEnc)
 	},
 	html([
 		div([class(jp_link)],[
@@ -670,20 +667,19 @@ infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
 %%% --- hidden js info --- %%%
 
 
-infoPage_hidden_info(Pattern, NumberOfJugglers, SwapList, BackURL) -->
+infoPage_hidden_info(Pattern, Persons, SwapList, BackURL) -->
 	{		
 		flatten(Pattern, PatternFlat),
 		length(PatternFlat, NumberOfNumbers),
-		float_to_shortpass(Pattern, PatternShort),
-		www_form_encode_all(PatternShort, PatternEnc),	
-		www_form_encode_all(NumberOfJugglers, NumberOfJugglersEnc),
-		www_form_encode_all(SwapList, SwapListEnc),
-		www_form_encode_all(BackURL, BackURLEnc)	
+		www_siteswap_encode(Pattern, PatternEnc),	
+		www_form_encode(Persons, PersonsEnc),
+		www_swaplist_encode(SwapList, SwapListEnc),
+		www_form_encode(BackURL, BackURLEnc)
 	},
 	html([
 		form([id(info_form), action('.'), method(post)],[
 			input([type(hidden), name(pattern), value(PatternEnc)]),
-			input([type(hidden), name(persons), value(NumberOfJugglersEnc)]),
+			input([type(hidden), name(persons), value(PersonsEnc)]),
 			input([type(hidden), name(swap), value(SwapListEnc)]),
 			input([type(hidden), name(numbers), value(NumberOfNumbers)]),
 			input([type(hidden), name(back), value(BackURLEnc)])
@@ -696,11 +692,10 @@ infoPage_hidden_info(Pattern, NumberOfJugglers, SwapList, BackURL) -->
 
 html_href(Pattern, Persons, SwapList, BackURL, Attributes, Content) -->
 	{
-		float_to_shortpass(Pattern, PatternShort),
-		www_form_encode_all(PatternShort, PatternEnc),	
-		www_form_encode_all(Persons, PersonsEnc),
-		www_form_encode_all(SwapList, SwapListEnc),
-		www_form_encode_all(BackURL, BackURLEnc),
+		www_siteswap_encode(Pattern, PatternEnc),	
+		www_form_encode(Persons, PersonsEnc),
+		www_swaplist_encode(SwapList, SwapListEnc),
+		www_form_encode(BackURL, BackURLEnc),
 		parse_url_search(Search, [pattern(PatternEnc), persons(PersonsEnc), swap(SwapListEnc), back(BackURLEnc)]),
 		http_info_page_path(Path),
 		format(atom(Href), ".~w?~s", [Path, Search])

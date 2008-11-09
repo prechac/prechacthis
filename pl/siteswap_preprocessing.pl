@@ -299,6 +299,22 @@ dcg_self(S) -->
 dcg_self(_) -->
 	dcg_underscore.
 
+dcg_pass(p(T,I,O)) -->	
+	dcg_p,
+	dcg_left_parenthesis,
+	dcg_float(T),
+	dcg_comma,
+	dcg_integer(I),
+	dcg_comma,
+	dcg_integer(O),
+	dcg_right_parenthesis.
+dcg_pass(p(T,I)) -->	
+	dcg_p,
+	dcg_left_parenthesis,
+	dcg_float(T),
+	dcg_comma,
+	dcg_integer(I),
+	dcg_right_parenthesis.
 dcg_pass(p(F,I)) -->
 	dcg_number(F),
 	dcg_p,
@@ -432,10 +448,27 @@ dcg_float(R) -->
 	dcg_dot,
 	dcg_integer(F),
 	{
-		R is I + F/10
+		number_chars(F, NumberChars),
+		length(NumberChars, Length),
+		R is I + F / (10^Length)
 	}.
-
+dcg_float(R) -->
+	{
+		nonvar(R),
+		I is round(float_integer_part(R)),
+		F is float_fractional_part(R),
+		F \= 0,
+		F10 is round(F * 10)
+	},
+	dcg_integer(I),
+	dcg_dot,
+	dcg_integer(F10).
+	
+	
 dcg_rational(Z) -->
+	{
+		var(Z)
+	},
 	dcg_integer(N1),
 	dcg_slash,
 	dcg_integer(N2),
@@ -443,6 +476,9 @@ dcg_rational(Z) -->
 		Z is N1 / N2
 	}.
 dcg_rational(Z) -->
+	{
+		var(Z)
+	},
 	dcg_integer(N1),
 	dcg_plus,
 	dcg_integer(N2),
@@ -452,6 +488,9 @@ dcg_rational(Z) -->
 		Z is N1 + (N2 / N3)
 	}.
 dcg_rational(Z) -->
+	{
+		var(Z)
+	},
 	dcg_integer(N1),
 	dcg_minus,
 	dcg_integer(N2),
@@ -467,6 +506,7 @@ dcg_number(R) -->
 	dcg_float(R).
 dcg_number(Z) -->
 	dcg_rational(Z).
+
 
 
 dcg_and -->
@@ -554,16 +594,17 @@ dcg_whitespace -->
 
 dcg_integer(I) -->
 	{
-		var(I), !
+		var(I)
 	},
 	dcg_digit(D0),
 	dcg_digits(D),
     { 
-		number_chars(I, [D0|D])
+		number_codes(I, [D0|D])
     }.
 dcg_integer(I) -->
     { 
-		number_chars(I, [D0|D])
+		nonvar(I),
+		number_codes(I, [D0|D])
     },
 	dcg_digit(D0),
 	dcg_digits(D).
@@ -576,7 +617,7 @@ dcg_digits([]) -->
 
 dcg_digit(D) -->
 	{
-		var(D), !
+		var(D)
 	},
 	[D],
 	{ 
@@ -584,6 +625,7 @@ dcg_digit(D) -->
 	}.
 dcg_digit(D) -->	
 	{ 
+		nonvar(D),
 		code_type(D, digit)
 	},
 	[D].
