@@ -88,10 +88,9 @@ member_NC(Number, NumberConstraint, infinity) :-
 
 %%% --- short passes ---
 
-float_to_shortpass(Throw,ShortPass) :-
+float_to_shortpass(Throw, ShortPass) :-
 	(number(Throw);rational(Throw)),!,
-	ThrowTen is Throw * 10,
-	ShortPass is truncate(ThrowTen)/10.
+	ShortPass is round(Throw * 10)/10.
 float_to_shortpass(p(Throw,Index,Original), p(ShortPass,Index,Original)) :-
 	float_to_shortpass(Throw, ShortPass).
 

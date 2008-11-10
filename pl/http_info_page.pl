@@ -16,11 +16,11 @@ info_page(Request) :-
 	retractall(href_type(_)),
 	asserta(href_type(ReqHrefType)),
 	
-	www_siteswap_encode(Pattern, ReqPattern),
+	atom2Pattern(ReqPattern, Pattern),
+	atom2SwapList(ReqSwap, OldSwapList),
+	atom2SwapList(ReqNewSwap, NewSwapList),
 	Persons = ReqPersons,
-	www_swaplist_encode(OldSwapList, ReqSwap),
-	www_swaplist_encode(NewSwapList, ReqNewSwap),
-	www_form_encode(BackURL, ReqBack),
+	BackURL = ReqBack,
 		
 	applyNewSwaps(OldSwapList, NewSwapList, SwapList),
 	
@@ -50,7 +50,7 @@ infoPage_html_page(Pattern, Persons, SwapList, BackURL, Request) :-
 			\js_script('./js/scriptaculous/scriptaculous.js')
 		],
 		[
-			\infoPage_back_link(BackURL),
+			\infoPage_head(BackURL),
 			table([align(center), cellpadding(0)],[
 				tr([],[
 					td([],[
@@ -60,7 +60,7 @@ infoPage_html_page(Pattern, Persons, SwapList, BackURL, Request) :-
 					])
 				])
 			]),					
-			\infoPage_back_link(BackURL),
+			\infoPage_foot(BackURL),
 			script([src('./js/swap.js'), type('text/javascript')], [])
 		]
 	).
@@ -90,47 +90,65 @@ infoPage_info(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL, Reque
 	infoPage_hidden_info(Pattern, NumberOfJugglers, SwapList, BackURL).
 	
 
-
-
-infoPage_back_link(BackURL) -->
+infoPage_head(BackURL) -->
 	html(
-		p([class(back)],[
-			a([href(BackURL)],[
-				'back to search results'
+		table([class(info_head_foot), align(center), cellpadding(0)],[
+			tr([],[
+				td([class(back)],[
+					a([href(BackURL)],[
+						'back to search results'
+					])
+				]),
+				td([id(linkhere)],[
+					&(nbsp)
+				])
 			])
 		])
 	).
-	
+
+infoPage_foot(BackURL) -->
+	html(
+		table([class(info_head_foot), align(center), cellpadding(0)],[
+			tr([],[
+				td([class(back)],[
+					a([href(BackURL)],[
+						'back to search results'
+					])
+				])
+			])
+		])
+	).
+
 
 %%% --- pattern --- %%%	
-	
+
 
 infoPage_pattern(Pattern, NumberOfJugglers, SwapList, BackURL) -->
-	html([
-		table([class(info_bigSwap_table), align(center)],[
-			\infoPage_PrechacThis_links(Pattern, up, NumberOfJugglers, SwapList, BackURL),
-			\infoPage_bigSwap_and_rotations(Pattern, NumberOfJugglers, SwapList, BackURL),
-			\infoPage_PrechacThis_links(Pattern, down, NumberOfJugglers, SwapList, BackURL)
-		])
-	]).
+html([
+	table([class(info_bigSwap_table), align(center)],[
+		\infoPage_PrechacThis_links(Pattern, up, NumberOfJugglers, SwapList, BackURL),
+		\infoPage_bigSwap_and_rotations(Pattern, NumberOfJugglers, SwapList, BackURL),
+		\infoPage_PrechacThis_links(Pattern, down, NumberOfJugglers, SwapList, BackURL)
+	])
+]).
 
 
 infoPage_bigSwap_and_rotations(Pattern, NumberOfJugglers, SwapList, BackURL) -->
-	{
-		rotate_left(Pattern, PatternRotatedLeft),
-		rotate_right(Pattern, PatternRotatedRight)
-	},
-	html(
-		tr([],[
-			td([class(info_left_arrow)],[
-				\html_href(PatternRotatedLeft, NumberOfJugglers, SwapList, BackURL, [title('rotate left')], \arrowRightLeft(left))
-			]),
-			\infoPage_big_swap(Pattern, NumberOfJugglers),
-			td([class(info_right_arrow)],[
-				\html_href(PatternRotatedRight, NumberOfJugglers, SwapList, BackURL, [title('rotate right')], \arrowRightLeft(right))
-			])
+{
+	rotate_left(Pattern, PatternRotatedLeft),
+	rotate_right(Pattern, PatternRotatedRight)
+},
+html(
+	tr([],[
+		td([class(info_left_arrow)],[
+			\html_href(PatternRotatedLeft, NumberOfJugglers, SwapList, BackURL, [title('rotate left')], \arrowRightLeft(left))
+		]),
+		\infoPage_big_swap(Pattern, NumberOfJugglers),
+		td([class(info_right_arrow)],[
+			\html_href(PatternRotatedRight, NumberOfJugglers, SwapList, BackURL, [title('rotate right')], \arrowRightLeft(right))
 		])
-	).
+	])
+).
 
 	
 infoPage_big_swap(Pattern, NumberOfJugglers) -->
@@ -622,9 +640,11 @@ infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
 		jp_filename(PatternShort, FileName),
 		atom_concat(FileName, '.pass', FileNamePass),
 		
-		www_siteswap_encode(Pattern, PatternEnc),	
+		atom2Pattern(PatternAtom, Pattern),	
+		atom2SwapList(SwapListAtom, SwapList),
+		www_form_encode(PatternAtom, PatternEnc),
+		www_form_encode(SwapListAtom, SwapListEnc),
 		www_form_encode(Persons, PersonsEnc),
-		www_swaplist_encode(SwapList, SwapListEnc),
 		www_form_encode(FileName, FileNameEnc)
 	},
 	html([
@@ -671,9 +691,11 @@ infoPage_hidden_info(Pattern, Persons, SwapList, BackURL) -->
 	{		
 		flatten(Pattern, PatternFlat),
 		length(PatternFlat, NumberOfNumbers),
-		www_siteswap_encode(Pattern, PatternEnc),	
+		atom2Pattern(PatternAtom, Pattern),	
+		atom2SwapList(SwapListAtom, SwapList),
+		www_form_encode(PatternAtom, PatternEnc),
+		www_form_encode(SwapListAtom, SwapListEnc),
 		www_form_encode(Persons, PersonsEnc),
-		www_swaplist_encode(SwapList, SwapListEnc),
 		www_form_encode(BackURL, BackURLEnc)
 	},
 	html([
@@ -692,11 +714,14 @@ infoPage_hidden_info(Pattern, Persons, SwapList, BackURL) -->
 
 html_href(Pattern, Persons, SwapList, BackURL, Attributes, Content) -->
 	{
-		www_siteswap_encode(Pattern, PatternEnc),	
-		www_form_encode(Persons, PersonsEnc),
-		www_swaplist_encode(SwapList, SwapListEnc),
-		www_form_encode(BackURL, BackURLEnc),
-		parse_url_search(Search, [pattern(PatternEnc), persons(PersonsEnc), swap(SwapListEnc), back(BackURLEnc)]),
+		atom2Pattern(PatternAtom, Pattern),	
+		atom2SwapList(SwapListAtom, SwapList),
+		%www_form_encode(PatternAtom, PatternEnc),
+		%www_form_encode(SwapListAtom, SwapListEnc),
+		%www_form_encode(Persons, PersonsEnc),
+		%www_form_encode(BackURL, BackURLEnc),
+		
+		parse_url_search(Search, [pattern(PatternAtom), persons(Persons), swap(SwapListAtom), back(BackURL)]),
 		http_info_page_path(Path),
 		format(atom(Href), ".~w?~s", [Path, Search])
 	},

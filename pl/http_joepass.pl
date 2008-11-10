@@ -13,13 +13,17 @@ joepass_page(Request) :-
 		]
 	),
 	
-	www_siteswap_encode(Pattern, ReqPattern),
+	
+	www_form_encode(PatternAtom, ReqPattern),
 	Persons = ReqPersons,
 	www_form_encode(FilenameAtom, ReqFilename),
-	www_swaplist_encode(SwapList, ReqSwap),
+	www_form_encode(SwapListAtom, ReqSwap),
 	www_form_encode(DownloadAtom, ReqDownload),
 	www_form_encode(StyleAtom, ReqStyle),
 	www_form_encode(NameTypeAtom, ReqNameType),
+	
+	atom2Pattern(PatternAtom, Pattern),
+	atom2SwapList(SwapListAtom, SwapList),
 	
 	set_cookie('joepass_download', DownloadAtom),
 	set_cookie('joepass_style', StyleAtom),

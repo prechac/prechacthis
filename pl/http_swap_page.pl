@@ -7,10 +7,12 @@ swap_page(Request) :-
 			pos2( ReqPos2,        [optional(false), integer])
 		]
 	),
-
-	www_siteswap_encode(Pattern, ReqPattern),
+	
+	%www_form_encode(ReqPattern, PatternAtom),
+	atom2Pattern(ReqPattern, Pattern),
 
 	swapPage_file_header,
+	%format(ReqPattern),
 	swapPage_swaped_pattern(Pattern, ReqPos1, ReqPos2).
 
 swapPage_file_header :-
@@ -18,7 +20,8 @@ swapPage_file_header :-
 	
 swapPage_swaped_pattern(Pattern, Pos1, Pos2) :-
 	swapThrows(Pattern, Pos1, Pos2, NewPattern),!,
-	www_siteswap_encode(NewPattern, PatternEnc),
+	atom2Pattern(PatternAtom, NewPattern),
+	www_form_encode(PatternAtom, PatternEnc),
 	format(PatternEnc).
 swapPage_swaped_pattern(_,_,_) :-
 	format("-2").

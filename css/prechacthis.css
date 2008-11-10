@@ -22,16 +22,6 @@ body{
 	margin-bottom: 1em;
 }
 
-.back {
-	text-align: left;
-	font-family: Arial,sans-serif;
-	width: 100%;
-	font-size: 80%;
-	margin-top: 0.5em;
-	margin-left: 0.5em;
-	border-width: 0px;
-	border-style: dotted;
-}
 a {
 	color: blue;
 }
@@ -180,6 +170,24 @@ th {
 	border-width: 0 0 .2ex 0;
 	border-style: dotted;
 }
+
+
+.info_head_foot {
+	width: 100%;
+	font-family: Arial,sans-serif;
+	font-size: 80%;
+	border-width: 0px;
+	border-style: dotted;
+}
+.back {
+	text-align: left;
+	white-space: nowrap;
+}
+#linkhere {
+	text-align: right;
+	white-space: nowrap;
+}
+
 .info_juggler_table, .info_pattern_table {
 	padding: 0 2ex 0 2ex;
 	margin: 4ex 0 4ex 0;

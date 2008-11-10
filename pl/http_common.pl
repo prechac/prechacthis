@@ -267,32 +267,6 @@ pStyle(Length, Origen, Index, instantbi) :-
 
 
 
-www_siteswap_encode(Pattern, Encoded) :-
-	nonvar(Pattern),
-	var(Encoded),
-	float_to_shortpass(Pattern, PatternShort),
-	atom2Pattern(Decoded, PatternShort),
-	www_form_encode(Decoded, Encoded).
-www_siteswap_encode(Pattern, Encoded) :-
-	var(Pattern),
-	nonvar(Encoded),
-	www_form_encode(Decoded, Encoded),
-	atom2Pattern(Decoded, Pattern).
-
-
-www_swaplist_encode(SwapList, Encoded) :-
-	nonvar(SwapList),
-	var(Encoded),
-	atom2SwapList(Decoded, SwapList),
-	www_form_encode(Decoded, Encoded).
-www_swaplist_encode(SwapList, Encoded) :-
-	var(SwapList),
-	nonvar(Encoded),
-	www_form_encode(Decoded, Encoded),
-	atom2SwapList(Decoded, SwapList).
-
-
-
 atom2Pattern(Atom, Pattern) :-
 	var(Pattern),
 	nonvar(Atom),
@@ -301,7 +275,8 @@ atom2Pattern(Atom, Pattern) :-
 atom2Pattern(Atom, Pattern) :-
 	nonvar(Pattern),
 	var(Atom),
-	a2P_dcg_pattern(Pattern, String, []), !,
+	float_to_shortpass(Pattern, PatternShort),
+	a2P_dcg_pattern(PatternShort, String, []), !,
 	atom_codes(Atom, String).
 
 atom2SwapList(Atom, SwapList) :-
