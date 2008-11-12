@@ -28,6 +28,8 @@ constraint(Constraint, Length, Persons, Max, Contain, ClubDoes, React, ContainMa
 	mergeConstraints(Constraint, Length, Persons, Max, Contain, ClubDoes, React, ContainMagic),
 	not(supConstraintChecked(Constraint)),
 	asserta(constraintChecked(Constraint)).
+constraint(_Constraint, _Length, _Persons, _Max, _Contain, _ClubDoes, _React, _Magic) :-
+	recorda(constraint_fillable, false), fail.
 	
 supConstraintChecked(Constraint) :-
 	constraintChecked(SupConstraint),

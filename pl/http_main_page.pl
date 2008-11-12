@@ -49,7 +49,7 @@ main_page(Request) :-
 		(
 			memberchk(path(MainPagePath), Request),
 			find_siteswap_lists(
-				SiteswapLists,
+				SearchResults,
 				ReqPersons,
 				ReqObjects,
 				ReqPeriod,
@@ -64,10 +64,11 @@ main_page(Request) :-
 				ReqResults
 			)
 		);
-		SiteswapLists = false
+		SearchResults = false
 	),
 	(
 		(
+			memberchk(SiteswapLists, SearchResults, [name(lists)]),
 			GoToInfoPage = true,
 			SiteswapLists = [SiteswapList], 
 			memberchk(siteswaps(Siteswaps), SiteswapList),
@@ -96,7 +97,7 @@ main_page(Request) :-
 				[
 					DebugHTML,
 					\mainPage_all_lists_of_siteswaps(
-						SiteswapLists, 
+						SearchResults, 
 						Request, 
 						ReqPersons
 					),
@@ -122,22 +123,38 @@ main_page(Request) :-
 	
 	
 
-find_siteswap_lists(SiteswapLists, PersonsInt, ObjectsAtom, LengthAtom, MaxInt, PassesMinInt, PassesMaxInt, ContainAtom, DontContainAtom, ClubDoesAtom, ReactAtom, MagicInt, ResultsInt) :-
+find_siteswap_lists(SearchResults, PersonsInt, ObjectsAtom, LengthAtom, MaxInt, PassesMinInt, PassesMaxInt, ContainAtom, DontContainAtom, ClubDoesAtom, ReactAtom, MagicInt, ResultsInt) :-
 	name(ContainAtom, ContainList),
 	name(DontContainAtom, DontContainList),
 	name(ClubDoesAtom, ClubDoesList),
 	name(ReactAtom, ReactList),
 	
+	forall(recorded(period_searched, _, R), erase(R)),
+	forall(recorded(objects_searched, _, R), erase(R)),
+	get_time(Start),
 	findall_restricted(
 		Siteswaps,
 		(
 			preprocess_number(LengthAtom, LengthInt, [to_come(_PeriodsToCome), default('1-5')]),
+			recordz(period_searched, LengthInt),
 			preprocess_number(ObjectsAtom, ObjectsInt, [to_come(_ObjectsToCome), default('>0'), stop_if(test_constraint_not_fillable)]),
+			recordz(objects_searched, ObjectsInt),
 			find_siteswaps(Siteswaps, PersonsInt, ObjectsInt, LengthInt, MaxInt, PassesMinInt, PassesMaxInt, ContainList, DontContainList, ClubDoesList, ReactList, MagicInt, ResultsInt)
 		),
 		SiteswapLists,
-		[time(20), flag(_Flag)]
-	).
+		[time(20), flag(Flag)]
+	),
+	get_time(End),
+	Time is End - Start,
+	findall(Period, (recorded(period_searched, Period, R), erase(R)), PeriodsSearched),
+	findall(Objects, (recorded(objects_searched, Objects, R), erase(R)), ObjectsSearched),
+	SearchResults = [
+		flag(Flag),
+		time(Time),
+		period_searched(PeriodsSearched),
+		objects_searched(ObjectsSearched),
+		lists(SiteswapLists)
+	].
 
 
 find_siteswaps(SiteswapList, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, Results) :-
@@ -163,10 +180,11 @@ find_siteswaps(SiteswapList, Persons, Objects, Length, Max, PassesMin, PassesMax
 
 
 
-mainPage_all_lists_of_siteswaps(SiteswapLists, Request, Persons) -->
+mainPage_all_lists_of_siteswaps(SearchResults, Request, Persons) -->
 	{		
 		http_main_page_path(MainPagePath),
-		memberchk(path(MainPagePath), Request)
+		memberchk(path(MainPagePath), Request),
+		memberchk(SiteswapLists, SearchResults, [name(lists)])
 	},
 	html(
 		table([align(center), cellpadding(0)],[
