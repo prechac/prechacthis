@@ -53,23 +53,29 @@ calcThe2(Distance, MultiplexLength, The2) :-
 % --- preprocess numbers --- %
 
 preprocess_number(Constraint, Number) :-
-	preprocess_number(Constraint, Number, _).
+	preprocess_number(Constraint, Number, []).
 
-preprocess_number(Var, Var, list) :-
-	var(Var), !.
-preprocess_number(Number, Number, list) :-
-	number(Number), !.
-preprocess_number(Number, Number, list) :-
-	rational(Number), !.
-preprocess_number(Constraint, Number, Type) :-
+preprocess_number([], Number, Options) :-
+	select(default(Default), Options, NewOptions),!,
+	preprocess_number(Default, Number, NewOptions).
+preprocess_number(Var, Var, Options) :-
+	var(Var), !,
+	memberchk(dontknow, Options, [name(to_come), optional]).
+preprocess_number(Number, Number, Options) :-
+	number(Number), !,
+	memberchk(0, Options, [name(to_come), optional]).
+preprocess_number(Number, Number, Options) :-
+	rational(Number), !,
+	memberchk(0, Options, [name(to_come), optional]).
+preprocess_number(Constraint, Number, Options) :-
 	is_list(Constraint), !,
 	string2Numbers(Constraint, NumberConstraint),
-	member_NC(Number, NumberConstraint, Type).
-preprocess_number(Atom, Number, Type) :-
+	preprocess_number_options(NumberConstraint, NumberConstraintWorkedOn, Options),
+	member_NC(Number, NumberConstraintWorkedOn, Options).
+preprocess_number(Atom, Number, Options) :-
 	atom(Atom),!,
 	name(Atom, String),
-	preprocess_number(String, Number, Type).
-
+	preprocess_number(String, Number, Options).
 
 string2Numbers(ConstraintString, Constraint) :-
 	(
@@ -77,14 +83,44 @@ string2Numbers(ConstraintString, Constraint) :-
 		throw(constraint_unclear)
 	),!.
 
+preprocess_number_options(Constraint, Constraint, []) :- !.
+preprocess_number_options(Constraint, NewConstraint, [Option|Options]) :-
+	preprocess_number_option(Constraint, ConstraintTmp, Option),
+	preprocess_number_options(ConstraintTmp, NewConstraint, Options).
 
-member_NC(Number, NumberConstraint, list) :-
-	member(list(List), NumberConstraint),
-	member(Number, List).
-member_NC(Number, NumberConstraint, infinity) :-
-	member(infinity(Min), NumberConstraint),
-	integer_gen(Min, Number).
+preprocess_number_option(Constraint, NewConstraint, max(Max)) :-
+	numlist(1, Max, List),
+	MaxConstraint = [list(List)],
+	dcgh_merge_number_constraints_and(Constraint, MaxConstraint, NewConstraint), !.
+preprocess_number_option(Constraint, Constraint, _) :- !.	
 
+member_NC(_Number, _NumberConstraint, Options) :-
+	memberchk(stop_if(Goal), Options),
+	call(Goal), !,
+	fail.
+member_NC(Number, NumberConstraint, Options) :-
+	memberchk(infinity(_Min), NumberConstraint), !,
+	member_NC_infinity(Number, NumberConstraint, Options),
+	memberchk(infinity, Options, [name(to_come), optional]).
+member_NC(Number, NumberConstraint, Options) :-
+	not(memberchk(infinity(_Min), NumberConstraint)),
+	memberchk(list(List), NumberConstraint),
+	length(List, Length),
+	sort(List, ListSorted),
+	member_NC_list(Number, ListSorted, Length, Options).
+	
+member_NC_list(Number, List, Length, Options) :-
+	nth1_restricted(Pos, List, Number, Options),
+	ToCome is Length - Pos,
+	memberchk(ToCome, Options, [name(to_come), optional]).
+
+member_NC_infinity(Number, NumberConstraint, Options) :-
+	memberchk(list(List), NumberConstraint),
+	sort(List, ListSorted),
+	member_restricted(Number, ListSorted, Options).
+member_NC_infinity(Number, NumberConstraint, Options) :-
+	memberchk(infinity(Min), NumberConstraint),
+	integer_gen(Min, Number, Options).
 
 %%% --- short passes ---
 
@@ -112,7 +148,7 @@ shortpass_to_pass(p(ShortThrow, Index), Length, Jugglers, MaxHeight, p(Throw, In
 	integer(Index),
 	shortpass_to_pass(p(ShortThrow, Index, _), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)).
 shortpass_to_pass(p(ShortThrow, Index, Origen), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)) :-
-	number(ShortThrow),
+	(number(ShortThrow); rational(ShortThrow)),
 	Prechator is Length rdiv Jugglers,
 	IndexMax is Jugglers - 1,
 	MaxHeightSolo is MaxHeight + Length,
@@ -344,7 +380,7 @@ dcg_pass(_) -->
 
 
 
-dcg_number_constraint([infinity(1)]) -->
+dcg_number_constraint([]) -->
 	dcg_whitespaces.
 dcg_number_constraint(NewListOfNumbers) -->
 	dcg_whitespaces,

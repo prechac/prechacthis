@@ -468,70 +468,144 @@ fillInVars([Var|ListWithVars], [Gap|ListOfGaps], RemainingGaps) :-
 	Var = Gap,
 	fillInVars(ListWithVars, ListOfGaps, RemainingGaps).
 
-findAtMostNUnique(X, Goal, MaxNumberOfResults, Bag, Flag) :-
-	findAtMostNUnique(X, Goal, MaxNumberOfResults, _MaxTime, Bag, Flag), !.
-	
-findAtMostNUnique(X, Goal, MaxNumberOfResults, MaxTime, Bag, Flag) :- 
-	initFindAtMostNUnique,
-	post_it_unique(X, Goal, MaxNumberOfResults, MaxTime, Flag),
-	gather([], Bag).
 
-initFindAtMostNUnique :-
-	retractall(counterNumberOfResults(_)),
-	retractall(dataResult(_)),
-	retractall(searchStartingTime(_)),
-	get_time(Time),
-	asserta(searchStartingTime(Time)),
-	asserta(counterNumberOfResults(0)),!.
+
+
+
+%%%%%% ------ replacements ------ %%%%%%
+
+
+%%% --- findall replacements --- %%%
+
+	
+/*** findall_unique_restricted
+*
+* findall_restricted(X, Goal, Bag, Options)
+* Options:
+* unique
+* time(+Seconds) - max time
+* results(+Results) - max number of results
+* flag(-Flag) - returns one of {all, some, time}
+*
+*/	
+
+findall_restricted(X, Goal, Bag, Options) :-
+	Session is random(10^10),
+	init_findall_restricted(Options, Session),
+	post_it_timecheck(X, Goal, Options, Session),
+	gather([], Bag, Session).
+
+init_findall_restricted([], Session) :- 
+	retractall(dataResult(Session, _)), !.
+init_findall_restricted([Option|Options], Session) :-
+	init_findall_restricted_option(Option, Session), 
+	init_findall_restricted(Options, Session).
+init_findall_restricted_option(results(_), Session) :-	
+	forall(recorded(findall_result_counter, results(Session, _), Ref), erase(Ref)),
+	recorda(findall_result_counter, results(Session, 0)), !.
+init_findall_restricted_option(_, _) :- !.
+
 	
 
-findAllUnique(X, Goal, Bag) :- 
-	initFindAllUnique,
-	post_it_unique(X, Goal),!,
-	gather([], Bag). 
-	
-initFindAllUnique :-
-	retractall(dataResult(_)),!.
-
-post_it_unique(X, Goal, MaxNumberOfResults, MaxTime, Flag) :- 
-	call(Goal),
-	not(dataResult(X)),
-	counterNumberOfResults(NumberOfResults),
-	retract(counterNumberOfResults(NumberOfResults)),
-	(
-		(
-			NumberOfResults >= MaxNumberOfResults,!,
-			Flag = some
-		);
-		(
-			NewNumberOfResults is NumberOfResults + 1,
-			asserta(counterNumberOfResults(NewNumberOfResults)),
-			asserta(dataResult(X)),
-			number(MaxTime),
-			searchStartingTime(Start), 
-			get_time(Now),
-			(MaxTime < Now - Start -> (Flag = time, !); fail)  % force backtrack if not enough results
-		)
+post_it_timecheck(X, Goal, Options, Session) :-
+	memberchk(time(MaxTime), Options),!,
+	catch(
+		call_with_time_limit(MaxTime, 
+			post_it(X, Goal, Options, Session)
+		),
+		time_limit_exceeded,
+		memberchk(time, Options, [name(flag), optional])
 	).
-post_it_unique(_, _, _, _, all).
+post_it_timecheck(X, Goal, Options, Session) :-
+	post_it(X, Goal, Options, Session).
+	
 
-
-post_it_unique(X, Goal) :- 
+post_it(X, Goal, Options, Session) :- 
 	call(Goal),
-	not(dataResult(X)),
-	asserta(dataResult(X)),
-	fail.  % force backtrack if not enough results
-post_it_unique(_, _).
+	not(fail_posting(X, Options, Session)),
+	asserta(dataResult(Session, X)),
+	stop_posting(Options, Session), !.
+post_it(_, _, Options, _Session) :-
+	memberchk(all, Options, [name(flag), optional]).
 
 
-gather(B,Bag) :-  
-	dataResult(X),
-	retract(dataResult(X)),
-	gather([X|B],Bag),
+fail_posting(X, Options, Session) :-
+	member(Option, Options),
+	fail_posting_option(X, Option, Session).
+	
+fail_posting_option(X, unique, Session) :-
+	dataResult(Session, X).
+	
+stop_posting(Options, Session) :-
+	member(Option, Options),
+	stop_posting_option(Option, Options, Session).
+	
+stop_posting_option(results(MaxResults), Options, Session) :-
+	number(MaxResults),
+	recorded(findall_result_counter, results(Session, NumberOfResults), Ref),
+	erase(Ref),
+	NewNumberOfResults is NumberOfResults + 1,
+	recorda(findall_result_counter, results(Session, NewNumberOfResults)),
+	NumberOfResults >= MaxResults - 1,
+	memberchk(some, Options, [name(flag), optional]).
+	
+	
+gather(B, Bag, Session) :-
+	dataResult(Session, X),
+	retract(dataResult(Session, X)),
+	gather([X|B],Bag, Session),
 	!.
-gather(S,S).
+gather(S,S, _Session).
 
 
+
+
+%%% --- member replacements --- %%%
+
+/*** memberchk
+* memberchk(X, List, Options)
+* Options: 
+* name(Name)
+* default(Default)
+* optional
+*/
+memberchk(X, List, Options) :-
+	select(name(Name), Options, RestOptions),
+	Y =.. [Name, X],
+	memberchk(Y, List, RestOptions), !.
+memberchk(X, List, Options) :-
+	not(memberchk(name(_), Options)),
+	memberchk(X, List), !.
+memberchk(X, _List, Options) :-
+	memberchk(default(X), Options), !.
+memberchk(_X, _List, Options) :-
+	memberchk(optional, Options), !.
+	
+	
+
+member_restricted(_X, _List, Options) :-
+	memberchk(stop_if(Goal), Options),
+	call(Goal), !,
+	fail.
+member_restricted(X, [X|_List], _Options).
+member_restricted(X, [_Y|List], Options) :-
+	member_restricted(X, List, Options).
+	
+
+nth1_restricted(_Pos, _List, _X, Options) :-
+	memberchk(stop_if(Goal), Options),
+	call(Goal), !,
+	fail.
+nth1_restricted(1, [X|_List], X, _Options).
+nth1_restricted(Pos, [_Y|List], X, Options) :-
+	nonvar(Pos),
+	Pos1 is Pos - 1,
+	nth1_restricted(Pos1, List, X, Options).
+nth1_restricted(Pos, [_Y|List], X, Options) :-
+	var(Pos),
+	nth1_restricted(Pos1, List, X, Options),
+	Pos is Pos1 + 1.
+	
 %%% string operations %%%
 
 remove_whitespace([], []) :- !.
@@ -595,7 +669,17 @@ a2String(X, String) :-
 	
 %% generating integers
 
-integer_gen(Min, Min).
 integer_gen(Min, Number) :-
-	integer_gen(Min, Befor),
+	integer_gen(Min, Number, []).
+
+integer_gen(_Min, _Number, Options) :-
+	memberchk(stop_if(Goal), Options),
+	call(Goal), !,
+	fail.
+integer_gen(Min, Min, _Options).
+integer_gen(Min, Number, Options) :-
+	integer_gen(Min, Befor, Options),
 	Number is Befor + 1.
+	
+
+	

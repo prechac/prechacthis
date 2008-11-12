@@ -71,7 +71,7 @@ infoPage_info(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL, Reque
 		init_html_throw_id,
 		length(PatternWithShortPasses, Period),
 		maxHeight(PatternWithShortPasses, ShortMaxHeight),
-		MaxHeight is truncate(ShortMaxHeight) + 1,
+		MaxHeight is ceiling(ShortMaxHeight),
 		convertShortPasses(PatternWithShortPasses, Period, NumberOfJugglers, MaxHeight, Pattern),
 		all_points_in_time(PointsInTime, NumberOfJugglers, Period),
 		what_happens(PointsInTime, Pattern, NumberOfJugglers, ActionList),
@@ -528,7 +528,7 @@ infoPage_the_cross(ThrowingJuggler, Action, SwapList) -->
 		CrossOrTramList
 		)
 	},
-	html_list(CrossOrTramList).
+	html_list(CrossOrTramList, []).
 infoPage_the_cross(ThrowingJuggler, Action, SwapList) -->
 	{
 		nth1(3, Action, ThrowingSiteswapPosition),
@@ -549,7 +549,9 @@ infoPage_cross_or_tramline(_TJuggler, _CJuggler, Hand, Hand) -->
 infoPage_cross_or_tramline(_TJuggler, _CJuggler, _HandA, _HandB) -->
 	 html('||'),!.
 
-
+cross_or_tramline(Juggler, Juggler, _HandA, _HandB, &(nbsp)) :- !.
+cross_or_tramline(_TJuggler, _CJuggler, Hand, Hand, 'X') :- !.
+cross_or_tramline(_TJuggler, _CJuggler, _HandA, _HandB, '||') :- !.
 
 infoPage_jugglers_catching_hand(_ThrowingJuggler, [], _SwapList) --> [], !.
 infoPage_jugglers_catching_hand(ThrowingJuggler, [Action|ActionList], SwapList) -->

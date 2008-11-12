@@ -44,6 +44,12 @@ addObjects([BaseHead|BaseRest], MissingObjects, Jugglers, PassesMax, MinHeight, 
       (Throw = 0, Index = 0);
       Throw >= 1
    ),
+%   (var(MaxHeight);
+%      (
+%         numberOfVars(PatternRest, NumberOfVars),
+%         CalculatedMinHeight is 
+%      )
+%   ),
    (
       var(MinHeight);
       (number(MinHeight), Throw >= MinHeight)
@@ -80,6 +86,11 @@ addObjects([BaseMultiplex|BaseRest], MissingObjects, Jugglers, PassesMax, MinHei
       )
    ),
    addObjects(BaseRest, ObjectsForRest, Jugglers, NextPassesMax, MinHeight, MaxHeight, Prechator, PatternRest).
+
+
+%objectsToAdd(ObjectsToAdd, MissingObjects, MinHeight, MaxHeight, NumberOfVars, NumberOfJugglers, Base, Prechator) :-
+%	between(0, MissingObjects, ObjectsToAdd),
+	
 
 
 landingSites2Pattern(LandingSites, BasePattern) :-

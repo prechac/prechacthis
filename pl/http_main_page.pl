@@ -127,25 +127,26 @@ find_siteswap_lists(SiteswapLists, PersonsInt, ObjectsAtom, LengthAtom, MaxInt, 
 	name(DontContainAtom, DontContainList),
 	name(ClubDoesAtom, ClubDoesList),
 	name(ReactAtom, ReactList),
-	findall(
+	
+	findall_restricted(
 		Siteswaps,
 		(
-			preprocess_number(ObjectsAtom, ObjectsInt),
-			preprocess_number(LengthAtom, LengthInt),
+			preprocess_number(LengthAtom, LengthInt, [to_come(_PeriodsToCome), default('1-5')]),
+			preprocess_number(ObjectsAtom, ObjectsInt, [to_come(_ObjectsToCome), default('>0'), stop_if(test_constraint_not_fillable)]),
 			find_siteswaps(Siteswaps, PersonsInt, ObjectsInt, LengthInt, MaxInt, PassesMinInt, PassesMaxInt, ContainList, DontContainList, ClubDoesList, ReactList, MagicInt, ResultsInt)
 		),
-		SiteswapLists
+		SiteswapLists,
+		[time(20), flag(_Flag)]
 	).
 
 
 find_siteswaps(SiteswapList, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, Results) :-
 	get_time(Start),
-	findAtMostNUnique(Throws, 
+	findall_restricted(
+		Throws, 
 		siteswap(Throws, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic),
-		Results,
-		1,
 		Bag,
-		Flag
+		[unique, results(Results), flag(Flag)]
 	),
 	length(Bag, NumberOfSiteswaps),
 	NumberOfSiteswaps > 0, !,
@@ -163,8 +164,7 @@ find_siteswaps(SiteswapList, Persons, Objects, Length, Max, PassesMin, PassesMax
 
 
 mainPage_all_lists_of_siteswaps(SiteswapLists, Request, Persons) -->
-	{
-		
+	{		
 		http_main_page_path(MainPagePath),
 		memberchk(path(MainPagePath), Request)
 	},
@@ -187,6 +187,7 @@ mainPage_all_lists_of_siteswaps(_Siteswaps, _Request, _Persons) -->
 mainPage_walk_list_of_siteswapLists([], _Request, _Persons) --> [], !.
 mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons) -->
 	{
+		http_main_page_path(MainPagePath),
 		memberchk(path(MainPagePath), Request),!,
 		memberchk(flag(Flag), SiteswapList),
 		memberchk(time(Time), SiteswapList),
@@ -197,7 +198,7 @@ mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons) -->
 		(Flag = some -> 
 			HowMany = p([class(some)],['Just a selection of patterns is shown!']);
 			(Flag = time ->
-				HowMany = p([class(some)],['Time is over, that\'s what has been found!']);
+				HowMany = p([class(some)],['Time limit reached, that\'s what has been found!']);
 				(NumberOfResults is 1 ->	
 					HowMany = p([class(all)],['The only possible pattern has been found!']);
 					HowMany = p([class(all)],['All ', NumberOfResults, ' patterns have been found!'])

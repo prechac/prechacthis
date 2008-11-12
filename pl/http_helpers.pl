@@ -104,7 +104,7 @@ www_form_encode_all(Decoded, Encoded) :-
 	
 	
 set_cookie(Name, Value) :-
-	format('Set-Cookie: ~w=~w; path="/"~n', [Name, Value]).
+	format('Set-Cookie: ~w=~w; Max-Age=31536000; path=/~n', [Name, Value]).
 
 
 get_cookie(Name, Request, Cookie) :-

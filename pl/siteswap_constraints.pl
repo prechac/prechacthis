@@ -2,8 +2,8 @@
 siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, PassesMin, PassesMax, ContainString, DontContainString, ClubDoesString, ReactString, ContainMagic) :-
 	initConstraintCheck,
 	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainString, ClubDoesString, ReactString, ContainMagic),
-	constraint_fillable(Pattern, NumberOfJugglers, Objects, MaxHeight),
 	preprocessMultiplexes(Pattern),
+	constraint_fillable(Pattern, NumberOfJugglers, Objects, MaxHeight),
 	siteswap(NumberOfJugglers, Objects, MaxHeight, PassesMin, PassesMax, Pattern),
 	catch(
 		preprocessConstraint(DontContainString, negativ, Length, NumberOfJugglers, MaxHeight, DontContain),
@@ -15,7 +15,8 @@ siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, PassesMin,
 	rotateHighestFirst(PatternM, OutputPattern).
 
 initConstraintCheck :- 
-	retractall(constraintChecked(_)),!.
+	retractall(constraintChecked(_)),
+	forall(recorded(constraint_fillable, _, R), erase(R)),!.
 
 constraint(Constraint, Length, _Persons, _Max, [], [], [], 0) :-
 	length(Constraint, Length),!.
@@ -37,11 +38,18 @@ constraint_fillable(Constraint, NumberOfJugglers, Objects, MaxHeight) :-
 	length(Constraint, Period),
 	numberOfVars(Constraint, NumberOfVars),
 	MaxToAddAV is NumberOfVars * MaxHeight / Period,
-	Objects =< (ClubsInConstraintAV + MaxToAddAV) * NumberOfJugglers.
+	Objects =< (ClubsInConstraintAV + MaxToAddAV) * NumberOfJugglers, !,
+	recorda(constraint_fillable, true).
+constraint_fillable(_Constraint, _NumberOfJugglers, _Objects, _MaxHeight) :-
+	recorda(constraint_fillable, false), fail.
 	
+test_constraint_not_fillable :-	
+	findall(B, (recorded(constraint_fillable, B, R), erase(R)), ListOfBool),
+	ListOfBool \= [],
+	not(
+		memberchk(true, ListOfBool)
+	), !.
 	
-	
-%	cleanEqualConstraints(ListOfConstraints, SetOfConstraints).
 	
 mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainString, ClubDoesString, ReactString, ContainMagic) :-
 	length(MagicPattern, Length),
