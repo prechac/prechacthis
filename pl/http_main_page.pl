@@ -146,8 +146,8 @@ find_siteswap_lists(SearchResults, PersonsInt, ObjectsAtom, LengthAtom, MaxInt, 
 	),
 	get_time(End),
 	Time is End - Start,
-	findall(Period, (recorded(period_searched, Period, R), erase(R)), PeriodsSearched),
-	findall(Objects, (recorded(objects_searched, Objects, R), erase(R)), ObjectsSearched),
+	findall_restricted(Period, (recorded(period_searched, Period, R), erase(R)), PeriodsSearched, [unique]),
+	findall_restricted(Objects, (recorded(objects_searched, Objects, R), erase(R)), ObjectsSearched, [unique]),
 	SearchResults = [
 		flag(Flag),
 		time(Time),
@@ -184,16 +184,21 @@ mainPage_all_lists_of_siteswaps(SearchResults, Request, Persons) -->
 	{		
 		http_main_page_path(MainPagePath),
 		memberchk(path(MainPagePath), Request),
-		memberchk(SiteswapLists, SearchResults, [name(lists)])
+		memberchk(SiteswapLists, SearchResults, [name(lists)]),
+		memberchk(flag(Flag), SearchResults),
+		memberchk(time(Time), SearchResults),
+		memberchk(period_searched(PeriodsSearched), SearchResults),
+		memberchk(objects_searched(ObjectsSearched), SearchResults)
 	},
 	html(
 		table([align(center), cellpadding(0)],[
 			tr([],[
 				td([],[
-					h2([],[
-						Persons,
-						' Jugglers'
-					]),
+					\mainPage_search_results_info(Persons, Flag, Time, PeriodsSearched, ObjectsSearched)
+				])
+			]),
+			tr([],[
+				td([],[
 					\mainPage_walk_list_of_siteswapLists(SiteswapLists, Request, Persons)
 				])
 			])
@@ -201,6 +206,98 @@ mainPage_all_lists_of_siteswaps(SearchResults, Request, Persons) -->
 	).
 mainPage_all_lists_of_siteswaps(_Siteswaps, _Request, _Persons) -->
 	[].		
+	
+	
+mainPage_search_results_info(Persons, Flag, Time, PeriodsSearched, ObjectsSearched) -->
+	mainPage_search_results_info_persons(Persons),
+	mainPage_search_results_info_rest(Flag, Time, PeriodsSearched, ObjectsSearched).
+	
+mainPage_search_results_info_persons(1) -->
+	html([
+		h2([],['one juggler'])
+	]), !.
+mainPage_search_results_info_persons(Persons) -->
+	html([
+		h2([],[Persons, ' juggers'])
+	]).
+
+
+mainPage_search_results_info_rest(_Flag, _Time, PeriodsSearched, ObjectsSearched) -->
+	{
+		length(PeriodsSearched, 0);
+		length(ObjectsSearched, 0)
+	},
+	html([h3([],['oops: nothing searched!'])]),!.
+mainPage_search_results_info_rest(_Flag, _Time, PeriodsSearched, ObjectsSearched) -->
+	{
+		length(PeriodsSearched, 1),
+		length(ObjectsSearched, 1)
+	},
+	[],!.
+mainPage_search_results_info_rest(time, Time, PeriodsSearched, ObjectsSearched) -->
+	html([
+		div([class(search_info), align(center)],[
+			table([align(center), cellpadding(0)],[
+				tr([],[
+					th([colspan(2)],[
+						'stopped searching after ', 
+						Time,
+						' seconds!'
+					])
+				]),
+				tr([],[
+					td([class(info_lable)],[
+						'periods searched:'
+					]),
+					td([class(info)],[
+						\html_list(PeriodsSearched, [list_left(''), list_right(''), list_seperator(', ')])
+					])
+				]),
+				tr([],[
+					td([class(info_lable)],[
+						'objects searched:'
+					]),
+					td([class(info)],[
+						\html_list(ObjectsSearched, [list_left(''), list_right(''), list_seperator(', ')])
+					])
+				])
+			])
+		])
+	]).
+
+mainPage_search_results_info_rest(_All, Time, PeriodsSearched, ObjectsSearched) -->
+	html([
+		div([class(search_info), align(center)],[
+			table([align(center), cellpadding(0)],[
+				tr([],[
+					td([class(info_lable)],[
+						'time:'
+					]),
+					td([class(info)],[
+						Time,
+						' seconds'
+					])
+				]),
+				tr([],[
+					td([class(info_lable)],[
+						'periods searched:'
+					]),
+					td([class(info)],[
+						\html_list(PeriodsSearched, [list_left(''), list_right(''), list_seperator(', ')])
+					])
+				]),
+				tr([],[
+					td([class(info_lable)],[
+						'objects searched:'
+					]),
+					td([class(info)],[
+						\html_list(ObjectsSearched, [list_left(''), list_right(''), list_seperator(', ')])
+					])
+				])
+			])
+		])
+	]).
+
 
 mainPage_walk_list_of_siteswapLists([], _Request, _Persons) --> [], !.
 mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons) -->
@@ -210,6 +307,7 @@ mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons) -->
 		memberchk(flag(Flag), SiteswapList),
 		memberchk(time(Time), SiteswapList),
 		memberchk(objects(Objects), SiteswapList),
+		(Objects = 1 -> ObjectsText = ' object'; ObjectsText = ' objects'),
 		memberchk(length(Length), SiteswapList),
 		memberchk(siteswaps(Siteswaps), SiteswapList),
 		length(Siteswaps, NumberOfResults),
@@ -223,7 +321,7 @@ mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons) -->
 				)	
 			)	
 		),
-		memberchk(search(BackURLSearchList), Request),
+		memberchk(BackURLSearchList, Request, [name(search), default([])]),
 		parse_url_search(BackURLSearch, BackURLSearchList),
 		format(atom(BackURL), ".~w?~s", [MainPagePath, BackURLSearch])
 	},
@@ -232,7 +330,8 @@ mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons) -->
 			div([class(swaps)],[
 				h3([],[
 					Objects, 
-					' objects, period ', 
+					ObjectsText,
+					', period ', 
 					Length
 				]),
 				HowMany,

@@ -124,13 +124,16 @@ html_list(List, Options) -->
 html_list(NoList, Options) -->
 	html_list_process_element_options(NoList, Options).
 
-
+html_list_first_middle_last([Element], Options) -->
+	{
+		append(Options, [befor(\html_list_left(Options)), after(\html_list_right(Options))], OptionsSingle)
+	},
+	html_list(Element, OptionsSingle).
 html_list_first_middle_last(List, Options) -->
 	{
 		append([First|Middle], [Last], List)
 	},
 	html_list_first(First, Options),
-	html_list_seperator(Options),
 	html_list_content(Middle, Options),
 	html_list_last(Last, Options).
 
@@ -145,15 +148,17 @@ html_list_last(Last, Options) -->
 	{
 		append(Options, [after(\html_list_right(Options))], OptionsLast)
 	},
+	html_list_seperator(Options),
 	html_list(Last, OptionsLast).
 
 html_list_content([], _Options) -->
 	[], !.
-html_list_content([Element], Options) --> 
+html_list_content([Element], Options) -->
+	html_list_seperator(Options),
 	html_list(Element, Options), !.
 html_list_content([Element|List], Options) -->
-	html_list(Element, Options),
 	html_list_seperator(Options),
+	html_list(Element, Options),
 	html_list_content(List, Options).
 
 
