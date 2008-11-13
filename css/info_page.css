@@ -1,0 +1,179 @@
+
+.info_head_foot {
+	width: 100%;
+	font-family: Arial,sans-serif;
+	font-size: 80%;
+	border-width: 0px;
+	border-style: dotted;
+}
+.back {
+	text-align: left;
+	white-space: nowrap;
+}
+#linkhere {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.info_juggler_table, .info_pattern_table {
+	padding: 0 2ex 0 2ex;
+	margin: 4ex 0 4ex 0;
+	white-space: nowrap;
+}
+
+
+
+
+.info_bigSwap_table {
+	margin: 4ex 0 4ex 0;
+	white-space: nowrap;
+}
+
+td.bigSwap {
+	margin: 0;
+	padding: 0 0.3em 0 0.3em;
+	vertical-align: top;
+	text-align: center;
+	font-family: 'Courier New', Courier, monospace !important;
+	font-weight: bold;
+	font-size: 300%;
+	white-space: nowrap;
+	border: 0px dotted black;
+}
+
+
+
+
+.info_juggler_table {
+	display: inline;
+}
+
+
+.info_lable, .info_lable_swap, .info_swaplink{
+	text-align: right !important;
+	font-family: Arial,sans-serif;
+	padding-right: 1ex;
+	padding-left: 1ex;
+	margin-right: 1ex;
+	margin-left: 1ex;
+	padding-bottom:.5ex;
+	border-width: 0px !important;
+	border-style: dotted;
+	font-size: 90%;
+	white-space: nowrap;
+}
+
+.info_right_info {
+	text-align: center !important;
+	font-family: Arial,sans-serif;
+	padding-right: 1ex;
+	padding-left: 1ex;
+	margin-right: 1ex;
+	margin-left: 1ex;
+	padding-bottom:.5ex;
+	border-color: black;
+	border-width: 0 0 0 1px !important;
+	border-style: dotted;
+	font-size: 90%;
+	white-space: nowrap;
+}
+
+td.info_title {
+	text-align: center !important;	
+	font-weight: bold;
+	font-family: Arial,sans-serif;
+	padding-right: 2ex;
+	padding-left: 2ex;
+	margin-right: 2ex;
+	margin-left: 2ex;
+	padding-bottom: 2ex;
+	border-color: black;
+	border-width: 0 !important;
+	border-style: dotted;
+	font-size: 100%;
+	white-space: nowrap;
+}
+
+.info_swaplink{
+	vertical-align: bottom;
+	white-space: nowrap;
+}
+
+.info_left_arrow, .info_right_arrow {
+	vertical-align: middle;
+	padding: 0 2em 0 2em;
+	margin: 0;
+	text-align: center;
+}
+
+.prechacthis_link {
+	vertical-align: middle;
+	padding: 0;
+	margin: 0;
+	text-align: center;
+}
+
+.info_bottom {
+	vertical-align: bottom;
+}
+
+.info_left {
+	text-align: left !important;
+}
+.info_right {
+	text-align: right !important;
+}
+
+
+.info_orbits {
+	text-align: center;
+	font-family: Arial,sans-serif;
+	white-space: nowrap;
+}
+
+.info_clubs,  .info_pointintime, .info_hand, .info_juggler, .info_cross{
+	font-family: 'Courier New', Courier, monospace !important;
+	font-weight: bold;
+	vertical-align: top !important;
+	text-align: center;
+	border-width: 0px;
+	border-style: dotted;
+	vertical-align: middle;
+	width: 2em;
+	white-space: nowrap;
+}
+.info_throw {
+	font-family: 'Courier New', Courier, monospace !important;
+	font-weight: bold;
+	vertical-align: top !important;
+	text-align: center;
+	border-width: 0px;
+	border-style: dotted;
+	width: 3em;
+	white-space: nowrap;
+}
+.info_clubdistri {
+	text-align: center;
+	font-family: Arial,sans-serif;
+	color: red;
+	margin-top: 3ex;
+	margin-bottom: 0ex;
+	font-size: 80%;
+}
+
+
+.jp_link {
+	text-align: center !important;
+	font-family: Arial,sans-serif;
+	margin: 5em 0 1em 0;
+	border-color: black;
+	border-width: 0 !important;
+	border-style: dotted;
+	font-size: 80%;
+	white-space: nowrap;
+}
+
+
+.hover {
+    background: #FEF8A4; 
+}

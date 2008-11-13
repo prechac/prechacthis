@@ -43,7 +43,8 @@ infoPage_html_page(Pattern, Persons, SwapList, BackURL, Request) :-
 		[
 			title('PrechacThis - Pattern Information'),
 			meta(['http-equiv'('Content-Type'), content('text/html;charset=utf-8')]),
-			link([type('text/css'), rel('stylesheet'), href('./css/prechacthis.css')]),
+			link([type('text/css'), rel('stylesheet'), href('./css/common.css')]),
+			link([type('text/css'), rel('stylesheet'), href('./css/info_page.css')]),
 			link([rel('shortcut icon'), href('./images/favicon.png')]),
 			\js_script('./js/ajax.js'),
 			\js_script('./js/prototype/prototype.js'),

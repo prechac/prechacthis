@@ -90,7 +90,8 @@ main_page(Request) :-
 				[
 					title('PrechacThis'),
 					meta(['http-equiv'('Content-Type'), content('text/html;charset=utf-8')]),
-					link([type('text/css'), rel('stylesheet'), href('./css/prechacthis.css')]),
+					link([type('text/css'), rel('stylesheet'), href('./css/common.css')]),
+					link([type('text/css'), rel('stylesheet'), href('./css/main_page.css')]),
 					link([rel('shortcut icon'), href('./images/favicon.png')])
 					%\ajax_script
 				],
@@ -236,28 +237,28 @@ mainPage_search_results_info_rest(_Flag, _Time, PeriodsSearched, ObjectsSearched
 	[],!.
 mainPage_search_results_info_rest(time, Time, PeriodsSearched, ObjectsSearched) -->
 	html([
-		div([class(search_info), align(center)],[
+		div([class(mainPage_info), align(center)],[
 			table([align(center), cellpadding(0)],[
 				tr([],[
-					th([colspan(2)],[
+					td([colspan(2)],[
 						'stopped searching after ', 
 						Time,
 						' seconds!'
 					])
 				]),
 				tr([],[
-					td([class(info_lable)],[
+					td([class(mainPage_info_lable)],[
 						'periods searched:'
 					]),
-					td([class(info)],[
+					td([class(mainPage_info_info)],[
 						\html_list(PeriodsSearched, [list_left(''), list_right(''), list_seperator(', ')])
 					])
 				]),
 				tr([],[
-					td([class(info_lable)],[
+					td([class(mainPage_info_lable)],[
 						'objects searched:'
 					]),
-					td([class(info)],[
+					td([class(mainPage_info_info)],[
 						\html_list(ObjectsSearched, [list_left(''), list_right(''), list_seperator(', ')])
 					])
 				])
@@ -267,19 +268,10 @@ mainPage_search_results_info_rest(time, Time, PeriodsSearched, ObjectsSearched) 
 
 mainPage_search_results_info_rest(_All, Time, PeriodsSearched, ObjectsSearched) -->
 	html([
-		div([class(search_info), align(center)],[
+		div([class(mainPage_info), align(center)],[
 			table([align(center), cellpadding(0)],[
 				tr([],[
-					td([class(info_lable)],[
-						'time:'
-					]),
-					td([class(info)],[
-						Time,
-						' seconds'
-					])
-				]),
-				tr([],[
-					td([class(info_lable)],[
+					td([class(mainPage_info_lable)],[
 						'periods searched:'
 					]),
 					td([class(info)],[
@@ -287,11 +279,20 @@ mainPage_search_results_info_rest(_All, Time, PeriodsSearched, ObjectsSearched) 
 					])
 				]),
 				tr([],[
-					td([class(info_lable)],[
+					td([class(mainPage_info_info)],[
 						'objects searched:'
 					]),
 					td([class(info)],[
 						\html_list(ObjectsSearched, [list_left(''), list_right(''), list_seperator(', ')])
+					])
+				]),
+				tr([],[
+					td([class(mainPage_info_lable)],[
+						'time needed:'
+					]),
+					td([class(mainPage_info_info)],[
+						Time,
+						' sec.'
 					])
 				])
 			])
