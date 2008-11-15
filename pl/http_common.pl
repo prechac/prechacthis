@@ -1,4 +1,21 @@
-	
+html_debug(Request) -->
+	{
+		http_parameters(
+			Request,
+			[
+				debug(ReqDebug, [default(off)])
+			]
+		),
+		ReqDebug = on, !
+	},
+	html(div([align(left)],[\html_write_request(Request)])).
+html_debug(_Request) -->
+	[].
+
+html_write_request([]) --> [].
+html_write_request([Info|Request]) -->
+	html([pre([],[\[Info]])]),
+	html_write_request(Request).
 	
 /*** html_throw(Throw, Options)
 *    Options:

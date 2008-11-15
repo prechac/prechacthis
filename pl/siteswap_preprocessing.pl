@@ -542,6 +542,15 @@ dcg_number(R) -->
 dcg_number(Z) -->
 	dcg_rational(Z).
 
+dcg_number_neg(N) -->
+	dcg_number(N).
+dcg_number_neg(N_neg) -->
+	dcg_minus,
+	dcg_whitespaces,
+	dcg_number(N),
+	{
+		N_neg is N * (-1)
+	}.
 
 
 dcg_and -->

@@ -1,6 +1,6 @@
 
 main_page(Request) :-
-	http_main_page_path(MainPagePath),
+	get_cookie(main_mode, Request, CookieMode, 'simple'),
 	get_cookie(main_persons, Request, CookiePersons, 2),	
 	get_cookie(main_max, Request, CookieMax, 4),
 	get_cookie(main_passesmin, Request, CookiePassesMin, 1),
@@ -15,7 +15,8 @@ main_page(Request) :-
 	
 	http_parameters(
 		Request,
-		[ 
+		[
+			mode(ReqMode, [default(CookieMode)]),
 			persons(ReqPersons, [integer, default(CookiePersonsInt)]),
 			objects(ReqObjects, [default('')]),
 			period(ReqPeriod, [default('')]),
@@ -28,7 +29,6 @@ main_page(Request) :-
 			react(ReqReact, [default('')]),
 			magic(ReqMagic, [integer, default(0)]),
 			results(ReqResults, [integer, default(CookieResultsInt)]),
-			debug(Debug, [default('off')]),
 			infopage(GoToInfoPage, [default('true')])
 		]
 	),
@@ -36,153 +36,140 @@ main_page(Request) :-
 	retractall(href_type(_)),
 	asserta(href_type(html)),
 	
+	set_cookie(main_mode, ReqMode),
 	set_cookie(main_persons, ReqPersons),
 	set_cookie(main_max, ReqMax),
 	set_cookie(main_passesmin, ReqPassesMin),
 	set_cookie(main_passesmax, ReqPassesMax),
 	set_cookie(main_results, ReqResults),
 	
-	(Debug = on -> DebugHTML = pre([],[\[Request]]); DebugHTML = ''),
-	
-	(a2Number(ReqPassesMax, -1) -> ReqPassesMaxVar = _Var; ReqPassesMaxVar = ReqPassesMax),
-	(
-		(
-			memberchk(path(MainPagePath), Request),
-			find_siteswap_lists(
-				SearchResults,
-				ReqPersons,
-				ReqObjects,
-				ReqPeriod,
-				ReqMax,
-				ReqPassesMin,
-				ReqPassesMaxVar,
-				ReqContain,
-				ReqExclude,
-				ReqClubDoes,
-				ReqReact,
-				ReqMagic,
-				ReqResults
-			)
-		);
-		SearchResults = false
+	find_siteswap_lists(
+		SearchResults,
+		ReqPersons,
+		ReqObjects,
+		ReqPeriod,
+		ReqMax,
+		ReqPassesMin,
+		ReqPassesMax,
+		ReqContain,
+		ReqExclude,
+		ReqClubDoes,
+		ReqReact,
+		ReqMagic,
+		ReqResults,
+		Request
 	),
-	(
-		(
-			memberchk(SiteswapLists, SearchResults, [name(lists)]),
-			GoToInfoPage = true,
-			SiteswapLists = [SiteswapList], 
-			memberchk(siteswaps(Siteswaps), SiteswapList),
-			Siteswaps = [Pattern]
-		) -> 
-		(
-			memberchk(search(BackURLSearchList), Request),
-			parse_url_search(BackURLSearch, BackURLSearchList),
-			format(atom(BackURL), '.~w?~s&infopage=false', [MainPagePath, BackURLSearch]),
-			infoPage_html_page(Pattern, ReqPersons, [], BackURL, Request)
-		) ;
-		(
-			html_set_options([
-					dialect(html), 
-					doctype('HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"'),
-					content_type('text/html; charset=UTF-8')
-			]),
-			reply_html_page(
-				[
-					title('PrechacThis'),
-					meta(['http-equiv'('Content-Type'), content('text/html;charset=utf-8')]),
-					link([type('text/css'), rel('stylesheet'), href('./css/common.css')]),
-					link([type('text/css'), rel('stylesheet'), href('./css/main_page.css')]),
-					link([rel('shortcut icon'), href('./images/favicon.png')])
-					%\ajax_script
-				],
-				[
-					DebugHTML,
-					\mainPage_all_lists_of_siteswaps(
-						SearchResults, 
-						Request, 
-						ReqPersons
-					),
-					\mainPage_form(
-						MainPagePath,
-						ReqPersons, 
-						ReqObjects, 
-						ReqPeriod, 
-						ReqMax, 
-						ReqPassesMin, 
-						ReqPassesMax, 
-						ReqContain, 
-						ReqExclude, 
-						ReqClubDoes, 
-						ReqReact, 
-						ReqMagic, 
-						ReqResults
-					)
-				]
-			)
-		)	
+	
+	mainPage_html_page(
+		SearchResults,
+		ReqPersons, 
+		ReqObjects, 
+		ReqPeriod, 
+		ReqMax, 
+		ReqPassesMin, 
+		ReqPassesMax, 
+		ReqContain, 
+		ReqExclude, 
+		ReqClubDoes, 
+		ReqReact, 
+		ReqMagic, 
+		ReqResults,
+		ReqMode, 
+		Request,
+		GoToInfoPage
 	).
 	
+
+mainPage_html_page(
+	SearchResults,
+	ReqPersons, 
+	_ReqObjects, 
+	_ReqPeriod, 
+	_ReqMax, 
+	_ReqPassesMin, 
+	_ReqPassesMax, 
+	_ReqContain, 
+	_ReqExclude, 
+	_ReqClubDoes, 
+	_ReqReact, 
+	_ReqMagic, 
+	_ReqResults,
+	_ReqMode, 
+	Request,
+	true
+) :-
+	http_main_page_path(MainPagePath),
+	memberchk(SiteswapLists, SearchResults, [name(lists)]),
+	SiteswapLists = [SiteswapList], 
+	memberchk(siteswaps(Siteswaps), SiteswapList),
+	Siteswaps = [Pattern],
+	memberchk(search(BackURLSearchList), Request),
+	parse_url_search(BackURLSearch, BackURLSearchList),
+	format(atom(BackURL), '.~w?~s&infopage=false', [MainPagePath, BackURLSearch]),
+	infoPage_html_page(Pattern, ReqPersons, [], BackURL, Request), !.
 	
 
-find_siteswap_lists(SearchResults, PersonsInt, ObjectsAtom, LengthAtom, MaxInt, PassesMinInt, PassesMaxInt, ContainAtom, DontContainAtom, ClubDoesAtom, ReactAtom, MagicInt, ResultsInt) :-
-	name(ContainAtom, ContainList),
-	name(DontContainAtom, DontContainList),
-	name(ClubDoesAtom, ClubDoesList),
-	name(ReactAtom, ReactList),
-	
-	forall(recorded(period_searched, _, R), erase(R)),
-	forall(recorded(objects_searched, _, R), erase(R)),
-	get_time(Start),
-	findall_restricted(
-		Siteswaps,
-		(
-			preprocess_number(LengthAtom, LengthInt, [to_come(_PeriodsToCome), default('1-5')]),
-			recordz(period_searched, LengthInt),
-			preprocess_number(ObjectsAtom, ObjectsInt, [to_come(_ObjectsToCome), default('>0'), stop_if(test_constraint_not_fillable)]),
-			recordz(objects_searched, ObjectsInt),
-			find_siteswaps(Siteswaps, PersonsInt, ObjectsInt, LengthInt, MaxInt, PassesMinInt, PassesMaxInt, ContainList, DontContainList, ClubDoesList, ReactList, MagicInt, ResultsInt)
-		),
-		SiteswapLists,
-		[time(20), flag(Flag)]
-	),
-	get_time(End),
-	Time is End - Start,
-	findall_restricted(Period, (recorded(period_searched, Period, R), erase(R)), PeriodsSearched, [unique]),
-	findall_restricted(Objects, (recorded(objects_searched, Objects, R), erase(R)), ObjectsSearched, [unique]),
-	SearchResults = [
-		flag(Flag),
-		time(Time),
-		period_searched(PeriodsSearched),
-		objects_searched(ObjectsSearched),
-		lists(SiteswapLists)
-	].
-
-
-find_siteswaps(SiteswapList, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, Results) :-
-	get_time(Start),
-	findall_restricted(
-		Throws, 
-		siteswap(Throws, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic),
-		Bag,
-		[unique, results(Results), flag(Flag)]
-	),
-	length(Bag, NumberOfSiteswaps),
-	NumberOfSiteswaps > 0, !,
-	sortListOfSiteswaps(Bag, Siteswaps),
-	get_time(End),
-	Time is End - Start,
-	SiteswapList = [
-		flag(Flag),
-		time(Time),
-		objects(Objects), 
-		length(Length),
-		siteswaps(Siteswaps)
-	].
+mainPage_html_page(
+	SearchResults,
+	ReqPersons, 
+	ReqObjects, 
+	ReqPeriod, 
+	ReqMax, 
+	ReqPassesMin, 
+	ReqPassesMax, 
+	ReqContain, 
+	ReqExclude, 
+	ReqClubDoes, 
+	ReqReact, 
+	ReqMagic, 
+	ReqResults,
+	ReqMode, 
+	Request,
+	_DontGoToInfoPage
+) :-
+	html_set_options([
+			dialect(html), 
+			doctype('HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"'),
+			content_type('text/html; charset=UTF-8')
+	]),
+	reply_html_page(
+		[
+			title('PrechacThis'),
+			meta(['http-equiv'('Content-Type'), content('text/html;charset=utf-8')]),
+			link([type('text/css'), rel('stylesheet'), href('./css/common.css')]),
+			link([type('text/css'), rel('stylesheet'), href('./css/main_page.css')]),
+			link([rel('shortcut icon'), href('./images/favicon.png')])
+			%\ajax_script
+		],
+		[
+			\html_debug(Request),
+			\mainPage_all_lists_of_siteswaps(
+				SearchResults, 
+				Request, 
+				ReqPersons
+			),
+			\mainPage_form(
+				ReqPersons, 
+				ReqObjects, 
+				ReqPeriod, 
+				ReqMax, 
+				ReqPassesMin, 
+				ReqPassesMax, 
+				ReqContain, 
+				ReqExclude, 
+				ReqClubDoes, 
+				ReqReact, 
+				ReqMagic, 
+				ReqResults,
+				ReqMode
+			)
+		]
+	).
 
 
 
 mainPage_all_lists_of_siteswaps(SearchResults, Request, Persons) -->
-	{		
+	{	
 		http_main_page_path(MainPagePath),
 		memberchk(path(MainPagePath), Request),
 		memberchk(SiteswapLists, SearchResults, [name(lists)]),
@@ -200,7 +187,7 @@ mainPage_all_lists_of_siteswaps(SearchResults, Request, Persons) -->
 			]),
 			tr([],[
 				td([],[
-					\mainPage_walk_list_of_siteswapLists(SiteswapLists, Request, Persons)
+					\mainPage_walk_list_of_siteswapLists(SiteswapLists, Request, Persons, first)
 				])
 			])
 		])
@@ -236,13 +223,16 @@ mainPage_search_results_info_rest(_Flag, _Time, PeriodsSearched, ObjectsSearched
 	},
 	[],!.
 mainPage_search_results_info_rest(time, Time, PeriodsSearched, ObjectsSearched) -->
+	{
+		TimeRound is round(Time)
+	},
 	html([
 		div([class(mainPage_info), align(center)],[
 			table([align(center), cellpadding(0)],[
 				tr([],[
 					td([colspan(2)],[
 						'stopped searching after ', 
-						Time,
+						TimeRound,
 						' seconds!'
 					])
 				]),
@@ -300,8 +290,10 @@ mainPage_search_results_info_rest(_All, Time, PeriodsSearched, ObjectsSearched) 
 	]).
 
 
-mainPage_walk_list_of_siteswapLists([], _Request, _Persons) --> [], !.
-mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons) -->
+mainPage_walk_list_of_siteswapLists([], _Request, _Persons, first) --> 
+	html([h2([],['nothing found!'])]), !.
+mainPage_walk_list_of_siteswapLists([], _Request, _Persons, not_first) --> [], !.
+mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons, _) -->
 	{
 		http_main_page_path(MainPagePath),
 		memberchk(path(MainPagePath), Request),!,
@@ -313,9 +305,12 @@ mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons) -->
 		memberchk(siteswaps(Siteswaps), SiteswapList),
 		length(Siteswaps, NumberOfResults),
 		(Flag = some -> 
-			HowMany = p([class(some)],['Just a selection of patterns is shown!']);
+			HowMany = p([class(some)],['Random selection of patterns!']);
 			(Flag = time ->
-				HowMany = p([class(some)],['Time limit reached, that\'s what has been found!']);
+				(NumberOfResults is 1 ->	
+					HowMany = p([class(some)],['Time limit reached, one pattern found!']);
+					HowMany = p([class(some)],['Time limit reached, ', NumberOfResults, ' patterns found!'])
+				);
 				(NumberOfResults is 1 ->	
 					HowMany = p([class(all)],['The only possible pattern has been found!']);
 					HowMany = p([class(all)],['All ', NumberOfResults, ' patterns have been found!'])
@@ -341,7 +336,7 @@ mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons) -->
 			])
 		])
 	),
-	mainPage_walk_list_of_siteswapLists(Rest, Request, Persons).
+	mainPage_walk_list_of_siteswapLists(Rest, Request, Persons, not_first).
 	
 
 mainPage_list_of_siteswaps([], _Persons, _BackURL) -->
@@ -384,134 +379,253 @@ mainPage_siteswap([Throw|RestThrows], Length, Persons, MagicPositions) -->
 
 
 	
-mainPage_form(MainPagePath, Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Exclude, ClubDoes, React, Magic, Results) -->
+mainPage_form(Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Exclude, ClubDoes, React, Magic, Results, Mode) -->
+	{
+		http_main_page_path(MainPagePath)
+	},
 	html(
 		form([action(MainPagePath), method(get)],[
 			table([class(form_table), align(center), cellpadding(0)],[
-				tr([],[
-					td([class(lable)],[
-						'Jugglers:'
-					]),
-					td([class(input)],[
-						select([name(persons), size(1)],[
-							\html_numbered_options(1, 10, Persons)
-						])
-					])	
-				]),	
-				tr([],[
-					td([class(lable)],[
-						'Objects:'
-					]),
-					td([class(input)],[
-						input([type(text), name(objects), value(Objects)])
-					])
-				]),
-				tr([],[
-					td([class(lable)],[
-						'Period:'
-					]),
-					td([class(input)],[
-						input([type(text), name(period), value(Period)])
-		
-					])
-				]),
-				tr([],[
-					td([class(lable)],[
-						'Max height:'
-					]),
-					td([class(input)],[
-						select([name(max), size(1)],[
-							\html_numbered_options(1, 10, Max)
-						])
-					])
-				]),
-				tr([],[
-					td([class(lable)],[
-						'Passes:'
-					]),
-					td([class(input)],[
-						table([align(left), cellpadding(0)],[
-							tr([],[
-								td([class(lable)],[
-									'min:'
-								]),
-								td([class(input)],[
-									select([name(passesmin), size(1)],[
-										\html_numbered_options(0, 9, PassesMin)
-									])
-								])
-							]),
-							tr([],[
-								td([class(lable)],[
-									'max:'
-								]),
-								td([class(input)],[
-									select([name(passesmax), size(1)],[
-										\html_numbered_options(0, 9, PassesMax),
-										\html_option('-1', PassesMax, &(nbsp))
-									])
-								])
+				\mainPage_form_jugglers(Persons, Mode),
+				\mainPage_form_objects(Objects, Mode),
+				\mainPage_form_period(Period, Mode),
+				\mainPage_form_max(Max, Mode),
+				\mainPage_form_passes(PassesMin, PassesMax, Mode),
+				\mainPage_form_contain(Contain, Mode),
+				\mainPage_form_exclude(Exclude, Mode),
+				\mainPage_form_clubdoes(ClubDoes, Mode),
+				\mainPage_form_react(React, Mode),
+				\mainPage_form_magic(Magic, Mode),
+				\mainPage_form_results(Results, Mode),
+				\mainPage_form_submit(Mode)
+			])
+		])
+	).	
+				
+	
+mainPage_form_jugglers(Persons, _Mode) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				'Jugglers:'
+			]),
+			td([class(input)],[
+				select([name(persons), size(1)],[
+					\html_numbered_options(1, 10, Persons)
+				])
+			])	
+		])
+	]).
+
+mainPage_form_objects(Objects, simple) -->	
+	{
+		a2Number(Objects, ObjectsInt, [default(4)])
+	},
+	html([
+		tr([],[
+			td([class(lable)],[
+				'Objects:'
+			]),
+			td([class(input)],[
+				select([name(objects), size(1)],[
+					\html_numbered_options(1, 20, ObjectsInt)
+				])
+			])
+		])
+	]), !.
+mainPage_form_objects(Objects, _Mode) -->	
+	html([
+		tr([],[
+			td([class(lable)],[
+				'Objects:'
+			]),
+			td([class(input)],[
+				input([type(text), name(objects), value(Objects)])
+			])
+		])
+	]).
+
+mainPage_form_period(Period, simple) -->
+	{
+		a2Number(Period, PeriodInt, [default(4)])
+	},
+	html([
+		tr([],[
+			td([class(lable)],[
+				'Period:'
+			]),
+			td([class(input)],[
+				select([name(period), size(1)],[
+					\html_numbered_options(1, 10, PeriodInt)
+				])
+			])
+		])
+	]), !.
+mainPage_form_period(Period, _Mode) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				'Period:'
+			]),
+			td([class(input)],[
+				input([type(text), name(period), value(Period)])
+
+			])
+		])
+	]).
+	
+mainPage_form_max(Max, _Mode) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				'Max height:'
+			]),
+			td([class(input)],[
+				select([name(max), size(1)],[
+					\html_numbered_options(1, 10, Max)
+				])
+			])
+		])
+ 	]).
+
+mainPage_form_passes(PassesMin, PassesMax, _Mode) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				'Passes:'
+			]),
+			td([class(input)],[
+				table([align(left), cellpadding(0)],[
+					tr([],[
+						td([class(lable)],[
+							'min:'
+						]),
+						td([class(input)],[
+							select([name(passesmin), size(1)],[
+								\html_numbered_options(0, 9, PassesMin)
 							])
 						])
-					])
-				]),
-				tr([],[
-					td([class(lable)],[
-						'Contain:'
 					]),
-					td([class(input)],[
-						input([type(text), name(contain), value(Contain)])
-					])
-				]),
-				tr([],[
-					td([class(lable)],[
-						'Exclude:'
-					]),
-					td([class(input)],[
-						input([type(text), name(exclude), value(Exclude)])
-					])
-				]),
-				tr([],[
-					td([class(lable)],[
-						'Club does:'
-					]),
-					td([class(input)],[
-						input([type(text), name(clubdoes), value(ClubDoes)])
-					])
-				]),
-				tr([],[
-					td([class(lable)],[
-						'React:'
-					]),
-					td([class(input)],[
-						input([type(text), name(react), value(React)])
-					])
-				]),
-				tr([],[
-					td([class(lable)],[
-						'Contain magic:'
-					]),
-					td([class(input)],[
-						\html_checkbox('1', magic, Magic)
-					])
-				]),
-				tr([],[
-					td([class(lable)],[
-						'Max results:'
-					]),
-					td([class(input)],[
-						input([type(text), name(results), value(Results)])
-					])
-				]),
-				tr([],[
-					td([class(lable)],[
-					]),
-					td([class(input)],[
-						input([type(submit), value('Generate')])
+					tr([],[
+						td([class(lable)],[
+							'max:'
+						]),
+						td([class(input)],[
+							select([name(passesmax), size(1)],[
+								\html_numbered_options(0, 9, PassesMax),
+								\html_option('-1', PassesMax, &(nbsp))
+							])
+						])
 					])
 				])
 			])
 		])
-	).	
+	]).
 
-		
+	
+mainPage_form_contain(Contain, _Mode) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				'Contain:'
+			]),
+			td([class(input)],[
+				input([type(text), name(contain), value(Contain)])
+			])
+		])
+	]).
+
+
+mainPage_form_exclude(_Exclude, simple) --> [], !.
+mainPage_form_exclude(Exclude, _Mode) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				'Exclude:'
+			]),
+			td([class(input)],[
+				input([type(text), name(exclude), value(Exclude)])
+			])
+		])
+	]).
+
+mainPage_form_clubdoes(_ClubDoes, simple) --> [], !.
+mainPage_form_clubdoes(ClubDoes, _Mode) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				'Club does:'
+			]),
+			td([class(input)],[
+				input([type(text), name(clubdoes), value(ClubDoes)])
+			])
+		])
+	]).
+
+mainPage_form_react(_React, simple) --> [], !.
+mainPage_form_react(React, _Mode) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				'Cause:'
+			]),
+			td([class(input)],[
+				input([type(text), name(react), value(React)])
+			])
+		])
+	]).
+
+mainPage_form_magic(_Magic, simple) --> [], !.
+mainPage_form_magic(Magic, _Mode) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				'Contain magic:'
+			]),
+			td([class(input)],[
+				\html_checkbox('1', magic, Magic)
+			])
+		])
+	]).
+
+mainPage_form_results(_Results, simple) --> 
+	html(
+		input([type(hidden), name(results), value(42)])
+	), !.
+mainPage_form_results(Results, _Mode) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				'Max results:'
+			]),
+			td([class(input)],[
+				input([type(text), name(results), value(Results)])
+			])
+		])
+	]).
+	
+	
+mainPage_form_submit(simple) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				a([class(small), href('./?mode=advanced')],['advanced mode'])
+			]),
+			td([class(input)],[
+				input([type(hidden), name(mode), value(simple)]),
+				input([type(submit), value('Generate')])
+			])
+		])
+	]),!.	
+mainPage_form_submit(_Mode) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				a([class(small), href('./?mode=simple')],['simple mode'])
+			]),
+			td([class(input)],[
+				input([type(hidden), name(mode), value(advanced)]),
+				input([type(submit), value('Generate')])
+			])
+		])
+	]).

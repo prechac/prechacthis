@@ -51,6 +51,7 @@ infoPage_html_page(Pattern, Persons, SwapList, BackURL, Request) :-
 			\js_script('./js/scriptaculous/scriptaculous.js')
 		],
 		[
+			\html_debug(Request),
 			\infoPage_head(BackURL),
 			table([align(center), cellpadding(0)],[
 				tr([],[

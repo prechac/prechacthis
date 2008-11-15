@@ -494,9 +494,15 @@ findall_restricted(X, Goal, Bag, Options) :-
 	init_findall_restricted(Options, Session),
 	post_it_timecheck(X, Goal, Options, Session),
 	gather([], Bag, Session).
+	
 
 init_findall_restricted([], Session) :- 
-	retractall(dataResult(Session, _)), !.
+	retractall(dataResult(Session, _)),
+	(recorded(findall_active, _OtherSession) ->
+		true;
+		forall(recorded(time_limit_exceeded, _, R), erase(R))
+	),
+	recorda(findall_active, Session), !.
 init_findall_restricted([Option|Options], Session) :-
 	init_findall_restricted_option(Option, Session), 
 	init_findall_restricted(Options, Session).
@@ -516,9 +522,20 @@ post_it_timecheck(X, Goal, Options, Session) :-
 		time_limit_exceeded,
 		memberchk(time, Options, [name(flag), optional])
 	).
-post_it_timecheck(X, Goal, Options, Session) :-
-	post_it(X, Goal, Options, Session).
 	
+post_it_timecheck(X, Goal, Options, Session) :-
+	recorded(findall_active, _OtherSession), !,
+	catch(
+		post_it(X, Goal, Options, Session),
+		time_limit_exceeded,
+		(
+			memberchk(time, Options, [name(flag), optional]),
+			recorda(time_limit_exceeded, Session)
+		)
+	).
+post_it_timecheck(X, Goal, Options, Session) :-	
+	post_it(X, Goal, Options, Session).
+
 
 post_it(X, Goal, Options, Session) :- 
 	call(Goal),
@@ -538,7 +555,10 @@ fail_posting_option(X, unique, Session) :-
 	
 stop_posting(Options, Session) :-
 	member(Option, Options),
-	stop_posting_option(Option, Options, Session).
+	stop_posting_option(Option, Options, Session), !.
+stop_posting(Options, _Session) :-
+	recorded(time_limit_exceeded, _S), 
+	memberchk(time, Options, [name(flag), optional]), !.
 	
 stop_posting_option(results(MaxResults), Options, Session) :-
 	number(MaxResults),
@@ -555,7 +575,9 @@ gather(B, Bag, Session) :-
 	retract(dataResult(Session, X)),
 	gather([X|B],Bag, Session),
 	!.
-gather(S,S, _Session).
+gather(S,S, Session) :-
+	recorded(findall_active, Session, Rev),
+	erase(Rev).
 
 
 
@@ -629,16 +651,21 @@ keys([Head|Tail], [Key|Keys], [Key-Head|TailWithKeys]) :-
 
 
 %%% convert types %%%
-
-a2Number(Number, Number) :- 
-	number(Number), !.
-a2Number(Atom, Number) :-
+a2Number(A, Number) :-
+	a2Number(A, Number, []).
+	
+a2Number(Number, Number, _Options) :- 
+	(number(Number); rational(Number)), !.
+a2Number(Atom, Number, Options) :-
 	atom(Atom), !,
-	atom_number(Atom, Number).
-a2Number(String, Number) :-
-	string(String), !,
-	string_to_atom(String, Atom),
-	atom_number(Atom, Number).
+	name(Atom, List),
+	a2Number(List, Number, Options).
+a2Number(String, Number, _Options) :-
+	is_list(String),
+	phrase(dcg_number_neg(Number), String), !.
+a2Number(_A, Default, Options) :-
+	memberchk(default(Default), Options),
+	(number(Default); rational(Default)), !.
 
 a2Atom(Atom, Atom) :-
 	atom(Atom), !.
