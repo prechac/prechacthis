@@ -161,11 +161,21 @@ td.info_title {
 	font-size: 80%;
 }
 
+.infoPage_swap_all_link {
+	text-align: center !important;
+	font-family: Arial,sans-serif;
+	margin-top: 2ex;
+	margin-bottom: 0ex;
+	border-width: 0px !important;
+	border-style: dotted;
+	font-size: 90%;
+	white-space: nowrap;
+}
 
 .jp_link {
 	text-align: center !important;
 	font-family: Arial,sans-serif;
-	margin: 5em 0 1em 0;
+	margin: 4em 0 1em 0;
 	border-color: black;
 	border-width: 0 !important;
 	border-style: dotted;

@@ -26,8 +26,8 @@ siteswap(Jugglers, Objects, MaxHeight, PassesMin, PassesMax, Pattern) :-
 	),
    addObjects(BasePattern, MissingObjects, Jugglers, PassesToAddMax, 0, MaxHeight, Prechator, Pattern),	
    (passesMin(Pattern, PassesMin); Jugglers=1),
-   passesMax(Pattern, PassesMax),
-   checkMultiplexes(Pattern).
+   passesMax(Pattern, PassesMax).
+   %checkMultiplexes(Pattern).
 
 addObjects([], 0, _Jugglers, _PassesMax, _MinHeight, _MaxHeight, _Prechator, []) :- !.
 addObjects([_BaseHead|BaseRest], MissingObjects, Jugglers, PassesMax, MinHeight, MaxHeight, Prechator, [Throw|PatternRest]) :-

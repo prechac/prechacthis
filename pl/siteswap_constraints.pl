@@ -2,7 +2,7 @@
 siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, PassesMin, PassesMax, ContainString, DontContainString, ClubDoesString, ReactString, ContainMagic) :-
 	initConstraintCheck,
 	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainString, ClubDoesString, ReactString, ContainMagic),
-	preprocessMultiplexes(Pattern),
+	%preprocessMultiplexes(Pattern),
 	constraint_fillable(Pattern, NumberOfJugglers, Objects, MaxHeight),
 	siteswap(NumberOfJugglers, Objects, MaxHeight, PassesMin, PassesMax, Pattern),
 	catch(

@@ -351,24 +351,17 @@ infoPage_just_this_orbit([], _OrbitPattern, _Orbit, Clubs, _NumberOfJugglers, _P
 			Clubs
 		])
 	]), !.
-infoPage_just_this_orbit([Throw|Rest], [Orbit|OrbitPattern], Orbit, Clubs, NumberOfJugglers, Period, MagicPositions) -->
+infoPage_just_this_orbit([Throw|Rest], [ThisOrbit|OrbitPattern], JustOrbit, Clubs, NumberOfJugglers, Period, MagicPositions) -->
 	{
 		length(Rest, RestLength),
 		Position is Period - RestLength - 1
 	},
 	html([
 		td([class(info_throw)],[
-			\html_throw(Throw, [hideIndex(NumberOfJugglers), colorThrow(Period), magic(Position, MagicPositions)])
+			\html_throw(Throw, [orbit(JustOrbit, ThisOrbit), hideIndex(NumberOfJugglers), colorThrow(Period), magic(Position, MagicPositions)])
 		])
 	]), !,
-	infoPage_just_this_orbit(Rest, OrbitPattern, Orbit, Clubs, NumberOfJugglers, Period, MagicPositions).
-infoPage_just_this_orbit([_Throw|Rest], [_OtherOrbit|OrbitPattern], Orbit, Clubs, NumberOfJugglers, Period, MagicPositions) -->
-	html([
-		td([class(info_throw)],[
-			&(nbsp)
-		])
-	]), !,
-	infoPage_just_this_orbit(Rest, OrbitPattern, Orbit, Clubs, NumberOfJugglers, Period, MagicPositions).
+	infoPage_just_this_orbit(Rest, OrbitPattern, JustOrbit, Clubs, NumberOfJugglers, Period, MagicPositions).
 
 	
 	
@@ -377,8 +370,17 @@ infoPage_just_this_orbit([_Throw|Rest], [_OtherOrbit|OrbitPattern], Orbit, Clubs
 %%% --- juggler info --- %%%
 	
 
-infoPage_juggler_info([], _ActionList, _SwapList, _ClubDistribution, _NumberOfJugglers, _Period, _Pattern, _BackURL) -->
-	[], !.
+infoPage_juggler_info([], _ActionList, SwapList, _ClubDistribution, NumberOfJugglers, _Period, Pattern, BackURL) -->
+	{
+		JugglerMax is NumberOfJugglers - 1,
+		numlist(0, JugglerMax, ListOfJugglers),
+		applyNewSwaps(SwapList, ListOfJugglers, NewSwapList)
+	},
+	html(
+		div([class(infoPage_swap_all_link)],[
+			\html_href(Pattern, NumberOfJugglers, NewSwapList, BackURL, [class(small)], 'swap all hands')
+		])
+	), !.
 infoPage_juggler_info([Juggler|ListOfJugglers], ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, Pattern, BackURL) -->
 	{
 		ColspanLong is Period,

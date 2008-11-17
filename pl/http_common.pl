@@ -28,15 +28,34 @@ html_write_request([Info|Request]) -->
 html_throw(Multiplex, Options) -->
 	html_list(Multiplex, [throw|Options]).
 	
-	
 html_throw_process_options(Throw, Options) -->
+	html_throw_pre_option(Throw, Options), !.
+html_throw_process_options(Throw, Options) -->
+	{
+		memberchk(not_just_spaces(true), Options, [optional])
+	},
 	html_throw_process_options(Throw, Options, Options).
+
+html_throw_pre_option(_Throw, Options) -->
+	{
+		memberchk(orbit(Orbit, Orbit), Options),!,
+		fail
+	}.
+html_throw_pre_option(_Throw, Options) -->
+	{
+		memberchk(orbit(JustOrbit, ThisOrbit), Options),
+		number(JustOrbit), 
+		number(ThisOrbit),
+		JustOrbit \= ThisOrbit, !
+	},
+	html(&(nbsp)).
+
+
 
 html_throw_process_options(Throw, [], OriginalOptions) -->
 	html_throw_content(Throw, OriginalOptions), !.
 html_throw_process_options(Throw, [Option|Options], OriginalOptions) -->
-	html_throw_option(Throw, Option, \html_throw_process_options(Throw, Options, OriginalOptions)).
-	
+	html_throw_option(Throw, Option, \html_throw_process_options(Throw, Options, OriginalOptions)).	
 	
 	
 html_throw_option(p(_Throw,0,_Origen), colorThrow(_Length), InnerHTML) -->
@@ -132,27 +151,40 @@ html_throw_id_next(Prefix, 0) :-
 *       list_right(Right)
 *       befor(Befor)
 *       after(After)
-*/	
+*/
 html_list(List, Options) -->
 	{
-		is_list(List), !
+		is_list(List)
 	},
-	html_list_first_middle_last(List, Options).
+	html_list_first_middle_last(List, [not_just_spaces(Bool)|Options]),
+	{
+		nonvar(Bool),!
+	}.
+html_list(List, _Options) -->
+	{
+		is_list(List),!
+	},
+	html(&(nbsp)).
 html_list(NoList, Options) -->
+	{
+		not(is_list(NoList))
+	},
 	html_list_process_element_options(NoList, Options).
 
 html_list_first_middle_last([Element], Options) -->
 	{
-		append(Options, [befor(\html_list_left(Options)), after(\html_list_right(Options))], OptionsSingle)
+		append(Options, [position(0), befor(\html_list_left(Options)), after(\html_list_right(Options))], OptionsSingle)
 	},
 	html_list(Element, OptionsSingle).
 html_list_first_middle_last(List, Options) -->
 	{
-		append([First|Middle], [Last], List)
+		append([First|Middle], [Last], List),
+		length(List, Length),
+		PosLast is Length - 1
 	},
-	html_list_first(First, Options),
-	html_list_content(Middle, Options),
-	html_list_last(Last, Options).
+	html_list_first(First, [position(0)|Options]),
+	html_list_content(Middle, Options, Length),
+	html_list_last(Last, [position(PosLast)|Options]).
 
 
 html_list_first(First, Options) -->
@@ -168,19 +200,26 @@ html_list_last(Last, Options) -->
 	html_list_seperator(Options),
 	html_list(Last, OptionsLast).
 
-html_list_content([], _Options) -->
+html_list_content([], _Options, _Length) -->
 	[], !.
-html_list_content([Element], Options) -->
+html_list_content([Element], Options, Length) -->
+	{
+		Pos is Length - 2
+	},
 	html_list_seperator(Options),
-	html_list(Element, Options), !.
-html_list_content([Element|List], Options) -->
+	html_list(Element, [position(Pos)|Options]), !.
+html_list_content([Element|List], Options, Length) -->
+	{
+		length(List, RestLength),
+		Pos is Length - RestLength - 2
+	},
 	html_list_seperator(Options),
-	html_list(Element, Options),
-	html_list_content(List, Options).
+	html_list(Element, [position(Pos)|Options]),
+	html_list_content(List, Options, Length).
 
 
-html_list_process_element_options(Throw, Options) -->
-	html_list_process_element_options(Throw, Options, Options).
+html_list_process_element_options(Element, Options) -->
+	html_list_process_element_options(Element, Options, Options).
 
 html_list_process_element_options(Element, [], OriginalOptions) -->
 	html_list_element(Element, OriginalOptions), !.
@@ -206,15 +245,36 @@ html_list_element_option(_Element, after(After), InnerHTML) -->
 html_list_element_option(_Element, _Option, InnerHTML) -->
 	html(InnerHTML).
 	
+html_list_element_change_options([], [], _OriginalOptions) :- !.
+html_list_element_change_options([Option|Options], [OptionNew|OptionsNew], OriginalOptions) :-
+	html_list_element_change_options(Options, OptionsNew, OriginalOptions),
+	html_list_element_change_option(Option, OptionNew, OriginalOptions).
 	
+	
+html_list_element_change_option(magic(Position, MagicPositions), magic([Position|PositionList], MagicPositions), OriginalOptions) :-
+	findall(Pos, member(position(Pos), OriginalOptions), PositionList), 
+	PositionList \= [], !.
+html_list_element_change_option(orbit(JustOrbit, ThisOrbit), orbit(JustOrbit, ThisOrbitNew), OriginalOptions) :-
+	is_list(ThisOrbit),
+	findall(Pos, member(position(Pos), OriginalOptions), PositionList), 
+	PositionList \= [],
+	nth0ListOfLists(PositionList, ThisOrbit, ThisOrbitNew), !.
+html_list_element_change_option(Option, Option, _OriginalOptions) :- !.	
+
 	
 html_list_element(Throw, Options) -->
 	{
-		memberchk(throw, Options), !
+		memberchk(throw, Options),!,
+		html_list_element_change_options(Options, OptionsChanged, Options)
 	},
-	html_throw_process_options(Throw, Options).
-html_list_element(Element, _Options) -->
-	html(Element).
+	html_throw_process_options(Throw, OptionsChanged).
+html_list_element(&(nbsp), _Options) -->
+	html(&(nbsp)), !.
+html_list_element(Element, Options) -->
+	html(Element),
+	{
+		memberchk(not_just_spaces(true), Options, [optional])
+	}.
 
 
 html_list_seperator(Options) -->

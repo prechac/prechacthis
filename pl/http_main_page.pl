@@ -206,7 +206,7 @@ mainPage_search_results_info_persons(1) -->
 	]), !.
 mainPage_search_results_info_persons(Persons) -->
 	html([
-		h2([],[Persons, ' juggers'])
+		h2([],[Persons, ' jugglers'])
 	]).
 
 
@@ -305,15 +305,15 @@ mainPage_walk_list_of_siteswapLists([SiteswapList|Rest], Request, Persons, _) --
 		memberchk(siteswaps(Siteswaps), SiteswapList),
 		length(Siteswaps, NumberOfResults),
 		(Flag = some -> 
-			HowMany = p([class(some)],['Random selection of patterns!']);
+			HowMany = p([class(some)],['selection of patterns!']);
 			(Flag = time ->
 				(NumberOfResults is 1 ->	
-					HowMany = p([class(some)],['Time limit reached, one pattern found!']);
-					HowMany = p([class(some)],['Time limit reached, ', NumberOfResults, ' patterns found!'])
+					HowMany = p([class(some)],['time limit reached, one pattern found!']);
+					HowMany = p([class(some)],['time limit reached, ', NumberOfResults, ' patterns found!'])
 				);
 				(NumberOfResults is 1 ->	
-					HowMany = p([class(all)],['The only possible pattern has been found!']);
-					HowMany = p([class(all)],['All ', NumberOfResults, ' patterns have been found!'])
+					HowMany = p([class(all)],['one pattern found!']);
+					HowMany = p([class(all)],[NumberOfResults, ' patterns found!'])
 				)	
 			)	
 		),
@@ -407,7 +407,7 @@ mainPage_form_jugglers(Persons, _Mode) -->
 	html([
 		tr([],[
 			td([class(lable)],[
-				'Jugglers:'
+				'jugglers:'
 			]),
 			td([class(input)],[
 				select([name(persons), size(1)],[
@@ -437,7 +437,7 @@ mainPage_form_objects(Objects, _Mode) -->
 	html([
 		tr([],[
 			td([class(lable)],[
-				'Objects:'
+				'objects:'
 			]),
 			td([class(input)],[
 				input([type(text), name(objects), value(Objects)])
@@ -452,7 +452,7 @@ mainPage_form_period(Period, simple) -->
 	html([
 		tr([],[
 			td([class(lable)],[
-				'Period:'
+				'period:'
 			]),
 			td([class(input)],[
 				select([name(period), size(1)],[
@@ -465,7 +465,7 @@ mainPage_form_period(Period, _Mode) -->
 	html([
 		tr([],[
 			td([class(lable)],[
-				'Period:'
+				'period:'
 			]),
 			td([class(input)],[
 				input([type(text), name(period), value(Period)])
@@ -478,7 +478,7 @@ mainPage_form_max(Max, _Mode) -->
 	html([
 		tr([],[
 			td([class(lable)],[
-				'Max height:'
+				'max height:'
 			]),
 			td([class(input)],[
 				select([name(max), size(1)],[
@@ -492,7 +492,7 @@ mainPage_form_passes(PassesMin, PassesMax, _Mode) -->
 	html([
 		tr([],[
 			td([class(lable)],[
-				'Passes:'
+				'passes:'
 			]),
 			td([class(input)],[
 				table([align(left), cellpadding(0)],[
@@ -527,7 +527,7 @@ mainPage_form_contain(Contain, _Mode) -->
 	html([
 		tr([],[
 			td([class(lable)],[
-				'Contain:'
+				'contain:'
 			]),
 			td([class(input)],[
 				input([type(text), name(contain), value(Contain)])
@@ -541,7 +541,7 @@ mainPage_form_exclude(Exclude, _Mode) -->
 	html([
 		tr([],[
 			td([class(lable)],[
-				'Exclude:'
+				'exclude:'
 			]),
 			td([class(input)],[
 				input([type(text), name(exclude), value(Exclude)])
@@ -554,7 +554,7 @@ mainPage_form_clubdoes(ClubDoes, _Mode) -->
 	html([
 		tr([],[
 			td([class(lable)],[
-				'Club does:'
+				'club does:'
 			]),
 			td([class(input)],[
 				input([type(text), name(clubdoes), value(ClubDoes)])
@@ -567,7 +567,7 @@ mainPage_form_react(React, _Mode) -->
 	html([
 		tr([],[
 			td([class(lable)],[
-				'Cause:'
+				'cause:'
 			]),
 			td([class(input)],[
 				input([type(text), name(react), value(React)])
@@ -580,7 +580,7 @@ mainPage_form_magic(Magic, _Mode) -->
 	html([
 		tr([],[
 			td([class(lable)],[
-				'Contain magic:'
+				'contain magic:'
 			]),
 			td([class(input)],[
 				\html_checkbox('1', magic, Magic)
@@ -596,7 +596,7 @@ mainPage_form_results(Results, _Mode) -->
 	html([
 		tr([],[
 			td([class(lable)],[
-				'Max results:'
+				'max results:'
 			]),
 			td([class(input)],[
 				input([type(text), name(results), value(Results)])
