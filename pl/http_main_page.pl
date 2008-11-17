@@ -424,7 +424,7 @@ mainPage_form_objects(Objects, simple) -->
 	html([
 		tr([],[
 			td([class(lable)],[
-				'Objects:'
+				'objects:'
 			]),
 			td([class(input)],[
 				select([name(objects), size(1)],[

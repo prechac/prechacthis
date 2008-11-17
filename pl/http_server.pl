@@ -6,11 +6,14 @@
 server :- server(4211), !.
 server(Port) :-
 	http_server(http_dispatch, [port(Port)]).
+server_stop :-
+	http_stop_server(4211, []).
 
-server_reload :- server_reload(4211), !.
-server_reload(Port) :-
-	http_stop_server(Port, []), consult('pl/prechacthis'), server(Port).
-	
+:- dynamic 
+	constraintChecked/1,
+	href_type/1,
+	dataResult/2.
+
 
 % ------ pages ------ %
 
