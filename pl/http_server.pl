@@ -97,7 +97,7 @@ serve_css_file(Request) :-
 	absolute_file_name(css(''), Dir, [file_type(directory)]),
 	sub_atom(FilePath, 0, _, _, Dir),
 	http_reply_file(FilePath, [], Request).
-	
+
 serve_css_resource(Request) :-
 	memberchk(path(Path), Request),
 	atom_concat('/css/', Local, Path),
@@ -113,7 +113,6 @@ serve_css_resource(Request) :-
 			fail
 		)
 	).
-	
 	
 %%------ images ------ %%
 
@@ -131,7 +130,7 @@ serve_images_file(Request) :-
 	sub_atom(FilePath, 0, _, _, Dir),
 	http_reply_file(FilePath, [], Request).
 
-	
+
 serve_images_resource(Request) :-
 	memberchk(path(Path), Request),
 	atom_concat('/images/', Local, Path),
@@ -147,7 +146,6 @@ serve_images_resource(Request) :-
 			fail
 		)
 	).
-	
 %%------ js ------ %%
 
 file_search_path(js, Path) :-
