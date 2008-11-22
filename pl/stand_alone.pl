@@ -1,5 +1,5 @@
 :- ['prechacthis.pl'].
-:- ['../xpce/server_gui.pl'].
+%:- ['../xpce/server_gui.pl'].
 
 
 build_prechacthis(Type) :-
@@ -10,4 +10,4 @@ build_prechacthis(Type) :-
 build_prechacthis_goal(gui, server_gui) :- !.
 build_prechacthis_goal(_, server) :- !.
 
-:- build_prechacthis(gui), halt.
+:- build_prechacthis(no_gui), halt.
