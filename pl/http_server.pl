@@ -3,12 +3,19 @@
 :- use_module(library('http/html_write')).
 :- use_module(library('http/http_parameters')).
 :- use_module(library('http/http_header')).
+:- use_module(library('time')).
 
 server :- server(4211), !.
 server(Port) :-
-	http_server(http_dispatch, [port(Port)]).
-server_stop :-
-	http_stop_server(4211, []).
+	format('\n*** PrechacThis ***\n'),
+	http_server(http_dispatch, [port(Port)]),
+	format('Type "stop_server." to quit.\n\n').
+
+	
+stop_server :- stop_server(4211), !.
+stop_server(Port) :-
+	http_stop_server(Port, []), 
+	halt.
 
 :- dynamic 
 	constraintChecked/1,
