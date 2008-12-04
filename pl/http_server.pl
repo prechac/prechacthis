@@ -9,7 +9,7 @@ server :- server(4211), !.
 server(Port) :-
 	format('\n*** PrechacThis ***\n'),
 	http_server(http_dispatch, [port(Port)]),
-	format('To use PrechacThis open http://localhost:4211 with your favorite webbrowser.\n').
+	format('To use PrechacThis open http://localhost:4211 with your favorite webbrowser.\n'),
 	format('Type "stop_server." to quit.\n\n').
 
 	
