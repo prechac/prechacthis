@@ -4,10 +4,6 @@
 
 build_prechacthis(Type) :-
 	make,
-	build_prechacthis_goal(Type, Goal),
-	qsave_program('building/linux/prechacthis', [stand_alone(true), class(runtime), autoload(true), goal(Goal)]).
+	qsave_program('building/linux/prechacthis', [stand_alone(true), class(runtime), autoload(true), goal(server)]).
 	
-build_prechacthis_goal(gui, server_gui) :- !.
-build_prechacthis_goal(_, server) :- !.
 
-:- build_prechacthis(no_gui), halt.
