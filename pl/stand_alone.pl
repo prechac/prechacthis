@@ -1,9 +1,11 @@
 :- ['prechacthis.pl'].
 %:- ['../xpce/server_gui.pl'].
 
+build_prechacthis :-
+	build_prechacthis('prechacthis').
 
-build_prechacthis(Type) :-
+build_prechacthis(Target) :-
 	make,
-	qsave_program('building/linux/prechacthis', [stand_alone(true), class(runtime), autoload(true), goal(server)]).
+	qsave_program(Target, [stand_alone(true), class(runtime), autoload(true), goal(server)]).
 	
 
