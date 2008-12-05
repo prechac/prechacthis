@@ -5,6 +5,7 @@
 :- use_module(library('http/http_header')).
 :- use_module(library('time')).
 
+
 server :- server(4211), !.
 server(Port) :-
 	format('\n*** PrechacThis ***\n'),
@@ -49,8 +50,8 @@ resource(Name, css, css(FileName)) :-
 	file_name_extension(Name, css, FileName).
 resource(Name, css, File) :-
 	var(Name),
-	absolute_file_name(css(''), Dir, [file_type(directory)]),
-	atom_concat(Dir, '*.css', Pattern),
+	absolute_file_name(css(''), [file_type(directory)], Dir),
+	file_pattern(Dir, css, Pattern),
 	expand_file_name(Pattern, Files),
 	member(File, Files),
 	atom_concat(Dir, Local, File),
@@ -62,8 +63,8 @@ resource(Name, images, images(FileName)) :-
 	file_name_extension(Name, png, FileName).
 resource(Name, images, File) :-
 	var(Name),
-	absolute_file_name(images(''), Dir, [file_type(directory)]),
-	concat(Dir, '*.png', Pattern),
+	absolute_file_name(images(''), [file_type(directory)], Dir),
+	file_pattern(Dir, png, Pattern),
 	expand_file_name(Pattern, Files),
 	member(File, Files),
 	atom_concat(Dir, Local, File),
@@ -74,12 +75,26 @@ resource(Name, js, js(FileName)) :-
 	file_name_extension(Name, js, FileName).
 resource(Name, js, File) :-
 	var(Name),
-	absolute_file_name(js(''), Dir, [file_type(directory)]),
-	concat(Dir, '*.js', Pattern),
+	absolute_file_name(js(''), [file_type(directory)], Dir),
+	file_pattern(Dir, js, Pattern),
 	expand_file_name(Pattern, Files),
 	member(File, Files),
 	atom_concat(Dir, Local, File),
 	file_name_extension(Name, js, Local).
+
+
+file_pattern(Dir, Ext, Pattern) :-
+	walk_subdirs(Dir, Subdir),
+	concat_atom([Subdir, '*.', Ext], Pattern).
+
+walk_subdirs(Dir, Dir).
+walk_subdirs(Dir, SubSubDir) :-
+	concat_atom([Dir, '*'], Pattern),
+	expand_file_name(Pattern, Dirs),
+	member(SubDir, Dirs),
+	exists_directory(SubDir),
+	atom_concat(SubDir, '/', SubDirPath),
+	walk_subdirs(SubDirPath, SubSubDir).
 
 % ------ files ------ %
 
@@ -111,6 +126,7 @@ serve_css_resource(Request) :-
 	file_name_extension(Name, css, Local),
 	open_resource(Name, css, StreamIn),
 	format('Content-type: text/css~n~n'),
+	%time_file
 	repeat,
 	(at_end_of_stream(StreamIn) ->
 		close(StreamIn), !;
