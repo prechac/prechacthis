@@ -5,6 +5,13 @@
 :- use_module(library('http/http_header')).
 :- use_module(library('time')).
 
+:- load_foreign_library(foreign('http_stream')).
+:- load_foreign_library(foreign('memfile')).
+:- load_foreign_library(foreign('mime')).
+:- load_foreign_library(foreign('sgml2pl')).
+:- load_foreign_library(foreign('socket')).
+:- load_foreign_library(foreign('time')).
+
 
 server :- server(4211), !.
 server(Port) :-
