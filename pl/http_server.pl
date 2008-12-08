@@ -46,7 +46,6 @@ http_joepass_page_path('/joepass.php').
 
 
 
-
 % ------ resources ------ %
 
 resource(Name, css, css(FileName)) :-
@@ -87,6 +86,7 @@ resource(Name, js, File) :-
 	file_name_extension(Name, js, Local).
 
 
+
 file_pattern(Dir, Ext, Pattern) :-
 	walk_subdirs(Dir, Subdir),
 	concat_atom([Subdir, '*.', Ext], Pattern).
@@ -100,21 +100,59 @@ walk_subdirs(Dir, SubSubDir) :-
 	atom_concat(SubDir, '/', SubDirPath),
 	walk_subdirs(SubDirPath, SubSubDir).
 
+
+serve_resource(Type, Request) :-
+	concat_atom(['/', Type, '/'], Prefix),
+	memberchk(path(Path), Request),
+	atom_concat(Prefix, Local, Path),
+	resource_type_extention(Type, Ext),
+	file_name_extension(Name, Ext, Local),
+	open_resource(Name, Type, StreamIn),
+	resource_content_type(Type, ContentType),
+	format('Content-type: ~w~n~n', [ContentType]),
+	%time_file
+	repeat,
+	(at_end_of_stream(StreamIn) ->
+		close(StreamIn), !;
+		(
+			read_pending_input(StreamIn, Chars, []),
+			format('~s', [Chars]),
+			fail
+		)
+	).
+	
+resource_content_type(css, 'text/css').
+resource_content_type(images, 'image/png').
+resource_content_type(js, 'text/javascript').
+
+resource_type_extention(css, css).
+resource_type_extention(js, js).
+resource_type_extention(images, png).
+
+
 % ------ files ------ %
 
 server_location(CWD) :-
 	working_directory(CWD, CWD).
 
-
 	
 %%------ css ------ %%
+
+
+http_prefix_handler(Prefix, Pred) :-
+	current_prolog_flag(version, Version), 
+	Version > 50655, !,
+	http_handler(Prefix, Pred, [prefix]).
+http_prefix_handler(Prefix, Pred) :-
+	http_handler(prefix(Prefix), Pred, []).
+
 
 file_search_path(css, Path) :-
 	server_location(ServerPath),
 	atom_concat(ServerPath, '/css', Path).
 	
 
-:- http_handler('/css/', serve_css_resource, [prefix]).
+:- http_prefix_handler('/css/', serve_resource(css)).
 
 serve_css_file(Request) :-
 	memberchk(path(Path), Request),
@@ -147,7 +185,7 @@ file_search_path(images, Path) :-
 	server_location(ServerPath),
 	atom_concat(ServerPath, '/images', Path).
 
-:- http_handler('/images/', serve_images_resource, [prefix]).
+:- http_prefix_handler('/images/', serve_resource(images)).
 
 serve_images_file(Request) :-
 	memberchk(path(Path), Request),
@@ -179,7 +217,7 @@ file_search_path(js, Path) :-
 	server_location(ServerPath),
 	atom_concat(ServerPath, '/js', Path).
 
-:- http_handler('/js/', serve_js_resource, [prefix]).
+:- http_prefix_handler('/js/', serve_resource(js)).
 
 serve_js_file(Request) :-
 	memberchk(path(Path), Request),
