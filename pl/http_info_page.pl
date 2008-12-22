@@ -86,9 +86,13 @@ infoPage_info(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL, Reque
 	},
 	infoPage_pattern(Pattern, NumberOfJugglers, SwapList, BackURL),
 	infoPage_pattern_info(Pattern, PointsInTime, ActionList, NumberOfJugglers, SwapList, BackURL),
-	infoPage_orbit_info(Pattern, NumberOfJugglers),
-	infoPage_juggler_info(ListOfJugglers, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, Pattern, BackURL),
-	infoPage_joepass_link(Pattern, NumberOfJugglers, SwapList, Request),
+	html([
+		form([id(joepass_form), action('./joe.pass'), method(post)],[
+			\infoPage_orbit_info(Pattern, NumberOfJugglers),
+			\infoPage_juggler_info(ListOfJugglers, ActionList, SwapList, ClubDistribution, NumberOfJugglers, Period, Pattern, BackURL),
+			\infoPage_joepass_link(Pattern, NumberOfJugglers, SwapList, Request)
+		])
+	]),
 	infoPage_hidden_info(Pattern, NumberOfJugglers, SwapList, BackURL).
 	
 
@@ -322,14 +326,23 @@ infoPage_orbit_info(Pattern, NumberOfJugglers) -->
 				td([class(info_right_info)],[
 					Clubs, ' clubs'
 				]),
-				td([],[
-					&(nbsp)
-				])
+				\infoPage_orbit_info_ColorHead(Pattern)
 			]),
 			\infoPage_this_orbit_info(OrbitPattern, Orbits, Pattern, NumberOfJugglers, Period, MagicPositions)
 		])
 	]).
 
+infoPage_orbit_info_ColorHead(Pattern) -->
+	{
+		noMultiplex(Pattern)
+	},
+	html(	
+		td([class(info_right_info)],[
+			'orbit color'
+		])
+	).
+infoPage_orbit_info_ColorHead(_) --> [], !.
+	
 	
 infoPage_this_orbit_info(_OrbitPattern, [], _Pattern, _NumberOfJugglers, _Period, _MagicPositions) --> [], !.
 infoPage_this_orbit_info(OrbitPattern, [Orbit|Orbits], Pattern, NumberOfJugglers, Period, MagicPositions) -->
@@ -339,19 +352,16 @@ infoPage_this_orbit_info(OrbitPattern, [Orbit|Orbits], Pattern, NumberOfJugglers
 	},
 	html([
 		tr([],[
-			\infoPage_just_this_orbit(Pattern, OrbitPattern, Orbit, Clubs, NumberOfJugglers, Period, MagicPositions)
+			\infoPage_just_this_orbit(Pattern, OrbitPattern, Orbit, Clubs, NumberOfJugglers, Period, MagicPositions, Pattern)
 		])
 	]),
 	infoPage_this_orbit_info(OrbitPattern, Orbits, Pattern, NumberOfJugglers, Period, MagicPositions).
 
 
-infoPage_just_this_orbit([], _OrbitPattern, _Orbit, Clubs, _NumberOfJugglers, _Period, _MagicPositions) --> 
-	html([
-		td([class(info_right_info)],[
-			Clubs
-		])
-	]), !.
-infoPage_just_this_orbit([Throw|Rest], [ThisOrbit|OrbitPattern], JustOrbit, Clubs, NumberOfJugglers, Period, MagicPositions) -->
+infoPage_just_this_orbit([], _OrbitPattern, Orbit, Clubs, _NumberOfJugglers, _Period, _MagicPositions, Pattern) --> 
+	infoPage_just_this_orbit_NumberOfClubs(Clubs),
+	infoPage_just_this_orbit_OrbitColor(Clubs, Orbit, Pattern), !.
+infoPage_just_this_orbit([Throw|Rest], [ThisOrbit|OrbitPattern], JustOrbit, Clubs, NumberOfJugglers, Period, MagicPositions, Pattern) -->
 	{
 		length(Rest, RestLength),
 		Position is Period - RestLength - 1
@@ -361,10 +371,46 @@ infoPage_just_this_orbit([Throw|Rest], [ThisOrbit|OrbitPattern], JustOrbit, Club
 			\html_throw(Throw, [orbit(JustOrbit, ThisOrbit), hideIndex(NumberOfJugglers), colorThrow(Period), magic(Position, MagicPositions)])
 		])
 	]), !,
-	infoPage_just_this_orbit(Rest, OrbitPattern, JustOrbit, Clubs, NumberOfJugglers, Period, MagicPositions).
+	infoPage_just_this_orbit(Rest, OrbitPattern, JustOrbit, Clubs, NumberOfJugglers, Period, MagicPositions, Pattern).
 
-	
-	
+
+infoPage_just_this_orbit_NumberOfClubs(Clubs) -->
+	html([
+		td([class(info_right_info)],[
+			Clubs
+		])
+	]).
+infoPage_just_this_orbit_OrbitColor(Clubs, Orbit, Pattern) -->
+	{
+		noMultiplex(Pattern)
+	},
+	html([
+		td([class(info_right_info)],[
+			\infoPage_orbit_select_color(Clubs, Orbit)
+		])
+	]), !.
+infoPage_just_this_orbit_OrbitColor(_, _, _) --> [], !.
+
+
+infoPage_orbit_select_color(0, _Orbit) -->
+	html(&(nbsp)), !.
+infoPage_orbit_select_color(NumberOfClubs, Orbit) -->
+	{
+		NumberOfClubs > 0,
+		atom_concat(color, Orbit, SelectName),
+		findall([Number, Name], jp_Color([number(Number), name(Name)]), SelectList)
+	},
+	html(
+		select([name(SelectName), size(1)],[
+			\infoPage_orbit_select_color_option(Orbit, SelectList)
+		])
+	).
+
+infoPage_orbit_select_color_option(_, []) --> [], !.
+infoPage_orbit_select_color_option(Orbit, [[Number, Name]|SelectList]) -->
+	html_option(Number, Orbit, Name),
+	infoPage_orbit_select_color_option(Orbit, SelectList).
+
 	
 	
 %%% --- juggler info --- %%%
@@ -655,36 +701,34 @@ infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
 	},
 	html([
 		div([class(jp_link)],[
-			form([id(joepass_form), action('./joe.pass'), method(post)],[
-				input([type(hidden), name(pattern), value(PatternEnc)]),
-				input([type(hidden), name(persons), value(PersonsEnc)]),
-				input([type(hidden), name(filename), value(FileNameEnc)]),
-				input([type(hidden), name(swap), value(SwapListEnc)]),
-				a([href('http://www.koelnvention.de/software'), target('_blank')],['JoePass!']),
-				&(nbsp),
-				'file:',
-				&(nbsp),
-				select([name(download), size(1)],[
-					\html_option('on', JoePass_Download, 'download'),
-					\html_option('off', JoePass_Download, 'show')
-				]),
-				&(nbsp),
-				select([name(style), size(1)],[
-					\html_option('normal', JoePass_Style, 'face to face'),
-					\html_option('shortdistance', JoePass_Style, 'short distance'),
-					\html_option('sidebyside', JoePass_Style, 'side by side'),
-					\html_option('backtoback', JoePass_Style, 'back to back'),
-					\html_option('dropbackline', JoePass_Style, 'drop back line'),
-					\html_option('none', JoePass_Style, &(nbsp))
-				]),
-				&(nbsp),
-				select([name(nametype), size(1)],[
-					\html_option('joe', JoePass_File, 'joe.pass'),
-					\html_option('numbers', JoePass_File, FileNamePass)
-				]),
-				&(nbsp),
-				input([type(submit), value('go')])
-			])
+			input([type(hidden), name(pattern), value(PatternEnc)]),
+			input([type(hidden), name(persons), value(PersonsEnc)]),
+			input([type(hidden), name(filename), value(FileNameEnc)]),
+			input([type(hidden), name(swap), value(SwapListEnc)]),
+			a([href('http://www.koelnvention.de/software'), target('_blank')],['JoePass!']),
+			&(nbsp),
+			'file:',
+			&(nbsp),
+			select([name(download), size(1)],[
+				\html_option('on', JoePass_Download, 'download'),
+				\html_option('off', JoePass_Download, 'show')
+			]),
+			&(nbsp),
+			select([name(style), size(1)],[
+				\html_option('normal', JoePass_Style, 'face to face'),
+				\html_option('shortdistance', JoePass_Style, 'short distance'),
+				\html_option('sidebyside', JoePass_Style, 'side by side'),
+				\html_option('backtoback', JoePass_Style, 'back to back'),
+				\html_option('dropbackline', JoePass_Style, 'drop back line'),
+				\html_option('none', JoePass_Style, &(nbsp))
+			]),
+			&(nbsp),
+			select([name(nametype), size(1)],[
+				\html_option('joe', JoePass_File, 'joe.pass'),
+				\html_option('numbers', JoePass_File, FileNamePass)
+			]),
+			&(nbsp),
+			input([type(submit), value('go')])
 		])
 	]).
 

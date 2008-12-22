@@ -9,10 +9,63 @@ joepass_page(Request) :-
 			swap(    ReqSwap,     [default('[]')]           ),
 			download(ReqDownload, [default('on')]           ),
 			style(   ReqStyle,    [default('normal')]       ),
-			nametype(ReqNameType, [default('joe')]     )
+			nametype(ReqNameType, [default('joe')]          ),
+			color0(Color0,        [default(-1), integer]    ),
+			color1(Color1,        [default(-1), integer]    ),
+			color2(Color2,        [default(-1), integer]    ),
+			color3(Color3,        [default(-1), integer]    ),
+			color4(Color4,        [default(-1), integer]    ),
+			color5(Color5,        [default(-1), integer]    ),
+			color6(Color6,        [default(-1), integer]    ),
+			color7(Color7,        [default(-1), integer]    ),
+			color8(Color8,        [default(-1), integer]    ),
+			color9(Color9,        [default(-1), integer]    ),
+			color10(Color10,      [default(-1), integer]    ),
+			color11(Color11,      [default(-1), integer]    ),
+			color12(Color12,      [default(-1), integer]    ),
+			color13(Color13,      [default(-1), integer]    ),
+			color14(Color14,      [default(-1), integer]    ),
+			color15(Color15,      [default(-1), integer]    ),
+			color16(Color16,      [default(-1), integer]    ),
+			color17(Color17,      [default(-1), integer]    ),
+			color18(Color18,      [default(-1), integer]    ),
+			color19(Color19,      [default(-1), integer]    ),
+			color20(Color20,      [default(-1), integer]    ),
+			color21(Color21,      [default(-1), integer]    ),
+			color22(Color22,      [default(-1), integer]    ),
+			color23(Color23,      [default(-1), integer]    )
 		]
 	),
 	
+	OrbitColors = [
+		[0, Color0],
+		[1, Color1],
+		[2, Color2],
+		[3, Color3],
+		[4, Color4],
+		[5, Color5],
+		[6, Color6],
+		[7, Color7],
+		[8, Color8],
+		[9, Color9],
+		[10, Color10],
+		[11, Color11],
+		[12, Color12],
+		[13, Color13],
+		[14, Color14],
+		[15, Color15],
+		[16, Color16],
+		[17, Color17],
+		[18, Color18],
+		[19, Color19],
+		[20, Color20],
+		[21, Color21],
+		[22, Color22],
+		[23, Color23]		
+	],
+	
+	jp_clean_orbit_colors(OrbitColors, OrbitColorsCleaned),
+%	OrbitColorsCleanedz = [[0,0], [1,1]],
 	
 	www_form_encode(PatternAtom, ReqPattern),
 	Persons = ReqPersons,
@@ -30,8 +83,9 @@ joepass_page(Request) :-
 	set_cookie('joepass_file', NameTypeAtom),
 	
 	jp_file_header(DownloadAtom, NameTypeAtom, FilenameAtom),
-	jp_pattern_def(Pattern, Persons, SwapList, StyleAtom).
-	
+	jp_pattern_def(Pattern, Persons, SwapList, StyleAtom, OrbitColorsCleaned).
+
+
 	
 jp_file_header(on, numbers, Filename) :-
 	format('Content-type: application/force-download~n'),
@@ -45,7 +99,7 @@ jp_file_header(off, _, _) :-
 	format('Content-type: text/plain~n~n').
 	
 
-jp_pattern_def(PatternShort, NumberOfJugglers, SwapList, Style) :-
+jp_pattern_def(PatternShort, NumberOfJugglers, SwapList, Style, OrbitColors) :-
 	length(PatternShort, Period),
 	maxHeight(PatternShort, ShortMaxHeight),
 	MaxHeight is truncate(ShortMaxHeight) + 1,
@@ -57,7 +111,7 @@ jp_pattern_def(PatternShort, NumberOfJugglers, SwapList, Style) :-
 	jp_positions(NumberOfJugglers, Style),
 	%jp_colors(ActionList, Pattern, NumberOfJugglers),
 	(noMultiplex(Pattern) -> 
-		jp_colors(ActionList, Pattern, NumberOfJugglers);
+		jp_colors(ActionList, Pattern, NumberOfJugglers, OrbitColors);
 		true
 	),
 	jp_jugglerStartLeft(LeftList),
@@ -120,14 +174,14 @@ jp_printJugglerPosition(Juggler, NumberOfJugglers, circle, D) :-
 	V is round(Radius * sin(X)),
 	format('#jugglerPosition ~w (~w,0,~w)(0,0,0)\n', [Juggler,U,V]).
 
-jp_colors(ActionList, Pattern, NumberOfJugglers) :-
+jp_colors(ActionList, Pattern, NumberOfJugglers, OrbitColors) :-
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('! colors\n'),
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n\n'), 
 	orbits(Pattern, OrbitPattern),
 	averageNumberOfClubs(Pattern, AVClubs),
 	NumberOfClubs is AVClubs * NumberOfJugglers,
-	jp_printOrbitDefs(OrbitPattern),
+	jp_printOrbitDefs(OrbitColors),
 	length(Pattern, Period),
 	club_siteswap_positions(ActionList, OrbitPattern, NumberOfClubs, Period, SiteswapPositions),
 	format('!-------------------------------------------\n'),
@@ -136,21 +190,28 @@ jp_colors(ActionList, Pattern, NumberOfJugglers) :-
 	jp_printClubColor(SiteswapPositions, NumberOfClubs),
 	format('\n').
 
-jp_printOrbitDefs(OrbitPattern) :-
+	
+jp_clean_orbit_colors([], []) :- !.
+jp_clean_orbit_colors([[_, -1]|OrbitColors], OrbitColorsCleaned) :-
+	!, jp_clean_orbit_colors(OrbitColors, OrbitColorsCleaned).
+jp_clean_orbit_colors([Color| OrbitColors], [Color| OrbitColorsCleaned]) :-
+	jp_clean_orbit_colors(OrbitColors, OrbitColorsCleaned).
+
+jp_printOrbitDefs(OrbitColors) :-
 	format('!-------------------------------------------\n'),
 	format('! color definition for orbits\n'),
 	format('!-------------------------------------------\n'),
-	flatten(OrbitPattern, OrbitsFlat),
-	list_to_set(OrbitsFlat, OrbitsSet),
-	length(OrbitsSet, NumberOfOrbits),
-	forall(between(1, NumberOfOrbits, Orbit),
+	forall(member([Orbit, Number], OrbitColors),
 		(
-			Orbit0 is Orbit - 1,
-			jp_Color(Orbit0, Color),
-			format('#replace orbit~w ~w\n', [Orbit, Color])
+			Orbit1 is Orbit + 1,
+			jp_Color([number(Number), code(Color), name(Name)]),
+			format('#replace orbit~w ~w ! ~w\n', [Orbit1, Color, Name])
 		)
 	),
 	format('\n').
+
+
+
 
 jp_printClubColor([], _) :- !.
 jp_printClubColor([[_Juggler, _SiteswapPosition, Orbit]|ClubSiteswapPositions], NumberOfClubs) :-
@@ -160,11 +221,56 @@ jp_printClubColor([[_Juggler, _SiteswapPosition, Orbit]|ClubSiteswapPositions], 
 	format('#objectColor ~w orbit~w\n', [Club, Orbit1]),
 	jp_printClubColor(ClubSiteswapPositions, NumberOfClubs).
 	
-jp_Color(Number, Color) :-
-	ColorList = ['(1,1,1)','(1,0,0)','(0,1,0)','(0,0,1)','(0,1,1)','(1,0,1)','(1,1,0)','(0.5,0,0)','(0,0.5,0)','(0,0,0.5)','(0,0.5,0.5)','(0.5,0,0.5)','(0.5,0.5,0)','(0.5,0.5,0.5)','(0,0,0)'],
-	length(ColorList, NumberOfColors),
-	Pos is Number mod NumberOfColors,
-	nth0(Pos, ColorList, Color).
+	
+jp_Color(Info) :-
+	select(number(Number), Info, InfoShort),!,
+	jp_Color(Number, InfoShort).
+jp_Color(Info) :-
+	jp_Color(_, Info).
+	
+jp_Color(Number, Info) :-
+	not(is_list(Info)), !,
+	jp_Color(Number, [Info]).
+jp_Color(Number, InfoList) :-
+	is_list(InfoList),
+	jp_Color_Info(Number, InfoList).
+	
+jp_Color_Info(_, []) :- !.
+jp_Color_Info(Number, [code(Code)|InfoList]) :-	
+	jp_ListOfColorCodes(ColorList),
+	(
+		(
+			var(Number),
+			Pos = Number
+		);
+		(
+			number(Number),
+			length(ColorList, NumberOfColors),
+			Pos is Number mod NumberOfColors
+		)
+	),
+	nth0(Pos, ColorList, Code),
+	jp_Color_Info(Number, InfoList).
+jp_Color_Info(Number, [name(Name)|InfoList]) :-
+	jp_ListOfColorNames(NameList),
+	(
+		(
+			var(Number),
+			Pos = Number
+		);
+		(
+			number(Number),
+			length(NameList, NumberOfNames),
+			Pos is Number mod NumberOfNames
+		)
+	),
+	nth0(Pos, NameList, Name),
+	jp_Color_Info(Number, InfoList).
+
+jp_ListOfColorCodes(['(1,1,1)', '(1,0,0)', '(0,1,0)', '(0,0,1)', '(0,1,1)',   '(1,0,1)', '(1,1,0)', '(0.5,0,0)', '(0,0.5,0)', '(0,0,0.5)', '(0,0.5,0.5)', '(0.5,0,0.5)', '(0.5,0.5,0)', '(0.5,0.5,0.5)', '(0,0,0)']).
+jp_ListOfColorNames(['white',   'red',     'green',   'blue',    'turquoise', 'magenta', 'lemon',   'cayenne',   'clover',    'midnight',  'teal',        'plum',        'asparagus',   'nickel',        'black'  ]).
+
+
 
 jp_jugglerStartLeft([]) :- !.
 jp_jugglerStartLeft(LeftList) :-
