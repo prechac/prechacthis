@@ -59,9 +59,7 @@ http_directory(css).
 http_directory(images).
 http_directory(js).
 
-prechacthis_server_type(resource) :-
-	recorded(prechacthis_server_type, resource), !.
-prechacthis_server_type(file).
+prechacthis_server_type(resource).
 	
 :- forall(
 		http_directory(Dir), 
