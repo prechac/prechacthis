@@ -24,7 +24,10 @@ stop_server(Port) :-
 	href_type/1,
 	dataResult/2.
 
-%working_directory(P, P), asserta(library_directory(P)).
+:-  working_directory(ServerPath, ServerPath), 
+	atom_concat(ServerPath, 'lib/', LibPath), 
+	asserta(library_directory(LibPath)).
+
 file_search_path(foreign, LibPath) :-
 	working_directory(ServerPath, ServerPath),
 	atom_concat(ServerPath, 'lib/', LibPath).
