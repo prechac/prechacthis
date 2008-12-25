@@ -25,12 +25,12 @@ stop_server(Port) :-
 	dataResult/2.
 
 :-  working_directory(ServerPath, ServerPath), 
-	atom_concat(ServerPath, 'lib/', LibPath), 
+	atom_concat(ServerPath, 'lib', LibPath), 
 	asserta(library_directory(LibPath)).
 
 file_search_path(foreign, LibPath) :-
 	working_directory(ServerPath, ServerPath),
-	atom_concat(ServerPath, 'lib/', LibPath).
+	atom_concat(ServerPath, 'lib', LibPath).
 
 % ------ pages ------ %
 
@@ -129,13 +129,13 @@ server_location(CWD) :-
 
 file_search_path(css, Path) :-
 	server_location(ServerPath),
-	atom_concat(ServerPath, '/css', Path).
+	atom_concat(ServerPath, 'css', Path).
 file_search_path(images, Path) :-
 	server_location(ServerPath),
-	atom_concat(ServerPath, '/images', Path).
+	atom_concat(ServerPath, 'images', Path).
 file_search_path(js, Path) :-
 	server_location(ServerPath),
-	atom_concat(ServerPath, '/js', Path).
+	atom_concat(ServerPath, 'js', Path).
 	
 
 serve_file(resource, Type, Request) :-	
