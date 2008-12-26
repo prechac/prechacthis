@@ -31,6 +31,8 @@ stop_server(Port) :-
 file_search_path(foreign, LibPath) :-
 	working_directory(ServerPath, ServerPath),
 	atom_concat(ServerPath, 'lib', LibPath).
+	
+file_search_path(foreign, '/usr/lib').
 
 % ------ pages ------ %
 
