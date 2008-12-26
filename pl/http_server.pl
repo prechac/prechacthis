@@ -6,12 +6,13 @@
 :- use_module(library('time')).
 
 
-server :- server(4211), !.
-server(Port) :-
+server :- server(4211, 2), !.
+server(Port, Workers) :-
 	format('\n*** PrechacThis ***\n'),
-	http_server(http_dispatch, [port(Port)]),
-	format('To use PrechacThis open http://localhost:4211 with your favorite webbrowser.\n'),
-	format('Type "stop_server." to quit.\n\n').
+	http_server(http_dispatch, [port(Port), workers(Workers)]),
+	format('Started PrechacThis server at port ~w\n', [Port]),
+	format('You may access the server at http://localhost:~w/\n', [Port]).
+	%format('Type "halt." to quit\n\n').
 
 	
 stop_server :- stop_server(4211), !.
