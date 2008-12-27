@@ -1,8 +1,5 @@
 #!/opt/local/bin/swipl -f none -g main -s
 
-:- ['pl/prechacthis'].
-
-
 
 %%	main
 %
@@ -12,7 +9,7 @@
 %	Start as
 %	
 %	    ==
-%	    ./prechacthis_server.pl  [--daemon] [--port=Port] [--workers=Workers]
+%	    ./prechacthis_server.pl  [--daemon] [--port=Port] [--workers=Workers] [--servertype=Type]
 %	    ==
 
 
@@ -26,6 +23,9 @@ main :-
 start_server(Argv) :-
 	av_option(port(Port), Argv, 4211),
 	av_option(workers(Workers), Argv, 3),
+	av_option(servertype(Type), Argv, file),
+	recorda(prechacthis_server_type, Type),
+	consult('pl/prechacthis'),
 	server(Port, Workers).
 	
 wait(Argv) :-

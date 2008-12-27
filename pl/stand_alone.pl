@@ -1,6 +1,8 @@
 :- ['prechacthis.pl'].
 %:- ['../xpce/server_gui.pl'].
 
+:- recorda(prechacthis_server_type, resource).
+
 build_prechacthis :-
 	build_prechacthis('prechacthis').
 
