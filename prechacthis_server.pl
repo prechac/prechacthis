@@ -1,8 +1,6 @@
 #!/opt/local/bin/swipl -f none -g main -s
 
 
-:- set_prolog_flag(verbose_load, false).
-:- use_module('pl/prechacthis').
 
 %%	main
 %
@@ -24,6 +22,7 @@ main :-
 	
 
 start_server(Argv) :-
+	
 	av_option(port(Port), Argv, 4211),
 	av_option(workers(Workers), Argv, 3),
 	av_option(servertype(Type), Argv, file),
@@ -56,7 +55,7 @@ av_option(Option, Argv, Default) :-
 av_option(Option, Argv) :-
 	Option =.. [Name, Value],
 	(   format(atom(Av), '--~w', [Name]),
-	    member(Av, Argv)
+		member(Av, Argv)
 	->  Value = true
 	;   Value = false
 	).
