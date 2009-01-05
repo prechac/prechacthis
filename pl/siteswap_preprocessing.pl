@@ -1,3 +1,41 @@
+:- module(siteswap_preprocessing,
+	[
+		preprocessConstraint/5,
+		preprocessConstraint/6,
+		preprocess_number/3,
+		float_to_shortpass/2,
+		convertShortPasses/5,
+		dcg_float/3,
+		dcg_rational/3,
+		dcg_number/3,
+		dcg_and/2,
+		dcg_or/2,
+		dcg_left_parenthesis/2,
+		dcg_right_parenthesis/2,
+		dcg_right_bracket/2,
+		dcg_left_bracket/2,
+		dcg_underscore/2,
+		dcg_slash/2,
+		dcg_plus/2,
+		dcg_minus/2,
+		dcg_comma/2,
+		dcg_gt/2,
+		dcg_lt/2,
+		dcg_p/2,
+		dcg_s/2,
+		dcg_dot/2,
+		dcg_whitespaces/2,
+		dcg_whitespace/2,
+		dcg_integer/3,
+		dcg_throw/3,
+		dcg_self/3,
+		dcg_pass/3,
+		dcg_number_neg/3
+	]
+).
+:- use_module(helpers).
+:- use_module(siteswap_helpers).
+:- use_module(siteswap_constraints).
 
 preprocessConstraint(ConstraintString, Period, NumberOfJugglers, MaxHeight, Constraint) :-
 	preprocessConstraint(ConstraintString, positiv, Period, NumberOfJugglers, MaxHeight, Constraint).

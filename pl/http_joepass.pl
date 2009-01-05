@@ -1,3 +1,26 @@
+:- module(http_joepass, 
+	[
+		joepass_page/1,
+		jp_filename/2,
+		jp_Color/1,
+		jp_Color/2,
+		jp_Color_Info/2
+	]
+).
+
+:- use_module(library('http/http_parameters')).
+
+:- use_module(helpers).
+:- use_module(siteswap_helpers).
+:- use_module(siteswap_multiplex).
+:- use_module(siteswap_info_page).
+:- use_module(http_info_page).
+
+:- use_module(http_helpers).
+:- use_module(http_common).
+:- use_module(http_server).
+:- use_module(siteswap_preprocessing).
+
 joepass_page(Request) :-
 	%http_joepass_page_path(JoePassPagePath),
 	http_parameters(

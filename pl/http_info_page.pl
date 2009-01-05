@@ -1,3 +1,33 @@
+:- module(http_info_page, 
+	[
+		info_page/1,
+		arrowRightLeft/3,
+		arrowUpDown/3,
+		html_href/8,
+		handShown/4
+	]
+).
+
+
+:- use_module(library('http/thread_httpd')).
+:- use_module(library('http/http_dispatch')).
+:- use_module(library('http/html_write')).
+:- use_module(library('http/http_parameters')).
+:- use_module(library('http/http_header')).
+
+:- use_module(helpers).
+:- use_module(siteswap_helpers).
+:- use_module(siteswap_engine).
+:- use_module(siteswap_info_page).
+:- use_module(siteswap_multiplex).
+:- use_module(siteswap_constraints).
+:- use_module(siteswap_preprocessing).
+:- use_module(http_server).
+
+:- use_module(http_helpers).
+:- use_module(http_common).
+:- use_module(http_joepass).
+
 
 info_page(Request) :-
 	%http_info_page_path(InfoPagePath),
@@ -10,7 +40,7 @@ info_page(Request) :-
 			newswap( ReqNewSwap,  [default('[]')]           ),
 			back(    ReqBack,     [default('')]             ),
 			hreftype(ReqHrefType, [default('html')]         ),
-			ajax(    Ajax,        [default('off')]           )
+			ajax(    Ajax,        [default('off')]          )
 		]
 	),
 	retractall(href_type(_)),
@@ -807,21 +837,21 @@ nth0(Orbit, OrbitList, OrbitShown).
 
 handShown(Juggler, [], _, []) :- number(Juggler), !.
 handShown(Juggler, [Hand|HandList], SwapList, [HandShown|ShownList]) :-
-number(Juggler),!,
-handShown(Juggler, Hand, SwapList, HandShown),
-handShown(Juggler, HandList, SwapList, ShownList).
+	number(Juggler),!,
+	handShown(Juggler, Hand, SwapList, HandShown),
+	handShown(Juggler, HandList, SwapList, ShownList).
 handShown([], [], _, []) :- !.
-handShown([Juggler|Jugglers], [Hand|Hands], SwapList, [Shown|ShownList]) :-
+	handShown([Juggler|Jugglers], [Hand|Hands], SwapList, [Shown|ShownList]) :-
 handShown(Juggler, Hand, SwapList, Shown),
-handShown(Jugglers, Hands, SwapList, ShownList).
+	handShown(Jugglers, Hands, SwapList, ShownList).
 handShown(Juggler, a, SwapList, 'L') :-
-member(Juggler, SwapList), !.
+	member(Juggler, SwapList), !.
 handShown(Juggler, a, SwapList, 'R') :-	
-not(member(Juggler, SwapList)), !.
+	not(member(Juggler, SwapList)), !.
 handShown(Juggler, b, SwapList, 'R') :-
-member(Juggler, SwapList), !.
+	member(Juggler, SwapList), !.
 handShown(Juggler, b, SwapList, 'L') :- 
-not(member(Juggler, SwapList)), !.
+	not(member(Juggler, SwapList)), !.
 
 handShownLong('R', right) :- !.
 handShownLong('L', left) :- !.

@@ -1,4 +1,33 @@
+:- module(http_helpers,
+	[
+		html_href/5,
+		html_href/6,
+		html_numbered_option/4,
+		html_numbered_options/5,
+		html_option/5,
+		html_checkbox/5,
+		css/3,
+		js_script/3,
+		ajax_script/2,
+		www_form_encode_all/2,
+		set_cookie/2,
+		get_cookie/3,
+		get_cookie/4
+	]
+).
 
+:- use_module(library('http/thread_httpd')).
+:- use_module(library('http/http_dispatch')).
+:- use_module(library('http/html_write')).
+:- use_module(library('http/http_parameters')).
+:- use_module(library('http/http_header')).
+
+:- use_module(helpers).
+:- use_module(http_info_page).
+:- use_module(http_main_page).
+
+:- dynamic
+	href_type/1.
 
 html_href(Href, Attributes, Content) -->
 	{

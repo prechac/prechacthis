@@ -1,4 +1,4 @@
-:- ['prechacthis.pl'].
+:- use_module('prechacthis').
 %:- ['../xpce/server_gui.pl'].
 
 :- recorda(prechacthis_server_type, resource).

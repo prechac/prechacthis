@@ -1,3 +1,18 @@
+:- module(siteswap_multiplex, 
+	[
+		multiplex/2,
+		multiplex/3,
+		permutateMultiplexes/2,
+		orderMultiplexes/2,
+		checkMultiplexes/1,
+		noMultiplex/1
+	]
+).
+
+:- use_module(helpers).
+:- use_module(siteswap_helpers).
+:- use_module(siteswap_constraints).
+
 
 multiplex(OldPattern, NewPattern) :-
 	length(OldPattern, Length),

@@ -1,6 +1,9 @@
 #!/opt/local/bin/swipl -f none -g main -s
 
 
+:- set_prolog_flag(verbose_load, false).
+:- use_module('pl/prechacthis').
+
 %%	main
 %
 %	Start the PrechacThis server and wait. Does not provide access
@@ -9,7 +12,7 @@
 %	Start as
 %	
 %	    ==
-%	    ./prechacthis_server.pl  [--daemon] [--port=Port] [--workers=Workers] [--servertype=Type]
+%	    ./prechacthis_server.pl  [--daemon] [--port=Port] [--workers=Workers] [--servertype=Type] [--verbos]
 %	    ==
 
 
@@ -24,8 +27,13 @@ start_server(Argv) :-
 	av_option(port(Port), Argv, 4211),
 	av_option(workers(Workers), Argv, 3),
 	av_option(servertype(Type), Argv, file),
+	av_option(verbos(Verbos), Argv),
 	recorda(prechacthis_server_type, Type),
-	consult('pl/prechacthis'),
+	(Verbos = false ->
+		set_prolog_flag(verbose_load, false);
+		set_prolog_flag(verbose_load, true)
+	),
+	use_module('pl/prechacthis'),
 	server(Port, Workers).
 	
 wait(Argv) :-
@@ -43,4 +51,12 @@ av_option(Option, Argv, Default) :-
 	    name(Value0, Codes)
 	->  Value = Value0
 	;   Value = Default
+	).
+	
+av_option(Option, Argv) :-
+	Option =.. [Name, Value],
+	(   format(atom(Av), '--~w', [Name]),
+	    member(Av, Argv)
+	->  Value = true
+	;   Value = false
 	).

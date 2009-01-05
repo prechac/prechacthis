@@ -1,3 +1,21 @@
+:- module(http_server,
+	[
+		server/0,
+		server/2,
+		stop_server/0,
+		stop_server/1,
+		http_main_page_path/1,
+		http_info_page_path/1,
+		http_joepass_page_path/1
+	]
+).
+
+:- use_module(helpers).
+:- use_module(http_swap_page).
+:- use_module(http_joepass).
+:- use_module(http_main_page).
+:- use_module(http_info_page).
+
 :- use_module(library('http/thread_httpd')).
 :- use_module(library('http/http_dispatch')).
 :- use_module(library('http/html_write')).
@@ -20,20 +38,29 @@ stop_server(Port) :-
 	http_stop_server(Port, []), 
 	halt.
 
-:- dynamic
-	constraintChecked/1,
-	href_type/1,
-	dataResult/2.
 
 :-  working_directory(ServerPath, ServerPath), 
 	atom_concat(ServerPath, 'lib', LibPath), 
 	asserta(library_directory(LibPath)).
 
-file_search_path(foreign, LibPath) :-
+user:file_search_path(foreign, LibPath) :-
 	working_directory(ServerPath, ServerPath),
 	atom_concat(ServerPath, 'lib', LibPath).
 	
-file_search_path(foreign, '/usr/lib').
+user:file_search_path(foreign, '/usr/lib').
+
+
+user:file_search_path(css, Path) :-
+	server_location(ServerPath),
+	atom_concat(ServerPath, 'css', Path).
+user:file_search_path(images, Path) :-
+	server_location(ServerPath),
+	atom_concat(ServerPath, 'images', Path).
+user:file_search_path(js, Path) :-
+	server_location(ServerPath),
+	atom_concat(ServerPath, 'js', Path).
+	
+
 
 % ------ pages ------ %
 
@@ -80,9 +107,9 @@ prechacthis_server_type(resource).
 % ------ resources ------ %
 
 
-resource(Name, css, File) :- resource_dir(Name, css, File).
-resource(Name, js, File) :- resource_dir(Name, js, File).
-resource(Name, images, File) :- resource_dir(Name, images, File).
+user:resource(Name, css, File) :- resource_dir(Name, css, File).
+user:resource(Name, js, File) :- resource_dir(Name, js, File).
+user:resource(Name, images, File) :- resource_dir(Name, images, File).
 
 resource_dir(Name, Type, FileLocation) :-
 	atom(Name), !,
@@ -128,18 +155,6 @@ resource_type_extention(images, png).
 
 server_location(CWD) :-
 	working_directory(CWD, CWD).
-
-
-file_search_path(css, Path) :-
-	server_location(ServerPath),
-	atom_concat(ServerPath, 'css', Path).
-file_search_path(images, Path) :-
-	server_location(ServerPath),
-	atom_concat(ServerPath, 'images', Path).
-file_search_path(js, Path) :-
-	server_location(ServerPath),
-	atom_concat(ServerPath, 'js', Path).
-	
 
 serve_file(resource, Type, Request) :-	
 	memberchk(path(Path), Request),

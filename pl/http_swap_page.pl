@@ -1,3 +1,18 @@
+:- module(http_swap_page, 
+	[
+		swap_page/1
+	]
+).
+
+:- use_module(http_common).
+
+:- use_module(library('http/http_parameters')).
+
+:- use_module(helpers).
+:- use_module(siteswap_helpers).
+
+:- use_module(http_helpers).
+
 swap_page(Request) :-
 	http_parameters(
 		Request,

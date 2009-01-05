@@ -1,3 +1,26 @@
+:- module(siteswap_constraints, 
+	[
+		siteswap/12,
+		test_constraint_not_fillable,
+		passesMin/2,
+		passesMax/2,
+		amountOfPasses/2,
+		dontcontain/2
+	]
+).
+
+
+:- use_module(helpers).
+:- use_module(siteswap_helpers).
+:- use_module(siteswap_preprocessing).
+
+:- use_module(siteswap_engine).
+:- use_module(siteswap_multiplex).
+
+
+
+:- dynamic
+	constraintChecked/1.
 
 siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, PassesMin, PassesMax, ContainString, DontContainString, ClubDoesString, ReactString, ContainMagic) :-
 	initConstraintCheck,

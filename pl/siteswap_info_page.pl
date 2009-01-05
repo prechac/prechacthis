@@ -1,3 +1,19 @@
+:- module(siteswap_info_page, 
+	[
+		what_happens/4,
+		hand/2,
+		club_distribution/6,
+		applyNewSwaps/3,
+		all_points_in_time/3,
+		siteswap_position/5,
+		club_siteswap_positions/5
+	]
+).
+
+:- use_module(helpers).
+:- use_module(siteswap_helpers).
+
+
 
 shift_by_minuend(OldPosition, Times, NewPosition, NumberOfJugglers, Period) :-
 	Minuend is Period rdiv NumberOfJugglers,

@@ -1,3 +1,14 @@
+:- module(siteswap_engine, 
+	[
+		siteswap/6, 
+		prechacThis/5
+	]
+).
+
+:- use_module(helpers).
+:- use_module(siteswap_helpers).
+:- use_module(siteswap_constraints).
+:- use_module(siteswap_multiplex).
 
 %% example:
 % 6 1 _ _  6 Pattern

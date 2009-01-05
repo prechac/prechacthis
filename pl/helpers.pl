@@ -1,3 +1,81 @@
+:- module(helpers, 
+	[
+		changeDimension/3,
+		allMembersUnique/1,
+		firstVar0/2,
+		firstNoGround0/2,
+		justVars/1,
+		positionsInList/3,
+		nth0List/3,
+		nth0ListOfLists/3,
+		changeOnePosition/4,
+		changePositions/4,
+		posList/2,
+		fillIn/2,
+		fillIn/4,
+		fillInAndCopy/3,
+		copyList/2,
+		copyList_if_smaller/3,
+		copyList_if_bigger/3,
+		numberOfX/3,
+		numberOfVars/2,
+		multiply/3,
+		add/3,
+		memberOrEqual/2,
+		memberOrEqual/3,
+		rotate/2,
+		rotate_right/2,
+		rotate_left/2,
+		sort_list_of_expr/2,
+		infimum/2,
+		min_of_list/2,
+		supremum/2,
+		max_of_list/2,
+		zeros/2,
+		oneToN/2,
+		realSubtract/3,
+		removeOnce/3,
+		listOfNumber/2,
+		listOfNumber/3,
+		listOf/2,
+		listOf/3,
+		nth0_gen/4,
+		compare_expr/3,
+		even/1,
+		odd/1,
+		rational_to_number/2,
+		substract_var/3,
+		substractUntilNonPositiv/3,
+		betweenRandom/3,
+		permutationRandom/2,
+		fillPermutation/2,
+		fillSetPermutation/2,
+		removeVars/2,
+		fillInVars/2,
+		fillInVars/3,
+		findall_restricted/4,
+		memberchk/3,
+		member_restricted/3,
+		nth1_restricted/4,
+		remove_whitespace/2,
+		keysort/3,
+		a2Number/2,
+		a2Number/3,
+		a2Atom/2,
+		a2Atom_list/2,
+		a2String/2,
+		integer_gen/2,
+		integer_gen/3
+	]
+).
+
+:- use_module(siteswap_preprocessing).
+:- use_module(siteswap_constraints).
+
+
+:- dynamic
+	dataResult/2.
+
 
 %%%  --- list operations ---
 

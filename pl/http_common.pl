@@ -1,3 +1,29 @@
+:- module(http_common, 
+	[
+		
+		html_debug/3,
+		html_write_request/3,
+		html_throw/4,
+		html_list/4,
+		init_html_throw_id/0,
+		pattern_to_string/2,
+		pStyle/4,
+		atom2Pattern/2,
+		atom2SwapList/2
+	]
+).
+
+:- use_module(library('http/thread_httpd')).
+:- use_module(library('http/http_dispatch')).
+:- use_module(library('http/html_write')).
+:- use_module(library('http/http_parameters')).
+:- use_module(library('http/http_header')).
+
+:- use_module(helpers).
+:- use_module(siteswap_helpers).
+:- use_module(siteswap_preprocessing).
+
+
 html_debug(Request) -->
 	{
 		http_parameters(

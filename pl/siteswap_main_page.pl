@@ -1,4 +1,14 @@
+:- module(siteswap_main_page,
+	[
+		find_siteswap_lists/14,
+		find_siteswaps/13
+	]
+).
 
+:- use_module(helpers).
+:- use_module(siteswap_helpers).
+:- use_module(siteswap_constraints).
+:- use_module(siteswap_preprocessing).
 
 
 
@@ -22,7 +32,7 @@ find_siteswap_lists(SearchResults, PersonsInt, ObjectsAtom, LengthAtom, MaxInt, 
 			recordz(period_searched, LengthInt),
 			preprocess_number(ObjectsAtom, ObjectsInt, [to_come(_ObjectsToCome), default('>0'), stop_if(test_constraint_not_fillable)]),
 			recordz(objects_searched, ObjectsInt),
-			find_siteswaps(Siteswaps, PersonsInt, ObjectsInt, LengthInt, MaxInt, PassesMinInt, PassesMaxVar, ContainList, DontContainList, ClubDoesList, ReactList, MagicInt, ResultsInt)
+			siteswap_main_page:find_siteswaps(Siteswaps, PersonsInt, ObjectsInt, LengthInt, MaxInt, PassesMinInt, PassesMaxVar, ContainList, DontContainList, ClubDoesList, ReactList, MagicInt, ResultsInt)
 		),
 		SiteswapLists,
 		[time(15), flag(Flag)]

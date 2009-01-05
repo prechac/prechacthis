@@ -1,3 +1,28 @@
+:- module(http_main_page,
+	[
+		main_page/1,
+		mainPage_siteswap/6
+	]
+).
+
+
+:- use_module(library('http/thread_httpd')).
+:- use_module(library('http/http_dispatch')).
+:- use_module(library('http/html_write')).
+:- use_module(library('http/http_parameters')).
+:- use_module(library('http/http_header')).
+
+:- use_module(helpers).
+:- use_module(siteswap_helpers).
+:- use_module(siteswap_main_page).
+:- use_module(siteswap_preprocessing).
+
+:- use_module(http_helpers).
+:- use_module(http_server).
+:- use_module(http_common).
+:- use_module(http_info_page).
+
+
 
 main_page(Request) :-
 	get_cookie(main_mode, Request, CookieMode, 'simple'),
