@@ -1,7 +1,7 @@
 :- module(siteswap_main_page,
 	[
-		find_siteswap_lists/14,
-		find_siteswaps/13
+		find_siteswap_lists/15,
+		find_siteswaps/14
 	]
 ).
 
@@ -12,7 +12,7 @@
 
 
 
-find_siteswap_lists(SearchResults, PersonsInt, ObjectsAtom, LengthAtom, MaxInt, PassesMinInt, PassesMaxInt, ContainAtom, DontContainAtom, ClubDoesAtom, ReactAtom, MagicInt, ResultsInt, Request) :-
+find_siteswap_lists(SearchResults, PersonsInt, ObjectsAtom, LengthAtom, MaxInt, PassesMinInt, PassesMaxInt, ContainAtom, DontContainAtom, ClubDoesAtom, ReactAtom, SyncAtom, MagicInt, ResultsInt, Request) :-
 	http_main_page_path(MainPagePath),
 	memberchk(path(MainPagePath), Request),
 	
@@ -21,6 +21,7 @@ find_siteswap_lists(SearchResults, PersonsInt, ObjectsAtom, LengthAtom, MaxInt, 
 	name(DontContainAtom, DontContainList),
 	name(ClubDoesAtom, ClubDoesList),
 	name(ReactAtom, ReactList),
+	name(SyncAtom, SyncList),
 	
 	forall(recorded(period_searched, _, R), erase(R)),
 	forall(recorded(objects_searched, _, R), erase(R)),
@@ -32,7 +33,7 @@ find_siteswap_lists(SearchResults, PersonsInt, ObjectsAtom, LengthAtom, MaxInt, 
 			recordz(period_searched, LengthInt),
 			preprocess_number(ObjectsAtom, ObjectsInt, [to_come(_ObjectsToCome), default('>0'), stop_if(test_constraint_not_fillable)]),
 			recordz(objects_searched, ObjectsInt),
-			siteswap_main_page:find_siteswaps(Siteswaps, PersonsInt, ObjectsInt, LengthInt, MaxInt, PassesMinInt, PassesMaxVar, ContainList, DontContainList, ClubDoesList, ReactList, MagicInt, ResultsInt)
+			siteswap_main_page:find_siteswaps(Siteswaps, PersonsInt, ObjectsInt, LengthInt, MaxInt, PassesMinInt, PassesMaxVar, ContainList, DontContainList, ClubDoesList, ReactList, SyncList, MagicInt, ResultsInt)
 		),
 		SiteswapLists,
 		[time(15), flag(Flag)]
@@ -48,14 +49,14 @@ find_siteswap_lists(SearchResults, PersonsInt, ObjectsAtom, LengthAtom, MaxInt, 
 		objects_searched(ObjectsSearched),
 		lists(SiteswapLists)
 	], !.
-find_siteswap_lists(false, _PersonsInt, _ObjectsAtom, _LengthAtom, _MaxInt, _PassesMinInt, _PassesMaxInt, _ContainAtom, _DontContainAtom, _ClubDoesAtom, _ReactAtom, _MagicInt, _ResultsInt, _Request) :- !.
+find_siteswap_lists(false, _PersonsInt, _ObjectsAtom, _LengthAtom, _MaxInt, _PassesMinInt, _PassesMaxInt, _ContainAtom, _DontContainAtom, _ClubDoesAtom, _ReactAtom, _SyncAtom, _MagicInt, _ResultsInt, _Request) :- !.
 
 
-find_siteswaps(SiteswapList, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic, Results) :-
+find_siteswaps(SiteswapList, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Sync, Magic, Results) :-
 	get_time(Start),
 	findall_restricted(
 		Throws, 
-		siteswap(Throws, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Magic),
+		siteswap(Throws, Persons, Objects, Length, Max, PassesMin, PassesMax, Contain, DontContain, ClubDoes, React, Sync, Magic),
 		Bag,
 		[unique, results(Results), flag(Flag)]
 	),

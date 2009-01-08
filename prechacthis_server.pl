@@ -1,7 +1,6 @@
 #!/opt/local/bin/swipl -f none -g main -s
 
 
-
 %%	main
 %
 %	Start the PrechacThis server and wait. Does not provide access
@@ -22,7 +21,6 @@ main :-
 	
 
 start_server(Argv) :-
-	
 	av_option(port(Port), Argv, 4211),
 	av_option(workers(Workers), Argv, 3),
 	av_option(servertype(Type), Argv, file),

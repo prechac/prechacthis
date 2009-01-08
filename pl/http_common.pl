@@ -9,7 +9,11 @@
 		pattern_to_string/2,
 		pStyle/4,
 		atom2Pattern/2,
-		atom2SwapList/2
+		atom2SwapList/2,
+		jugglerShown/2,
+		orbitShown/2,
+		handShown/4,
+		handShownLong/2
 	]
 ).
 
@@ -333,6 +337,62 @@ html_list_right(Options) -->
 	html([Right]).
 html_list_right(_Options) -->
 	html(']'),!.
+
+
+
+
+
+
+%%% ------ %%%
+
+
+jugglerShown([], []) :- !.
+jugglerShown([Juggler|ListJuggler], [Shown|ListShown]) :-
+	!,
+	jugglerShown(Juggler, Shown),
+	jugglerShown(ListJuggler, ListShown).
+jugglerShown(Juggler, JugglerShown) :-
+	JugglerList = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
+	nth0(Juggler, JugglerList, JugglerShown).
+
+orbitShown([], []) :- !.
+orbitShown([Orbit|ListOrbit], [Shown|ListShown]) :-
+	!,
+	orbitShown(Orbit, Shown),
+	orbitShown(ListOrbit, ListShown).
+orbitShown(Orbit, OrbitShown) :-
+	OrbitList = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'],
+	nth0(Orbit, OrbitList, OrbitShown).	
+
+
+%% handShown(number, char, _List, char)	  
+%% handShown(number, List, _List, List)  - throwing Juggler
+%% handShown(List, List, _List, List)    - catching Jugglers
+
+handShown(Juggler, [], _, []) :- number(Juggler), !.
+handShown(Juggler, [Hand|HandList], SwapList, [HandShown|ShownList]) :-
+	number(Juggler),!,
+	handShown(Juggler, Hand, SwapList, HandShown),
+	handShown(Juggler, HandList, SwapList, ShownList).
+handShown([], [], _, []) :- !.
+	handShown([Juggler|Jugglers], [Hand|Hands], SwapList, [Shown|ShownList]) :-
+handShown(Juggler, Hand, SwapList, Shown),
+	handShown(Jugglers, Hands, SwapList, ShownList).
+handShown(Juggler, a, SwapList, 'L') :-
+	member(Juggler, SwapList), !.
+handShown(Juggler, a, SwapList, 'R') :-	
+	not(member(Juggler, SwapList)), !.
+handShown(Juggler, b, SwapList, 'R') :-
+	member(Juggler, SwapList), !.
+handShown(Juggler, b, SwapList, 'L') :- 
+	not(member(Juggler, SwapList)), !.
+
+handShownLong('R', right) :- !.
+handShownLong('L', left) :- !.
+
+
+
+
 
 
 

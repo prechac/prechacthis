@@ -52,6 +52,7 @@ main_page(Request) :-
 			exclude(ReqExclude, [default('')]),
 			clubdoes(ReqClubDoes, [default('')]),
 			react(ReqReact, [default('')]),
+			sync(ReqSync, [default('')]),
 			magic(ReqMagic, [integer, default(0)]),
 			results(ReqResults, [integer, default(CookieResultsInt)]),
 			infopage(GoToInfoPage, [default('true')])
@@ -80,6 +81,7 @@ main_page(Request) :-
 		ReqExclude,
 		ReqClubDoes,
 		ReqReact,
+		ReqSync,
 		ReqMagic,
 		ReqResults,
 		Request
@@ -96,7 +98,8 @@ main_page(Request) :-
 		ReqContain, 
 		ReqExclude, 
 		ReqClubDoes, 
-		ReqReact, 
+		ReqReact,
+		ReqSync,
 		ReqMagic, 
 		ReqResults,
 		ReqMode, 
@@ -117,6 +120,7 @@ mainPage_html_page(
 	_ReqExclude, 
 	_ReqClubDoes, 
 	_ReqReact, 
+	_ReqSync,
 	_ReqMagic, 
 	_ReqResults,
 	_ReqMode, 
@@ -145,7 +149,8 @@ mainPage_html_page(
 	ReqContain, 
 	ReqExclude, 
 	ReqClubDoes, 
-	ReqReact, 
+	ReqReact,
+	ReqSync,
 	ReqMagic, 
 	ReqResults,
 	ReqMode, 
@@ -183,7 +188,8 @@ mainPage_html_page(
 				ReqContain, 
 				ReqExclude, 
 				ReqClubDoes, 
-				ReqReact, 
+				ReqReact,
+				ReqSync,
 				ReqMagic, 
 				ReqResults,
 				ReqMode
@@ -404,7 +410,7 @@ mainPage_siteswap([Throw|RestThrows], Length, Persons, MagicPositions) -->
 
 
 	
-mainPage_form(Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Exclude, ClubDoes, React, Magic, Results, Mode) -->
+mainPage_form(Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Exclude, ClubDoes, React, Sync, Magic, Results, Mode) -->
 	{
 		http_main_page_path(MainPagePath)
 	},
@@ -420,6 +426,7 @@ mainPage_form(Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Excl
 				\mainPage_form_exclude(Exclude, Mode),
 				\mainPage_form_clubdoes(ClubDoes, Mode),
 				\mainPage_form_react(React, Mode),
+				\mainPage_form_sync(Sync, Mode),
 				\mainPage_form_magic(Magic, Mode),
 				\mainPage_form_results(Results, Mode),
 				\mainPage_form_submit(Mode)
@@ -600,6 +607,19 @@ mainPage_form_react(React, _Mode) -->
 		])
 	]).
 
+mainPage_form_sync(_Sync, simple) --> [], !.
+mainPage_form_sync(Sync, _Mode) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				'sync throws:'
+			]),
+			td([class(input)],[
+				input([type(text), name(sync), value(Sync)])
+			])
+		])
+	]).
+	
 mainPage_form_magic(_Magic, simple) --> [], !.
 mainPage_form_magic(Magic, _Mode) -->
 	html([

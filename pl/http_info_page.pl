@@ -1,6 +1,7 @@
 :- module(http_info_page, 
 	[
 		info_page/1,
+		infoPage_html_page/5,
 		arrowRightLeft/3,
 		arrowUpDown/3,
 		html_href/8,
@@ -806,54 +807,5 @@ html_href(Pattern, Persons, SwapList, BackURL, Attributes, Content) -->
 		format(atom(Href), ".~w?~s", [Path, Search])
 	},
 	html_href(Href, Attributes, Content).
-
-
-
-%%% ------ %%%
-
-
-jugglerShown([], []) :- !.
-jugglerShown([Juggler|ListJuggler], [Shown|ListShown]) :-
-!,
-jugglerShown(Juggler, Shown),
-jugglerShown(ListJuggler, ListShown).
-jugglerShown(Juggler, JugglerShown) :-
-JugglerList = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
-nth0(Juggler, JugglerList, JugglerShown).
-
-orbitShown([], []) :- !.
-orbitShown([Orbit|ListOrbit], [Shown|ListShown]) :-
-!,
-orbitShown(Orbit, Shown),
-orbitShown(ListOrbit, ListShown).
-orbitShown(Orbit, OrbitShown) :-
-OrbitList = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'],
-nth0(Orbit, OrbitList, OrbitShown).	
-
-
-%% handShown(number, char, _List, char)	  
-%% handShown(number, List, _List, List)  - throwing Juggler
-%% handShown(List, List, _List, List)    - catching Jugglers
-
-handShown(Juggler, [], _, []) :- number(Juggler), !.
-handShown(Juggler, [Hand|HandList], SwapList, [HandShown|ShownList]) :-
-	number(Juggler),!,
-	handShown(Juggler, Hand, SwapList, HandShown),
-	handShown(Juggler, HandList, SwapList, ShownList).
-handShown([], [], _, []) :- !.
-	handShown([Juggler|Jugglers], [Hand|Hands], SwapList, [Shown|ShownList]) :-
-handShown(Juggler, Hand, SwapList, Shown),
-	handShown(Jugglers, Hands, SwapList, ShownList).
-handShown(Juggler, a, SwapList, 'L') :-
-	member(Juggler, SwapList), !.
-handShown(Juggler, a, SwapList, 'R') :-	
-	not(member(Juggler, SwapList)), !.
-handShown(Juggler, b, SwapList, 'R') :-
-	member(Juggler, SwapList), !.
-handShown(Juggler, b, SwapList, 'L') :- 
-	not(member(Juggler, SwapList)), !.
-
-handShownLong('R', right) :- !.
-handShownLong('L', left) :- !.
 
 
