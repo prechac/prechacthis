@@ -53,6 +53,7 @@ main_page(Request) :-
 			clubdoes(ReqClubDoes, [default('')]),
 			react(ReqReact, [default('')]),
 			sync(ReqSync, [default('')]),
+			just(ReqJust, [default('')]),
 			magic(ReqMagic, [integer, default(0)]),
 			results(ReqResults, [integer, default(CookieResultsInt)]),
 			infopage(GoToInfoPage, [default('true')])
@@ -82,6 +83,7 @@ main_page(Request) :-
 		ReqClubDoes,
 		ReqReact,
 		ReqSync,
+		ReqJust,
 		ReqMagic,
 		ReqResults,
 		Request
@@ -100,6 +102,7 @@ main_page(Request) :-
 		ReqClubDoes, 
 		ReqReact,
 		ReqSync,
+		ReqJust,
 		ReqMagic, 
 		ReqResults,
 		ReqMode, 
@@ -121,6 +124,7 @@ mainPage_html_page(
 	_ReqClubDoes, 
 	_ReqReact, 
 	_ReqSync,
+	_ReqJust,
 	_ReqMagic, 
 	_ReqResults,
 	_ReqMode, 
@@ -151,6 +155,7 @@ mainPage_html_page(
 	ReqClubDoes, 
 	ReqReact,
 	ReqSync,
+	ReqJust,
 	ReqMagic, 
 	ReqResults,
 	ReqMode, 
@@ -190,6 +195,7 @@ mainPage_html_page(
 				ReqClubDoes, 
 				ReqReact,
 				ReqSync,
+				ReqJust,
 				ReqMagic, 
 				ReqResults,
 				ReqMode
@@ -410,7 +416,7 @@ mainPage_siteswap([Throw|RestThrows], Length, Persons, MagicPositions) -->
 
 
 	
-mainPage_form(Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Exclude, ClubDoes, React, Sync, Magic, Results, Mode) -->
+mainPage_form(Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Exclude, ClubDoes, React, Sync, Just, Magic, Results, Mode) -->
 	{
 		http_main_page_path(MainPagePath)
 	},
@@ -427,6 +433,7 @@ mainPage_form(Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Excl
 				\mainPage_form_clubdoes(ClubDoes, Mode),
 				\mainPage_form_react(React, Mode),
 				\mainPage_form_sync(Sync, Mode),
+				\mainPage_form_just(Just, Mode),
 				\mainPage_form_magic(Magic, Mode),
 				\mainPage_form_results(Results, Mode),
 				\mainPage_form_submit(Mode)
@@ -616,6 +623,19 @@ mainPage_form_sync(Sync, _Mode) -->
 			]),
 			td([class(input)],[
 				input([type(text), name(sync), value(Sync)])
+			])
+		])
+	]).
+	
+mainPage_form_just(_Just, simple) --> [], !.
+mainPage_form_just(Just, _Mode) -->
+	html([
+		tr([],[
+			td([class(lable)],[
+				'contain just:'
+			]),
+			td([class(input)],[
+				input([type(text), name(just), value(Just)])
 			])
 		])
 	]).

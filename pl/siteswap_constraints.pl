@@ -1,6 +1,6 @@
 :- module(siteswap_constraints, 
 	[
-		siteswap/13,
+		siteswap/14,
 		test_constraint_not_fillable,
 		passesMin/2,
 		passesMax/2,
@@ -22,9 +22,9 @@
 :- dynamic
 	constraintChecked/1.
 
-siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, PassesMin, PassesMax, ContainString, DontContainString, ClubDoesString, ReactString, SyncString, ContainMagic) :-
+siteswap(OutputPattern, NumberOfJugglers, Objects, Length, MaxHeight, PassesMin, PassesMax, ContainString, DontContainString, ClubDoesString, ReactString, SyncString, JustString, ContainMagic) :-
 	initConstraintCheck,
-	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainString, ClubDoesString, ReactString, SyncString, ContainMagic),
+	constraint(Pattern, Length, NumberOfJugglers, MaxHeight, ContainString, ClubDoesString, ReactString, SyncString, JustString, ContainMagic),
 	%preprocessMultiplexes(Pattern),
 	constraint_fillable(Pattern, NumberOfJugglers, Objects, MaxHeight),
 	siteswap(NumberOfJugglers, Objects, MaxHeight, PassesMin, PassesMax, Pattern),
@@ -41,17 +41,17 @@ initConstraintCheck :-
 	retractall(constraintChecked(_)),
 	forall(recorded(constraint_fillable, _, R), erase(R)),!.
 
-constraint(Constraint, Length, _Persons, _Max, [], [], [], [], 0) :-
+constraint(Constraint, Length, _Persons, _Max, [], [], [], [], [], 0) :-
 	length(Constraint, Length),!.
-constraint(Constraint, Length, _Persons, _Max, "", "", "", "", 0) :-
+constraint(Constraint, Length, _Persons, _Max, "", "", "", "", "", 0) :-
 	length(Constraint, Length),!.
-constraint(Constraint, Length, _Persons, _Max, '', '', '', '', 0) :-
+constraint(Constraint, Length, _Persons, _Max, '', '', '', '', '', 0) :-
 	length(Constraint, Length),!.
-constraint(Constraint, Length, Persons, Max, Contain, ClubDoes, React, Sync, ContainMagic) :-
-	mergeConstraints(Constraint, Length, Persons, Max, Contain, ClubDoes, React, Sync, ContainMagic),
+constraint(Constraint, Length, Persons, Max, Contain, ClubDoes, React, Sync, Just, ContainMagic) :-
+	mergeConstraints(Constraint, Length, Persons, Max, Contain, ClubDoes, React, Sync, Just, ContainMagic),
 	not(supConstraintChecked(Constraint)),
 	asserta(constraintChecked(Constraint)).
-constraint(_Constraint, _Length, _Persons, _Max, _Contain, _ClubDoes, _React, _Sync, _Magic) :-
+constraint(_Constraint, _Length, _Persons, _Max, _Contain, _ClubDoes, _React, _Sync, _Just, _Magic) :-
 	recorda(constraint_fillable, false), fail.
 	
 supConstraintChecked(Constraint) :-
@@ -76,7 +76,7 @@ test_constraint_not_fillable :-
 	), !.
 	
 	
-mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainString, ClubDoesString, ReactString, SyncString, ContainMagic) :-
+mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainString, ClubDoesString, ReactString, SyncString, JustString, ContainMagic) :-
 	length(MagicPattern, Length),
 	(ContainMagic = 1 ->	
 		(
@@ -104,6 +104,11 @@ mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainString, ClubDoe
 		constraint_unclear,
 		throw(constraint_unclear('"sync throws"'))
 	),
+	catch(
+		preprocessConstraint(JustString, positiv, Length, Persons, Max, ContainJustConstraints),
+		constraint_unclear,
+		throw(constraint_unclear('"contains just"'))
+	),
 	findall(Pattern, (length(Pattern, Length), member(Contain,  ContainConstraints ), contains(Pattern, Contain         )), BagContains),
 	(BagContains = [] -> ContainConstraints = []; true),
 	findall(Pattern, (length(Pattern, Length), member(ClubDoes, ClubDoesConstraints), clubDoes(Pattern, ClubDoes        )), BagClubDoes),
@@ -112,8 +117,10 @@ mergeConstraints(ConstraintRotated, Length, Persons, Max, ContainString, ClubDoe
 	(BagReact = [] -> ReactConstraints = []; true),
 	findall(Pattern, (length(Pattern, Length), member(Sync,     SyncConstraints    ), sync_throws(Pattern, Sync, Persons)), BagSync    ),
 	(BagSync = [] -> SyncConstraints = []; true),
+	length(JustPattern, Length),
+	(ContainJustConstraints = []; contains_just(JustPattern, ContainJustConstraints)),
 	% !!!!!! ?????????????????
-	append([MagicPattern], BagContains, BagTmp1),
+	append([MagicPattern, JustPattern], BagContains, BagTmp1),
 	append(BagTmp1, BagClubDoes, BagTmp2),
 	append(BagTmp2, BagReact, BagTmp3),
 	append(BagTmp3, BagSync, BagOfConstraints),
@@ -244,18 +251,18 @@ not_this_throw(p(Throw, Index, Origen), p(SegThrow, SegIndex, SegOrigen)) :-
 dontContainRotation(Pattern, Segment) :-
 	forall(rotate(Pattern, Rotation), dontcontain(Rotation, Segment)).
 
-clubDoes(Pattern, Seq) :-
-   insertThrows(Pattern, Seq, landingSite).
+clubDoes(Pattern, Seg) :-
+   insertThrows(Pattern, Seg, landingSite).
 
-react(Pattern, Seq) :-
-	insertThrows(Pattern, Seq, landingSite, [delta(-2)]).
+react(Pattern, Seg) :-
+	insertThrows(Pattern, Seg, landingSite, [delta(-2)]).
 
 
-insertThrows(Pattern, Seq, Pred) :-
-	insertThrows(Pattern, Seq, Pred, 0, []).
+insertThrows(Pattern, Seg, Pred) :-
+	insertThrows(Pattern, Seg, Pred, 0, []).
 
-insertThrows(Pattern, Seq, Pred, Options) :-
-	insertThrows(Pattern, Seq, Pred, 0, Options).
+insertThrows(Pattern, Seg, Pred, Options) :-
+	insertThrows(Pattern, Seg, Pred, 0, Options).
 
 insertThrows(_Pattern, [], _Pred, _Site, _Options) :- !.
 insertThrows(Pattern, [Throw | Rest], Pred, Site, Options) :-
@@ -294,18 +301,25 @@ insertThrows_nextSite(NextSite, Options, landingSite) :-
 
 
 
-sync_throws(Pattern, Seq, NumberOfJugglers) :-
+sync_throws(Pattern, Seg, NumberOfJugglers) :-
 	length(Pattern, Length),
 	0 is Length mod NumberOfJugglers,
-	sync_throws_fill(Pattern, Seq, 0, NumberOfJugglers).
+	sync_throws_fill(Pattern, Seg, 0, NumberOfJugglers).
 
-sync_throws_fill(_Pattern, _Seq, NumberOfJugglers, NumberOfJugglers) :- !.
-sync_throws_fill(Pattern, Seq, Juggler, NumberOfJugglers) :-
+sync_throws_fill(_Pattern, _Seg, NumberOfJugglers, NumberOfJugglers) :- !.
+sync_throws_fill(Pattern, Seg, Juggler, NumberOfJugglers) :-
 	length(Pattern, Length),
 	Offset is Juggler * (Length / NumberOfJugglers),
-	insertThrows(Pattern, Seq, next, [offset(Offset)]),
+	insertThrows(Pattern, Seg, next, [offset(Offset)]),
 	NextJuggler is Juggler + 1,
-	sync_throws_fill(Pattern, Seq, NextJuggler, NumberOfJugglers).
+	sync_throws_fill(Pattern, Seg, NextJuggler, NumberOfJugglers).
+
+
+contains_just([], _ListOfSegs) :- !.
+contains_just(Pattern, ListOfSegs) :-
+	member(Seg, ListOfSegs),
+	append(Seg, RestPattern, Pattern),
+	contains_just(RestPattern, ListOfSegs).
 
 
 
