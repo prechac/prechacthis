@@ -15,6 +15,7 @@
 
 main :-
 	current_prolog_flag(argv, Argv),
+	set_working_directory(Argv),
 	append(_, [--|AV], Argv), !,
 	start_server(AV),
 	wait(AV).
@@ -32,6 +33,12 @@ start_server(Argv) :-
 	),
 	use_module('pl/prechacthis'),
 	server(Port, Workers).
+	
+set_working_directory(Argv) :-
+	member(File, Argv),
+	atom_concat(Dir, 'prechacthis_server.pl', File),
+	working_directory(_Old, Dir), !.	
+set_working_directory(_).
 	
 wait(Argv) :-
 	memberchk('--daemon', Argv), !,
