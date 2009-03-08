@@ -12,7 +12,7 @@ function loadContent(link){
 
 function writeLinkHere() {
 	var info_f = $('info_form');
-	var uri = "./info.php?pattern="+$F(info_f['pattern'])
+	var uri = "./info?pattern="+$F(info_f['pattern'])
 		+"&persons="+$F(info_f['persons'])
 		+"&swap="+$F(info_f['swap'])
 		+"&back="+$F(info_f['back']);

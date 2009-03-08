@@ -1,0 +1,116 @@
+
+/* Search Form */
+
+.form_table {
+	margin-top: 2em;
+	margin-bottom: 1em;
+}
+
+.lable {
+	text-align: left;
+	color: #000000;
+	vertical-align: top;
+	padding: 1ex 1ex 1ex 0;
+}
+
+.input {
+	text-align: left;
+	color: #000000;
+	vertical-align: top;
+	padding: 1ex 0 1ex 1ex;
+}
+
+
+/* Siteswap Lists Info */
+
+.mainPage_info {
+	font-family: Arial,sans-serif;
+	margin-top: 0ex;
+	margin-bottom: 0ex;
+	font-size: 80%;
+}
+.mainPage_info_lable {
+	text-align: right;
+	margin: 0;
+	padding-right: 1em;
+}
+.mainPage_info_info {
+	text-align: left;
+	margin: 0;
+}
+
+/* Siteswap Lists */
+
+.inline{
+	display: inline-block;
+	vertical-align: top;
+	border-width: 0px;
+	border-color: black;
+	border-style: solid;
+	margin-right: 1em;
+	margin-left: 1em;
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+.swaps {
+	color: #000000;
+	font-family: 'Courier New', Courier, monospace !important;
+	font-weight: bold;
+	font-size: 90%;
+	text-align: left;
+}
+
+.time{
+	font-family: Arial,sans-serif;
+	margin-top: 0ex;
+	margin-bottom: 1ex;
+	font-size: 80%;
+}
+.some, .all{
+	font-family: Arial,sans-serif;
+	margin-top: 0.1ex;
+	margin-bottom: 0.1ex;
+	font-size: 90%;
+}
+
+
+.swaps a {
+	color: #000000;
+	font-weight: bold;
+	font-family: 'Courier New', Courier, monospace !important;
+}
+.swaps a:visited, .swaps a:link {
+	text-decoration: none;
+}
+.swaps a:hover {
+	text-decoration: underline;
+}
+
+.swaps p {
+	padding: 0;
+	margin-top: 0.4ex;
+	margin-bottom: 0ex;
+}
+
+
+
+
+
+
+/* page info */
+
+
+
+#path {
+	text-align: right;
+	font-family: Arial,sans-serif;
+	width: 100%;
+	font-size: 80%;
+	margin-top: 3em;
+	margin-right: 2em;
+	border-width: 0px;
+	border-style: dotted;
+	white-space: nowrap;
+}
+

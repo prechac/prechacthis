@@ -10,11 +10,16 @@ format_href(Href, ajax) :-
 format_href(Href, html) :-
 	format("'~w'", [Href]).
 	
-format_href(Pattern, NumberOfJugglers, SwapList, BackURL) :-
-	pattern_to_string(Pattern, PatternStr),
-	list_to_string(SwapList, SwapListStr),
-	format(atom(Href), "./info.php?pattern=~s&amp;persons=~w&amp;swap=~s&amp;back=~w", [PatternStr, NumberOfJugglers, SwapListStr, BackURL]),
+format_href(Pattern, Persons, SwapList, BackURL) :-
+	a2Atom(Pattern, PatternStr),
+	a2Atom(SwapList, SwapListStr),
+	format(atom(Href), "./info.php?pattern=~w&amp;persons=~w&amp;swap=~w&amp;back=~w", [PatternStr, Persons, SwapListStr, BackURL]),
 	format_href(Href).
+	
+	
+	
+	
+	
 	
 if_ajax(Call, Type) :-
 	(Type = ajax ->

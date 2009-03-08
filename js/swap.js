@@ -28,14 +28,14 @@ function swapAndShow(elementA, elementB) {
 	var posA = elementA.identify().toString().substring(5,elementA.identify().toString().length) * 1;
 	var posB = elementB.identify().toString().substring(5,elementB.identify().toString().length) * 1;
 	var swapedPattern = -1;
-	new Ajax.Request('./swapThrows.php?pattern='+$F(info_f['pattern'])+'&pos1='+posA+'&pos2='+posB, {
+	new Ajax.Request('./swap?pattern='+$F(info_f['pattern'])+'&pos1='+posA+'&pos2='+posB, {
 		method: 'get',
 		onSuccess: function(transport) {
 			swapedPattern = transport.responseText;
 			if(swapedPattern < 0) {
 				alert("not a possible Pattern");
 			}else{
-				var new_uri = "./info.php?pattern="+swapedPattern
+				var new_uri = "./info?pattern="+swapedPattern
 					+"&persons="+$F(info_f['persons'])
 					+"&swap="+$F(info_f['swap'])
 					+"&back="+$F(info_f['back']);

@@ -1,3 +1,14 @@
+:- module(siteswap_engine, 
+	[
+		siteswap/6, 
+		prechacThis/5
+	]
+).
+
+:- use_module(helpers).
+:- use_module(siteswap_helpers).
+:- use_module(siteswap_constraints).
+:- use_module(siteswap_multiplex).
 
 %% example:
 % 6 1 _ _  6 Pattern
@@ -26,8 +37,8 @@ siteswap(Jugglers, Objects, MaxHeight, PassesMin, PassesMax, Pattern) :-
 	),
    addObjects(BasePattern, MissingObjects, Jugglers, PassesToAddMax, 0, MaxHeight, Prechator, Pattern),	
    (passesMin(Pattern, PassesMin); Jugglers=1),
-   passesMax(Pattern, PassesMax),
-   checkMultiplexes(Pattern).
+   passesMax(Pattern, PassesMax).
+   %checkMultiplexes(Pattern).
 
 addObjects([], 0, _Jugglers, _PassesMax, _MinHeight, _MaxHeight, _Prechator, []) :- !.
 addObjects([_BaseHead|BaseRest], MissingObjects, Jugglers, PassesMax, MinHeight, MaxHeight, Prechator, [Throw|PatternRest]) :-
@@ -44,6 +55,12 @@ addObjects([BaseHead|BaseRest], MissingObjects, Jugglers, PassesMax, MinHeight, 
       (Throw = 0, Index = 0);
       Throw >= 1
    ),
+%   (var(MaxHeight);
+%      (
+%         numberOfVars(PatternRest, NumberOfVars),
+%         CalculatedMinHeight is 
+%      )
+%   ),
    (
       var(MinHeight);
       (number(MinHeight), Throw >= MinHeight)
@@ -80,6 +97,11 @@ addObjects([BaseMultiplex|BaseRest], MissingObjects, Jugglers, PassesMax, MinHei
       )
    ),
    addObjects(BaseRest, ObjectsForRest, Jugglers, NextPassesMax, MinHeight, MaxHeight, Prechator, PatternRest).
+
+
+%objectsToAdd(ObjectsToAdd, MissingObjects, MinHeight, MaxHeight, NumberOfVars, NumberOfJugglers, Base, Prechator) :-
+%	between(0, MissingObjects, ObjectsToAdd),
+	
 
 
 landingSites2Pattern(LandingSites, BasePattern) :-
