@@ -1,3 +1,81 @@
+:- module(helpers, 
+	[
+		changeDimension/3,
+		allMembersUnique/1,
+		firstVar0/2,
+		firstNoGround0/2,
+		justVars/1,
+		positionsInList/3,
+		nth0List/3,
+		nth0ListOfLists/3,
+		changeOnePosition/4,
+		changePositions/4,
+		posList/2,
+		fillIn/2,
+		fillIn/4,
+		fillInAndCopy/3,
+		copyList/2,
+		copyList_if_smaller/3,
+		copyList_if_bigger/3,
+		numberOfX/3,
+		numberOfVars/2,
+		multiply/3,
+		add/3,
+		memberOrEqual/2,
+		memberOrEqual/3,
+		rotate/2,
+		rotate_right/2,
+		rotate_left/2,
+		sort_list_of_expr/2,
+		infimum/2,
+		min_of_list/2,
+		supremum/2,
+		max_of_list/2,
+		zeros/2,
+		oneToN/2,
+		realSubtract/3,
+		removeOnce/3,
+		listOfNumber/2,
+		listOfNumber/3,
+		listOf/2,
+		listOf/3,
+		nth0_gen/4,
+		compare_expr/3,
+		even/1,
+		odd/1,
+		rational_to_number/2,
+		substract_var/3,
+		substractUntilNonPositiv/3,
+		betweenRandom/3,
+		permutationRandom/2,
+		fillPermutation/2,
+		fillSetPermutation/2,
+		removeVars/2,
+		fillInVars/2,
+		fillInVars/3,
+		findall_restricted/4,
+		memberchk/3,
+		member_restricted/3,
+		nth1_restricted/4,
+		remove_whitespace/2,
+		keysort/3,
+		a2Number/2,
+		a2Number/3,
+		a2Atom/2,
+		a2Atom_list/2,
+		a2String/2,
+		integer_gen/2,
+		integer_gen/3
+	]
+).
+
+:- use_module(siteswap_preprocessing).
+:- use_module(siteswap_constraints).
+
+
+:- dynamic
+	dataResult/2.
+
 
 %%%  --- list operations ---
 
@@ -203,6 +281,22 @@ copyList([_Head|List], [_HeadCopy|ListCopy]) :-
 	copyList(List, ListCopy).
 	
 	
+copyList_if_smaller([], _Sup, []) :- !.
+copyList_if_smaller([Head|Tail], Sup, [Head|TailCopy]) :-
+	Head < Sup, !,
+	copyList_if_smaller(Tail, Sup, TailCopy).
+copyList_if_smaller([_Head|Tail], Sup, TailCopy) :-
+	copyList_if_smaller(Tail, Sup, TailCopy).
+	
+	
+copyList_if_bigger([], _Min, []) :- !.
+copyList_if_bigger([Head|Tail], Min, [Head|TailCopy]) :-
+	Head >= Min, !,
+	copyList_if_bigger(Tail, Min, TailCopy).
+copyList_if_bigger([_Head|Tail], Min, TailCopy) :-
+	copyList_if_bigger(Tail, Min, TailCopy).
+	
+	
 numberOfX([], _, 0) :- !.
 numberOfX([Var|Tail], X, Number) :-
 	var(Var), !,
@@ -213,6 +307,20 @@ numberOfX([X|Tail], X, Number) :-
 	Number is OldNumber + 1.
 numberOfX([_Y|Tail], X, Number) :-
 	numberOfX(Tail, X, Number).
+
+numberOfVars([], 0) :- !.
+numberOfVars([Head|Tail], Number) :-
+	var(Head), !,
+	numberOfVars(Tail, NumberTail),
+	Number is NumberTail + 1.
+numberOfVars([Head|Tail], Number) :-
+	is_list(Head), !,
+	numberOfVars(Head, NumberHead),
+	numberOfVars(Tail, NumberTail),
+	Number is NumberTail + NumberHead.
+numberOfVars([_Head|Tail], Number) :-
+	numberOfVars(Tail, Number).
+
 
 multiply(Var, _Factor, _Product) :-
 	var(Var), !.
@@ -438,59 +546,166 @@ fillInVars([Var|ListWithVars], [Gap|ListOfGaps], RemainingGaps) :-
 	Var = Gap,
 	fillInVars(ListWithVars, ListOfGaps, RemainingGaps).
 
-findAtMostNUnique(X, Goal, MaxNumberOfResults, Bag, Flag) :- 
-	initFindAtMostNUnique,
-	post_it_unique(X, Goal, MaxNumberOfResults, Flag),
-	gather([], Bag).
 
-initFindAtMostNUnique :-
-	retractall(counterNumberOfResults(_)),
-	retractall(dataResult(_)),
-	asserta(counterNumberOfResults(0)),!.
 
-findAllUnique(X, Goal, Bag) :- 
-	initFindAllUnique,
-	post_it_unique(X, Goal),
-	gather([], Bag). 
+
+
+%%%%%% ------ replacements ------ %%%%%%
+
+
+%%% --- findall replacements --- %%%
+
 	
-initFindAllUnique :-
-	retractall(dataResult(_)),!.
-		
-post_it_unique(X, Goal, MaxNumberOfResults, some) :- 
-	call(Goal),
-	not(dataResult(X)),
-	counterNumberOfResults(NumberOfResults),
-	retract(counterNumberOfResults(NumberOfResults)),
-	(
+/*** findall_unique_restricted
+*
+* findall_restricted(X, Goal, Bag, Options)
+* Options:
+* unique
+* time(+Seconds) - max time
+* results(+Results) - max number of results
+* flag(-Flag) - returns one of {all, some, time}
+*
+*/	
+
+findall_restricted(X, Goal, Bag, Options) :-
+	Session is random(10^10),
+	init_findall_restricted(Options, Session),
+	post_it_timecheck(X, Goal, Options, Session),
+	gather([], Bag, Session).
+	
+
+init_findall_restricted([], Session) :- 
+	retractall(dataResult(Session, _)),
+	(recorded(findall_active, _OtherSession) ->
+		true;
+		forall(recorded(time_limit_exceeded, _, R), erase(R))
+	),
+	recorda(findall_active, Session), !.
+init_findall_restricted([Option|Options], Session) :-
+	init_findall_restricted_option(Option, Session), 
+	init_findall_restricted(Options, Session).
+init_findall_restricted_option(results(_), Session) :-	
+	forall(recorded(findall_result_counter, results(Session, _), Ref), erase(Ref)),
+	recorda(findall_result_counter, results(Session, 0)), !.
+init_findall_restricted_option(_, _) :- !.
+
+	
+
+post_it_timecheck(X, Goal, Options, Session) :-
+	memberchk(time(MaxTime), Options),!,
+	catch(
+		call_with_time_limit(MaxTime, 
+			post_it(X, Goal, Options, Session)
+		),
+		time_limit_exceeded,
+		memberchk(time, Options, [name(flag), optional])
+	).
+	
+post_it_timecheck(X, Goal, Options, Session) :-
+	recorded(findall_active, _OtherSession), !,
+	catch(
+		post_it(X, Goal, Options, Session),
+		time_limit_exceeded,
 		(
-			NumberOfResults >= MaxNumberOfResults,!
-		);
-		(
-			NewNumberOfResults is NumberOfResults + 1,
-			asserta(counterNumberOfResults(NewNumberOfResults)),
-			asserta(dataResult(X)),
-			fail  % force backtrack if not enough results
+			memberchk(time, Options, [name(flag), optional]),
+			recorda(time_limit_exceeded, Session)
 		)
 	).
-post_it_unique(_, _, _, all).
+post_it_timecheck(X, Goal, Options, Session) :-	
+	post_it(X, Goal, Options, Session).
 
 
-post_it_unique(X, Goal) :- 
+post_it(X, Goal, Options, Session) :- 
 	call(Goal),
-	not(dataResult(X)),
-	asserta(dataResult(X)),
-	fail.  % force backtrack if not enough results
-post_it_unique(_, _).
+	not(fail_posting(X, Options, Session)),
+	asserta(dataResult(Session, X)),
+	stop_posting(Options, Session), !.
+post_it(_, _, Options, _Session) :-
+	memberchk(all, Options, [name(flag), optional]).
 
 
-gather(B,Bag) :-  
-	dataResult(X),
-	retract(dataResult(X)),
-	gather([X|B],Bag),
+fail_posting(X, Options, Session) :-
+	member(Option, Options),
+	fail_posting_option(X, Option, Session).
+	
+fail_posting_option(X, unique, Session) :-
+	dataResult(Session, X).
+	
+stop_posting(Options, Session) :-
+	member(Option, Options),
+	stop_posting_option(Option, Options, Session), !.
+stop_posting(Options, _Session) :-
+	recorded(time_limit_exceeded, _S), 
+	memberchk(time, Options, [name(flag), optional]), !.
+	
+stop_posting_option(results(MaxResults), Options, Session) :-
+	number(MaxResults),
+	recorded(findall_result_counter, results(Session, NumberOfResults), Ref),
+	erase(Ref),
+	NewNumberOfResults is NumberOfResults + 1,
+	recorda(findall_result_counter, results(Session, NewNumberOfResults)),
+	NumberOfResults >= MaxResults - 1,
+	memberchk(some, Options, [name(flag), optional]).
+	
+	
+gather(B, Bag, Session) :-
+	dataResult(Session, X),
+	retract(dataResult(Session, X)),
+	gather([X|B],Bag, Session),
 	!.
-gather(S,S).
+gather(S,S, Session) :-
+	recorded(findall_active, Session, Rev),
+	erase(Rev).
 
 
+
+
+%%% --- member replacements --- %%%
+
+/*** memberchk
+* memberchk(X, List, Options)
+* Options: 
+* name(Name)
+* default(Default)
+* optional
+*/
+memberchk(X, List, Options) :-
+	select(name(Name), Options, RestOptions),
+	Y =.. [Name, X],
+	memberchk(Y, List, RestOptions), !.
+memberchk(X, List, Options) :-
+	not(memberchk(name(_), Options)),
+	memberchk(X, List), !.
+memberchk(X, _List, Options) :-
+	memberchk(default(X), Options), !.
+memberchk(_X, _List, Options) :-
+	memberchk(optional, Options), !.
+	
+	
+
+member_restricted(_X, _List, Options) :-
+	memberchk(stop_if(Goal), Options),
+	call(Goal), !,
+	fail.
+member_restricted(X, [X|_List], _Options).
+member_restricted(X, [_Y|List], Options) :-
+	member_restricted(X, List, Options).
+	
+
+nth1_restricted(_Pos, _List, _X, Options) :-
+	memberchk(stop_if(Goal), Options),
+	call(Goal), !,
+	fail.
+nth1_restricted(1, [X|_List], X, _Options).
+nth1_restricted(Pos, [_Y|List], X, Options) :-
+	nonvar(Pos),
+	Pos1 is Pos - 1,
+	nth1_restricted(Pos1, List, X, Options).
+nth1_restricted(Pos, [_Y|List], X, Options) :-
+	var(Pos),
+	nth1_restricted(Pos1, List, X, Options),
+	Pos is Pos1 + 1.
+	
 %%% string operations %%%
 
 remove_whitespace([], []) :- !.
@@ -510,3 +725,66 @@ keysort(List, Keys, Sorted) :-
 keys([], [], []) :- !.
 keys([Head|Tail], [Key|Keys], [Key-Head|TailWithKeys]) :-
 	keys(Tail, Keys, TailWithKeys).
+
+
+
+%%% convert types %%%
+a2Number(A, Number) :-
+	a2Number(A, Number, []).
+	
+a2Number(Number, Number, _Options) :- 
+	(number(Number); rational(Number)), !.
+a2Number(Atom, Number, Options) :-
+	atom(Atom), !,
+	name(Atom, List),
+	a2Number(List, Number, Options).
+a2Number(String, Number, _Options) :-
+	is_list(String),
+	phrase(dcg_number_neg(Number), String), !.
+a2Number(_A, Default, Options) :-
+	memberchk(default(Default), Options),
+	(number(Default); rational(Default)), !.
+
+a2Atom(Atom, Atom) :-
+	atom(Atom), !.
+a2Atom(Number, Atom) :-
+	number(Number), !,
+	atom_number(Atom, Number).
+a2Atom(String, Atom) :-
+	string(String), !,
+	string_to_atom(String, Atom).
+a2Atom(List, Atom) :-
+	is_list(List), !,
+	a2Atom_list(List, ListOfAtoms),
+	concat_atom(ListOfAtoms, ',', InnerAtom),
+	format(atom(Atom), "[~w]", [InnerAtom]).
+a2Atom(X, Atom) :-
+	format(atom(Atom), "~w", [X]).
+	
+a2Atom_list([], []) :- !.
+a2Atom_list([A|List], [Atom|ListOfAtoms]) :-
+	a2Atom(A, Atom),
+	a2Atom_list(List, ListOfAtoms).
+
+a2String(String, String) :-
+	string(String), !.
+a2String(X, String) :-
+	format(string(String), "~w", [X]).
+	
+	
+%% generating integers
+
+integer_gen(Min, Number) :-
+	integer_gen(Min, Number, []).
+
+integer_gen(_Min, _Number, Options) :-
+	memberchk(stop_if(Goal), Options),
+	call(Goal), !,
+	fail.
+integer_gen(Min, Min, _Options).
+integer_gen(Min, Number, Options) :-
+	integer_gen(Min, Befor, Options),
+	Number is Befor + 1.
+	
+
+	

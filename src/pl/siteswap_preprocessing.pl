@@ -1,7 +1,46 @@
+:- module(siteswap_preprocessing,
+	[
+		preprocessConstraint/5,
+		preprocessConstraint/6,
+		preprocess_number/3,
+		float_to_shortpass/2,
+		convertShortPasses/5,
+		dcg_float/3,
+		dcg_rational/3,
+		dcg_number/3,
+		dcg_and/2,
+		dcg_or/2,
+		dcg_left_parenthesis/2,
+		dcg_right_parenthesis/2,
+		dcg_right_bracket/2,
+		dcg_left_bracket/2,
+		dcg_underscore/2,
+		dcg_slash/2,
+		dcg_plus/2,
+		dcg_minus/2,
+		dcg_comma/2,
+		dcg_gt/2,
+		dcg_lt/2,
+		dcg_p/2,
+		dcg_s/2,
+		dcg_dot/2,
+		dcg_whitespaces/2,
+		dcg_whitespace/2,
+		dcg_integer/3,
+		dcg_throw/3,
+		dcg_self/3,
+		dcg_pass/3,
+		dcg_number_neg/3
+	]
+).
+:- use_module(helpers).
+:- use_module(siteswap_helpers).
+:- use_module(siteswap_constraints).
 
 preprocessConstraint(ConstraintString, Period, NumberOfJugglers, MaxHeight, Constraint) :-
 	preprocessConstraint(ConstraintString, positiv, Period, NumberOfJugglers, MaxHeight, Constraint).
-	
+
+
 preprocessConstraint(ConstraintString, ConstraintType, Period, NumberOfJugglers, MaxHeight, Constraint) :-
 	string2Constraint(ConstraintString, ConstraintBagShort),
 	member(ConstraintShort, ConstraintBagShort),
@@ -49,14 +88,83 @@ calcThe2(Distance, MultiplexLength, The2) :-
 	Length is MultiplexLength - Distance + 1,
 	listOf(p(2,0,2), Length, The2).
 	
+% --- preprocess numbers --- %
 
+preprocess_number(Constraint, Number) :-
+	preprocess_number(Constraint, Number, []).
+
+preprocess_number([], Number, Options) :-
+	select(default(Default), Options, NewOptions),!,
+	preprocess_number(Default, Number, NewOptions).
+preprocess_number(Var, Var, Options) :-
+	var(Var), !,
+	memberchk(dontknow, Options, [name(to_come), optional]).
+preprocess_number(Number, Number, Options) :-
+	number(Number), !,
+	memberchk(0, Options, [name(to_come), optional]).
+preprocess_number(Number, Number, Options) :-
+	rational(Number), !,
+	memberchk(0, Options, [name(to_come), optional]).
+preprocess_number(Constraint, Number, Options) :-
+	is_list(Constraint), !,
+	string2Numbers(Constraint, NumberConstraint),
+	preprocess_number_options(NumberConstraint, NumberConstraintWorkedOn, Options),
+	member_NC(Number, NumberConstraintWorkedOn, Options).
+preprocess_number(Atom, Number, Options) :-
+	atom(Atom),!,
+	name(Atom, String),
+	preprocess_number(String, Number, Options).
+
+string2Numbers(ConstraintString, Constraint) :-
+	(
+		dcg_number_constraint(Constraint, ConstraintString, []);
+		throw(constraint_unclear)
+	),!.
+
+preprocess_number_options(Constraint, Constraint, []) :- !.
+preprocess_number_options(Constraint, NewConstraint, [Option|Options]) :-
+	preprocess_number_option(Constraint, ConstraintTmp, Option),
+	preprocess_number_options(ConstraintTmp, NewConstraint, Options).
+
+preprocess_number_option(Constraint, NewConstraint, max(Max)) :-
+	numlist(1, Max, List),
+	MaxConstraint = [list(List)],
+	dcgh_merge_number_constraints_and(Constraint, MaxConstraint, NewConstraint), !.
+preprocess_number_option(Constraint, Constraint, _) :- !.	
+
+member_NC(_Number, _NumberConstraint, Options) :-
+	memberchk(stop_if(Goal), Options),
+	call(Goal), !,
+	fail.
+member_NC(Number, NumberConstraint, Options) :-
+	memberchk(infinity(_Min), NumberConstraint), !,
+	member_NC_infinity(Number, NumberConstraint, Options),
+	memberchk(infinity, Options, [name(to_come), optional]).
+member_NC(Number, NumberConstraint, Options) :-
+	not(memberchk(infinity(_Min), NumberConstraint)),
+	memberchk(list(List), NumberConstraint),
+	length(List, Length),
+	sort(List, ListSorted),
+	member_NC_list(Number, ListSorted, Length, Options).
+	
+member_NC_list(Number, List, Length, Options) :-
+	nth1_restricted(Pos, List, Number, Options),
+	ToCome is Length - Pos,
+	memberchk(ToCome, Options, [name(to_come), optional]).
+
+member_NC_infinity(Number, NumberConstraint, Options) :-
+	memberchk(list(List), NumberConstraint),
+	sort(List, ListSorted),
+	member_restricted(Number, ListSorted, Options).
+member_NC_infinity(Number, NumberConstraint, Options) :-
+	memberchk(infinity(Min), NumberConstraint),
+	integer_gen(Min, Number, Options).
 
 %%% --- short passes ---
 
-float_to_shortpass(Throw,ShortPass) :-
+float_to_shortpass(Throw, ShortPass) :-
 	(number(Throw);rational(Throw)),!,
-	ThrowTen is Throw * 10,
-	ShortPass is truncate(ThrowTen)/10.
+	ShortPass is round(Throw * 10)/10.
 float_to_shortpass(p(Throw,Index,Original), p(ShortPass,Index,Original)) :-
 	float_to_shortpass(Throw, ShortPass).
 
@@ -78,7 +186,7 @@ shortpass_to_pass(p(ShortThrow, Index), Length, Jugglers, MaxHeight, p(Throw, In
 	integer(Index),
 	shortpass_to_pass(p(ShortThrow, Index, _), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)).
 shortpass_to_pass(p(ShortThrow, Index, Origen), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)) :-
-	number(ShortThrow),
+	(number(ShortThrow); rational(ShortThrow)),
 	Prechator is Length rdiv Jugglers,
 	IndexMax is Jugglers - 1,
 	MaxHeightSolo is MaxHeight + Length,
@@ -264,6 +372,22 @@ dcg_self(S) -->
 dcg_self(_) -->
 	dcg_underscore.
 
+dcg_pass(p(T,I,O)) -->	
+	dcg_p,
+	dcg_left_parenthesis,
+	dcg_float(T),
+	dcg_comma,
+	dcg_integer(I),
+	dcg_comma,
+	dcg_integer(O),
+	dcg_right_parenthesis.
+dcg_pass(p(T,I)) -->	
+	dcg_p,
+	dcg_left_parenthesis,
+	dcg_float(T),
+	dcg_comma,
+	dcg_integer(I),
+	dcg_right_parenthesis.
 dcg_pass(p(F,I)) -->
 	dcg_number(F),
 	dcg_p,
@@ -289,17 +413,135 @@ dcg_pass(p(_,I))  -->
 dcg_pass(_) -->
 	dcg_underscore.
 
+
+
+
+
+
+dcg_number_constraint([]) -->
+	dcg_whitespaces.
+dcg_number_constraint(NewListOfNumbers) -->
+	dcg_whitespaces,
+	dcg_numbers(ListOfNumbers),
+	dcg_whitespaces,
+	dcg_and_numbers(AndListOfNumbers),
+	{
+		dcgh_merge_number_constraints_and(ListOfNumbers, AndListOfNumbers, NewListOfNumbers)
+	}.
+dcg_number_constraint(NewListOfNumbers) -->	
+	dcg_whitespaces,
+	dcg_numbers(ListOfNumbers),
+	dcg_whitespaces,
+	dcg_or_numbers(OrListOfNumbers),
+	{
+		dcgh_merge_number_constraints_or(ListOfNumbers, OrListOfNumbers, NewListOfNumbers)
+	}.
+
+dcg_and_numbers(NewListOfNumbers) -->
+	dcg_and,
+	dcg_whitespaces,
+	dcg_numbers(ListOfNumbers),
+	dcg_whitespaces,
+	dcg_and_numbers(AndListOfNumbers),
+	{
+		dcgh_merge_number_constraints_and(ListOfNumbers, AndListOfNumbers, NewListOfNumbers)
+	}.
+dcg_and_numbers([infinity(1)]) -->
+	[].
+	
+dcg_or_numbers(NewListOfNumbers) -->
+	dcg_or,
+	dcg_whitespaces,
+	dcg_numbers(ListOfNumbers),
+	dcg_whitespaces,
+	dcg_or_numbers(OrListOfNumbers),
+	{
+		dcgh_merge_number_constraints_or(ListOfNumbers, OrListOfNumbers, NewListOfNumbers)
+	}.
+dcg_or_numbers([]) -->
+	[].
+
+
+dcg_numbers(ListOfNumbers) -->
+	dcg_left_parenthesis,
+	dcg_number_constraint(ListOfNumbers),
+	dcg_right_parenthesis.
+
+
+dcg_numbers([list([I])]) -->
+	dcg_integer(I).
+dcg_numbers([list(List)]) -->
+	dcg_integer(N),
+	dcg_whitespaces,
+	dcg_minus,
+	dcg_whitespaces,
+	dcg_integer(M),
+	{
+		numlist(N,M,List)
+	}.
+dcg_numbers([list(List)]) -->
+	dcg_lt,
+	dcg_whitespaces,
+	dcg_integer(I),
+	{
+		Max is I - 1,
+		numlist(1, Max, List)
+	}.
+dcg_numbers([infinity(Min)]) -->
+	dcg_gt,
+	dcg_whitespaces,
+	dcg_integer(I),
+	{
+		Min is I + 1
+	}.
+dcg_numbers([infinity(Min)]) -->	
+	dcg_integer(I),
+	dcg_whitespaces,
+	dcg_lt,
+	{
+		Min is I + 1
+	}.
+dcg_numbers([list(List)]) -->
+	dcg_integer(I),
+	dcg_whitespaces,
+	dcg_gt,
+	{
+		Max is I - 1,
+		numlist(1, Max, List)
+	}.
+
+
+dcg_float(I) -->
+	dcg_integer(I).
 dcg_float(R) -->
+	{
+		var(R), !
+	},
 	dcg_integer(I),
 	dcg_dot,
 	dcg_integer(F),
 	{
-		R is I + F/10
+		number_chars(F, NumberChars),
+		length(NumberChars, Length),
+		R is I + F / (10^Length)
 	}.
-dcg_float(I) -->
-	dcg_integer(I).
-
+dcg_float(R) -->
+	{
+		nonvar(R),
+		I is round(float_integer_part(R)),
+		F is float_fractional_part(R),
+		F \= 0,
+		F10 is round(F * 10)
+	},
+	dcg_integer(I),
+	dcg_dot,
+	dcg_integer(F10).
+	
+	
 dcg_rational(Z) -->
+	{
+		var(Z)
+	},
 	dcg_integer(N1),
 	dcg_slash,
 	dcg_integer(N2),
@@ -307,6 +549,9 @@ dcg_rational(Z) -->
 		Z is N1 / N2
 	}.
 dcg_rational(Z) -->
+	{
+		var(Z)
+	},
 	dcg_integer(N1),
 	dcg_plus,
 	dcg_integer(N2),
@@ -316,6 +561,9 @@ dcg_rational(Z) -->
 		Z is N1 + (N2 / N3)
 	}.
 dcg_rational(Z) -->
+	{
+		var(Z)
+	},
 	dcg_integer(N1),
 	dcg_minus,
 	dcg_integer(N2),
@@ -331,6 +579,16 @@ dcg_number(R) -->
 	dcg_float(R).
 dcg_number(Z) -->
 	dcg_rational(Z).
+
+dcg_number_neg(N) -->
+	dcg_number(N).
+dcg_number_neg(N_neg) -->
+	dcg_minus,
+	dcg_whitespaces,
+	dcg_number(N),
+	{
+		N_neg is N * (-1)
+	}.
 
 
 dcg_and -->
@@ -374,6 +632,16 @@ dcg_plus -->
 
 dcg_minus -->
 	"-".
+	
+dcg_comma -->
+	",".
+	
+dcg_gt -->
+	">".
+	
+dcg_lt -->
+	"<".
+	
 
 dcg_p -->
 	"p".
@@ -407,11 +675,21 @@ dcg_whitespace -->
 
 
 dcg_integer(I) -->
+	{
+		var(I)
+	},
 	dcg_digit(D0),
 	dcg_digits(D),
     { 
-		number_chars(I, [D0|D])
+		number_codes(I, [D0|D])
     }.
+dcg_integer(I) -->
+    { 
+		nonvar(I),
+		number_codes(I, [D0|D])
+    },
+	dcg_digit(D0),
+	dcg_digits(D).
 
 dcg_digits([D0|D]) -->
 	dcg_digit(D0), !,
@@ -420,10 +698,19 @@ dcg_digits([]) -->
 	[].
 
 dcg_digit(D) -->
+	{
+		var(D)
+	},
 	[D],
 	{ 
 		code_type(D, digit)
 	}.
+dcg_digit(D) -->	
+	{ 
+		nonvar(D),
+		code_type(D, digit)
+	},
+	[D].
 
 
 
@@ -492,6 +779,95 @@ dcgh_constraint_to_multiplex(Constraint, Multiplex) :-
 	), !.
 
 
+%%%% merge Number Constraints %%%%
+
+%%% NumberConstraint = [list([...]), infinity(N)]   "elements from list or greater equal N"
+
+dcgh_merge_number_constraints_or([], C, C) :- !.
+dcgh_merge_number_constraints_or(C, [], C) :- !.
+
+
+dcgh_merge_number_constraints_or(ConstraintA, ConstraintB, NewConstraint) :- 
+	dcgh_merge_number_lists_or(ConstraintA, ConstraintB, NewConstraintList),
+	dcgh_merge_number_infinity_or(ConstraintA, ConstraintB, NewConstraintInfinity),
+	dcgh_merge_number_list_infinity_or(NewConstraintList, NewConstraintInfinity, NewConstraint).
+	
+dcgh_merge_number_lists_or(ConstraintA, ConstraintB, [list(NewList)]) :-
+	memberchk(list(ListA), ConstraintA),
+	memberchk(list(ListB), ConstraintB), !,
+	union(ListA, ListB, NewList).
+dcgh_merge_number_lists_or(ConstraintA, _ConstraintB, [list(ListA)]) :-
+	memberchk(list(ListA), ConstraintA), !.
+dcgh_merge_number_lists_or(_ConstraintA, ConstraintB, [list(ListB)]) :-
+	memberchk(list(ListB), ConstraintB), !.
+dcgh_merge_number_lists_or(_ConstraintA, _ConstraintB, []) :- !.
+
+dcgh_merge_number_infinity_or(ConstraintA, ConstraintB, [infinity(NewMin)]) :-
+	memberchk(infinity(MinA), ConstraintA),
+	memberchk(infinity(MinB), ConstraintB), !,
+	NewMin is min(MinA, MinB).
+dcgh_merge_number_infinity_or(ConstraintA, _ConstraintB, [infinity(MinA)]) :-
+	memberchk(infinity(MinA), ConstraintA), !.
+dcgh_merge_number_infinity_or(_ConstraintA, ConstraintB, [infinity(MinB)]) :-
+	memberchk(infinity(MinB), ConstraintB), !.
+dcgh_merge_number_infinity_or(_ConstraintA, _ConstraintB, []) :- !.
+
+dcgh_merge_number_list_infinity_or([], ConstraintInfinity, ConstraintInfinity) :- !.
+dcgh_merge_number_list_infinity_or(ConstraintList, [], ConstraintList) :- !.
+dcgh_merge_number_list_infinity_or([list(List)], [infinity(Min)], [list(NewList), infinity(Min)]) :-
+	copyList_if_smaller(List, Min, NewList).
+	
+	
+	
+dcgh_merge_number_constraints_and([], _C, []) :- !.
+dcgh_merge_number_constraints_and(_C, [], []) :- !.
+dcgh_merge_number_constraints_and([infinity(1)], C, C) :- !.
+dcgh_merge_number_constraints_and(C, [infinity(1)], C) :- !.
+
+dcgh_merge_number_constraints_and(ConstraintA, ConstraintB, NewConstraintClean) :- 
+	dcgh_merge_number_intersect_all(ConstraintA, ConstraintB, NewConstraint),
+	dcgh_merge_number_clean(NewConstraint, NewConstraintClean).
+
+dcgh_merge_number_intersect_all(ConstraintA, ConstraintB, NewConstraint) :-
+	findall(
+		Intersection,
+		(
+			member(PartA, ConstraintA),
+			member(PartB, ConstraintB),
+			dcgh_merge_number_intersect_parts(PartA, PartB, Intersection)
+		),
+		NewConstraint
+	).
+	
+dcgh_merge_number_intersect_parts(list(ListA), list(ListB), list(List)) :-
+	intersection(ListA, ListB, List).
+dcgh_merge_number_intersect_parts(infinity(MinA), infinity(MinB), infinity(Min)) :-
+	Min is max(MinA, MinB).
+dcgh_merge_number_intersect_parts(infinity(Min), list(ListB), list(List)) :-
+	dcgh_merge_number_intersect_parts(list(ListB), infinity(Min), list(List)).
+dcgh_merge_number_intersect_parts(list(ListA), infinity(Min), list(List)) :-
+	copyList_if_bigger(ListA, Min, List).
+
+
+dcgh_merge_number_clean(Constraint, [list(NewList), infinity(Min)]) :-
+	memberchk(infinity(Min), Constraint),
+	memberchk(list(_), Constraint), !,
+	dcgh_merge_number_clean_lists(Constraint, NewList).
+dcgh_merge_number_clean(Constraint, [list(NewList)]) :-
+	memberchk(list(_), Constraint), !,
+	dcgh_merge_number_clean_lists(Constraint, NewList).
+dcgh_merge_number_clean(Constraint, Constraint) :- !.
+	
+dcgh_merge_number_clean_lists(Constraint, NewList) :-
+	findall(
+		List,
+		member(list(List), Constraint),
+		ListOfLists
+	),
+	flatten(ListOfLists, ListOfListsFlat),
+	list_to_set(ListOfListsFlat, NewList).
+	
+	
 
 
 %% http://gollem.science.uva.nl/SWI-Prolog/pldoc/doc_for?object=section%282%2c%20%274.12%27%2c%20%27%2fusr%2flib%2fpl-5.6.51%2fdoc%2fManual%2fDCG.html%27%29
