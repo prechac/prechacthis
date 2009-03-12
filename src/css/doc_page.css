@@ -1,7 +1,32 @@
 
+#docPage {
+    border-right: solid 2px black;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 350px;
+    height: 100%;
+    text-align: left;
+}
+#mainPage_doc {
+    position: absolute;
+    top: 0;
+    left: 350px;
+    right: 0;
+    height: 100%;
+    overflow: auto;
+}
+
+#doc_container {
+    padding: 1.5ex;
+}
+
+#docPage h1 {
+    text-align: center;
+    margin-bottom: 1.5em;
+}
 
 #doc_main {
-	margin: 1ex .2ex .2ex .2ex;
 }
 #doc_main ul {
 	padding: 0 0 0 3ex;

@@ -35,6 +35,7 @@
 		oneToN/2,
 		realSubtract/3,
 		removeOnce/3,
+        removeAll/3,
 		listOfNumber/2,
 		listOfNumber/3,
 		listOf/2,
@@ -415,6 +416,13 @@ removeOnce([Head|List], Head, List) :- !.
 removeOnce([Head|Tail], Element, [Head|List]) :- 
 	removeOnce(Tail, Element, List), !.
 	
+
+removeAll([], _Head, []) :- !.
+removeAll([Head|List], Head, NewList) :-
+    removeAll(List, Head, NewList), !.
+removeAll([XHead|List], Head, [XHead|NewList]) :-
+    removeAll(List, Head, NewList), !.
+
 listOfNumber(Number, Length, List) :- listOf(Number, Length, List).
 listOfNumber(Number, List) :- listOf(Number, List).
 	

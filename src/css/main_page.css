@@ -98,6 +98,7 @@
 
 
 
+
 /* page info */
 
 
@@ -114,3 +115,7 @@
 	white-space: nowrap;
 }
 
+
+#mainPage_doc_link {
+    padding: 1em;
+}

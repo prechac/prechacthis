@@ -719,6 +719,7 @@ infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
 		get_cookie(joepass_download, Request, JoePass_Download),
 		get_cookie(joepass_style, Request, JoePass_Style),
 		get_cookie(joepass_file, Request, JoePass_File),
+        JoePass_DistanceMax is Persons - 1,
 		float_to_shortpass(Pattern, PatternShort),
 		jp_filename(PatternShort, FileName),
 		atom_concat(FileName, '.pass', FileNamePass),
@@ -757,6 +758,10 @@ infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
 			select([name(nametype), size(1)],[
 				\html_option('joe', JoePass_File, 'joe.pass'),
 				\html_option('numbers', JoePass_File, FileNamePass)
+			]),
+			&(nbsp),
+			select([name(distance), size(1)],[
+                \html_numbered_options(1, JoePass_DistanceMax, 1)
 			]),
 			&(nbsp),
 			input([type(submit), value('go')])

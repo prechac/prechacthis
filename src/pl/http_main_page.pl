@@ -21,6 +21,7 @@
 :- use_module(http_server).
 :- use_module(http_common).
 :- use_module(http_info_page).
+:- use_module(http_doc_page).
 
 
 
@@ -56,7 +57,8 @@ main_page(Request) :-
 			just(ReqJust, [default('')]),
 			magic(ReqMagic, [integer, default(0)]),
 			results(ReqResults, [integer, default(CookieResultsInt)]),
-			infopage(GoToInfoPage, [default('true')])
+			infopage(GoToInfoPage, [default('true')]),
+            doc(DocPage, [default('false')])
 		]
 	),
 	
@@ -107,7 +109,8 @@ main_page(Request) :-
 		ReqResults,
 		ReqMode, 
 		Request,
-		GoToInfoPage
+		GoToInfoPage,
+        DocPage
 	).
 	
 
@@ -129,7 +132,8 @@ mainPage_html_page(
 	_ReqResults,
 	_ReqMode, 
 	Request,
-	true
+	true,
+    _DocPage
 ) :-
 	http_main_page_path(MainPagePath),
 	memberchk(SiteswapLists, SearchResults, [name(lists)]),
@@ -160,7 +164,8 @@ mainPage_html_page(
 	ReqResults,
 	ReqMode, 
 	Request,
-	_DontGoToInfoPage
+	_DontGoToInfoPage,
+    DocPage
 ) :-
 	html_set_options([
 			dialect(html), 
@@ -173,37 +178,43 @@ mainPage_html_page(
 			meta(['http-equiv'('Content-Type'), content('text/html;charset=utf-8')]),
 			link([type('text/css'), rel('stylesheet'), href('./css/common.css')]),
 			link([type('text/css'), rel('stylesheet'), href('./css/main_page.css')]),
+			link([type('text/css'), rel('stylesheet'), href('./css/doc_page.css')]),
 			link([rel('shortcut icon'), href('./images/favicon.png')])
 			%\ajax_script
 		],
 		[
-			\html_debug(Request),
-			\mainPage_all_lists_of_siteswaps(
-				SearchResults, 
-				Request, 
-				ReqPersons
-			),
-			\mainPage_form(
-				ReqPersons, 
-				ReqObjects, 
-				ReqPeriod, 
-				ReqMax, 
-				ReqPassesMin, 
-				ReqPassesMax, 
-				ReqContain, 
-				ReqExclude, 
-				ReqClubDoes, 
-				ReqReact,
-				ReqSync,
-				ReqJust,
-				ReqMagic, 
-				ReqResults,
-				ReqMode
-			)
+            div([id('container')],[
+                \doc_page(DocPage, Request, MainPage_Div_Class),
+                div([id(MainPage_Div_Class)],[
+                    \html_debug(Request),
+                    \mainPage_all_lists_of_siteswaps(
+                        SearchResults, 
+                        Request, 
+                        ReqPersons
+                    ),
+                    \mainPage_form(
+                        ReqPersons, 
+                        ReqObjects, 
+                        ReqPeriod, 
+                        ReqMax, 
+                        ReqPassesMin, 
+                        ReqPassesMax, 
+                        ReqContain, 
+                        ReqExclude, 
+                        ReqClubDoes, 
+                        ReqReact,
+                        ReqSync,
+                        ReqJust,
+                        ReqMagic, 
+                        ReqResults,
+                        ReqMode,
+                        DocPage
+                    ),
+                    \mainPage_doc_link(Request)
+                ])
+            ])
 		]
 	).
-
-
 
 mainPage_all_lists_of_siteswaps(SearchResults, Request, Persons) -->
 	{	
@@ -416,7 +427,7 @@ mainPage_siteswap([Throw|RestThrows], Length, Persons, MagicPositions) -->
 
 
 	
-mainPage_form(Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Exclude, ClubDoes, React, Sync, Just, Magic, Results, Mode) -->
+mainPage_form(Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Exclude, ClubDoes, React, Sync, Just, Magic, Results, Mode, DocPage) -->
 	{
 		http_main_page_path(MainPagePath)
 	},
@@ -436,6 +447,7 @@ mainPage_form(Persons, Objects, Period, Max, PassesMin, PassesMax, Contain, Excl
 				\mainPage_form_just(Just, Mode),
 				\mainPage_form_magic(Magic, Mode),
 				\mainPage_form_results(Results, Mode),
+                \mainPage_form_docpage(DocPage),
 				\mainPage_form_submit(Mode)
 			])
 		])
@@ -694,3 +706,22 @@ mainPage_form_submit(_Mode) -->
 			])
 		])
 	]).
+
+mainPage_form_docpage('false') --> [], !.
+mainPage_form_docpage(DocPage) -->
+    html([
+        input([type(hidden), name(doc), value(DocPage)])
+    ]).
+
+mainPage_doc_link(Request) -->
+    {
+        remove_doc_in_URL(Request, Request_clean),
+        parse_url(URL, Request_clean)
+    },
+    html([
+        div([id(mainPage_doc_link)],[
+            a([href(URL+'&doc=main')],[
+                'Documented Example'
+            ])
+        ])
+    ]).

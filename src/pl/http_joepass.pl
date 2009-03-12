@@ -33,6 +33,7 @@ joepass_page(Request) :-
 			download(ReqDownload, [default('on')]           ),
 			style(   ReqStyle,    [default('normal')]       ),
 			nametype(ReqNameType, [default('joe')]          ),
+            distance(ReqDistance, [default(1), integer]     ),
 			color0(Color0,        [default(-1), integer]    ),
 			color1(Color1,        [default(-1), integer]    ),
 			color2(Color2,        [default(-1), integer]    ),
@@ -84,7 +85,7 @@ joepass_page(Request) :-
 		[20, Color20],
 		[21, Color21],
 		[22, Color22],
-		[23, Color23]		
+		[23, Color23]
 	],
 	
 	jp_clean_orbit_colors(OrbitColors, OrbitColorsCleaned),
@@ -97,6 +98,7 @@ joepass_page(Request) :-
 	www_form_encode(DownloadAtom, ReqDownload),
 	www_form_encode(StyleAtom, ReqStyle),
 	www_form_encode(NameTypeAtom, ReqNameType),
+    Distance = ReqDistance,
 	
 	atom2Pattern(PatternAtom, Pattern),
 	atom2SwapList(SwapListAtom, SwapList),
@@ -106,7 +108,7 @@ joepass_page(Request) :-
 	set_cookie('joepass_file', NameTypeAtom),
 	
 	jp_file_header(DownloadAtom, NameTypeAtom, FilenameAtom),
-	jp_pattern_def(Pattern, Persons, SwapList, StyleAtom, OrbitColorsCleaned).
+	jp_pattern_def(Pattern, Persons, SwapList, StyleAtom, OrbitColorsCleaned, Distance).
 
 
 	
@@ -122,7 +124,7 @@ jp_file_header(off, _, _) :-
 	format('Content-type: text/plain~n~n').
 	
 
-jp_pattern_def(PatternShort, NumberOfJugglers, SwapList, Style, OrbitColors) :-
+jp_pattern_def(PatternShort, NumberOfJugglers, SwapList, Style, OrbitColors, Distance) :-
 	length(PatternShort, Period),
 	maxHeight(PatternShort, ShortMaxHeight),
 	MaxHeight is truncate(ShortMaxHeight) + 1,
@@ -131,7 +133,7 @@ jp_pattern_def(PatternShort, NumberOfJugglers, SwapList, Style, OrbitColors) :-
 	what_happens(PointsInTime, Pattern, NumberOfJugglers, ActionList),
 	jp_listOfJugglerStartLeft(Period, NumberOfJugglers, SwapList, LeftList),
 	jp_header(PatternShort, NumberOfJugglers),
-	jp_positions(NumberOfJugglers, Style),
+	jp_positions(NumberOfJugglers, Style, Distance),
 	%jp_colors(ActionList, Pattern, NumberOfJugglers),
 	(noMultiplex(Pattern) -> 
 		jp_colors(ActionList, Pattern, NumberOfJugglers, OrbitColors);
@@ -156,46 +158,52 @@ jp_header(PatternShort, NumberOfJugglers) :-
 	format('!###########################################\n'),
 	format('#sx\n\n').
 
-jp_positions(_, sidebyside) :-
+jp_positions(NumberOfJugglers, Style, Distance) :-
+	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
+	format('! juggler positions\n'),
+	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
+	forall(between(1, NumberOfJugglers, Juggler), jp_printJugglerPosition(Juggler, NumberOfJugglers, Style, Distance)), !,
+	format('\n'), !.
+jp_positions(_NumberOfJugglers, sidebyside, _Distance) :-
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('! juggler positions\n'),
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('#sidetoside\n\n'), !.
-jp_positions(NumberOfJugglers, shortdistance) :-
-	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
-	format('! juggler positions\n'),
-	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
-	D = 150,
-	forall(between(1, NumberOfJugglers, Juggler), jp_printJugglerPosition(Juggler, NumberOfJugglers, circle, D)), !,
-	format('\n').
-jp_positions(_, normal) :- 
-	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
-	format('! juggler positions\n'),
-	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
-	format('#circle\n\n'), !.
-jp_positions(_, backtoback) :- 
+jp_positions(_NumberOfJugglers, backtoback, _Distance) :- 
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('! juggler positions\n'),
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('#backToBack\n\n'), !.
-jp_positions(_, line) :- 
+jp_positions(_NumberOfJugglers, line, _Distance) :- 
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('! juggler positions\n'),
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('#line\n\n'), !.
-jp_positions(_, dropbackline) :- 
+jp_positions(_NumberOfJugglers, dropbackline, _Distance) :- 
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('! juggler positions\n'),
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('#dropbackLine\n\n'), !.
-jp_positions(_, _) :- !.
+jp_positions(_NumberOfJugglers, _Niente, _Distance) :- !.
 
-jp_printJugglerPosition(Juggler, NumberOfJugglers, circle, D) :-
-	X is 2 * pi * (Juggler - 1)/NumberOfJugglers,
-	Radius is D / (2 * sin(pi/NumberOfJugglers)),
+jp_printJugglerPosition(Juggler, NumberOfJugglers, normal, Distance) :-
+    PostitionInCircle is ((Juggler - 1) * Distance) mod NumberOfJugglers,
+    X is 2 * pi * ((1/4) - PostitionInCircle/NumberOfJugglers),
+	Radius1 is 150 / (2 * sin(pi/NumberOfJugglers)),
+    Radius2 is 250,
+    Radius is max(Radius1, Radius2),
+	U is round(Radius * cos(X)),
+	V is round(Radius * sin(X)),
+    format('#jugglerPosition ~w (~w,0,~w)(0,0,0) ! ~w\n', [Juggler, U, V, PostitionInCircle]).
+
+jp_printJugglerPosition(Juggler, NumberOfJugglers, shortdistance, Distance) :-
+    PostitionInCircle is ((Juggler - 1) * Distance) mod NumberOfJugglers,
+    X is 2 * pi * ((1/4) - PostitionInCircle/NumberOfJugglers),
+	Radius is 150 / (2 * sin(pi/NumberOfJugglers)),
 	U is round(Radius * cos(X)),
 	V is round(Radius * sin(X)),
 	format('#jugglerPosition ~w (~w,0,~w)(0,0,0)\n', [Juggler,U,V]).
+
 
 jp_colors(ActionList, Pattern, NumberOfJugglers, OrbitColors) :-
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),

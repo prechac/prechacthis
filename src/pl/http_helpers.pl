@@ -143,3 +143,9 @@ get_cookie(Name, Request, Cookie, _Default) :-
 	memberchk(Name=Cookie, Cookies), !.
 get_cookie(_Name, _Request, Default, Default) :- !.
 	
+
+request2url(Request, URL) :-
+    %memberchk(search(Search), Request),
+    %memberchk(path(Path), Request),
+    parse_url(URL, Request).
+
