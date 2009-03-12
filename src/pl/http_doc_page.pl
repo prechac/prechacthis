@@ -128,3 +128,10 @@ doc_section(simple, [
     )
 ]).
 
+doc_section(advanced, [ 
+    name('Advanced Mode'),
+    url('./list?persons=2&objects=4+-+6&period=<+7&max=4&passesmin=2&passesmax=4&contain=1+(1p+or+1.5p)+and+(4+or+4p+or+4.5p)&exclude=0&react=4+(1p+or+1.5p)&results=42&mode=advanced'),
+    content(
+        'some text is going to come soonish ;-)'
+    )
+]).

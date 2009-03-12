@@ -75,7 +75,6 @@ http_joepass_page_path('/joepass.php').
 :- forall(http_main_page_path(Path), http_handler(Path, main_page, [])).
 :- forall(http_info_page_path(Path), http_handler(Path, info_page, [])).
 :- forall(http_joepass_page_path(Path), http_handler(Path, joepass_page, [])).
-:- forall(http_doc_frameset_path(Path), http_handler(Path, doc_frameset, [])).
 :- http_handler('/swap', swap_page, []).
 
 
