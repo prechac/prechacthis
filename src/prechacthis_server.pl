@@ -31,7 +31,7 @@ start_server(Argv) :-
 		set_prolog_flag(verbose_load, false);
 		set_prolog_flag(verbose_load, true)
 	),
-	use_module('pl/prechacthis'),
+	['pl/prechacthis'],
 	server(Port, Workers).
 	
 set_working_directory(Argv) :-
