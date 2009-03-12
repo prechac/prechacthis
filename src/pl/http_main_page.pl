@@ -721,7 +721,7 @@ mainPage_doc_link(Request) -->
     html([
         div([id(mainPage_doc_link)],[
             a([href(URL+'&doc=main')],[
-                'Documented Example'
+                'Documented Examples'
             ])
         ])
     ]).
