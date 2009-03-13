@@ -12,7 +12,8 @@
 		www_form_encode_all/2,
 		set_cookie/2,
 		get_cookie/3,
-		get_cookie/4
+		get_cookie/4,
+        request2URL/2
 	]
 ).
 
@@ -144,8 +145,11 @@ get_cookie(Name, Request, Cookie, _Default) :-
 get_cookie(_Name, _Request, Default, Default) :- !.
 	
 
-request2url(Request, URL) :-
-    %memberchk(search(Search), Request),
-    %memberchk(path(Path), Request),
-    parse_url(URL, Request).
+request2URL(Request, URL) :-
+    memberchk(path(Path), Request),
+    concat_atom(PathList, '/', Path),
+    append(_, [ShortPath], PathList),
+    memberchk(search(Search), Request),
+    parse_url_search(SearchSpec, Search),
+    format(atom(URL), './~w?~s', [ShortPath, SearchSpec]).
 

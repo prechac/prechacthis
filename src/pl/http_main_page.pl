@@ -715,12 +715,12 @@ mainPage_form_docpage(DocPage) -->
 
 mainPage_doc_link(Request) -->
     {
-        remove_doc_in_URL(Request, Request_clean),
-        parse_url(URL, Request_clean)
+        newDocRequest(Request, 'main', Request_new),
+        request2URL(Request_new, URL)
     },
     html([
         div([id(mainPage_doc_link)],[
-            a([href(URL+'&doc=main')],[
+            a([href(URL)],[
                 'Documented Examples'
             ])
         ])
