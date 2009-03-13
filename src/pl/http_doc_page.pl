@@ -132,10 +132,13 @@ request2DocURL(Request, DocPage, URL) :-
 docFreeRequest(Request, [search(NewSearch)|Request_clean]) :-
     select(search(Search), Request, Request_clean),
     removeAll(Search, doc=_, NewSearch). 
+docFreeRequest(Request, Request) :- !.
+
 
 newDocRequest(Request, DocPage, [search([doc=DocPage|NewSearch])|Request_clean]) :-
     select(search(Search), Request, Request_clean),
     removeAll(Search, doc=_, NewSearch).
+newDocRequest(Request, DocPage, [search([doc=DocPage])|Request]) :- !.
 
 %%% ---------- Sections ----------- %%%
 

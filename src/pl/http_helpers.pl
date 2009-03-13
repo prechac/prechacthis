@@ -151,5 +151,17 @@ request2URL(Request, URL) :-
     append(_, [ShortPath], PathList),
     memberchk(search(Search), Request),
     parse_url_search(SearchSpec, Search),
-    format(atom(URL), './~w?~s', [ShortPath, SearchSpec]).
+    format(atom(URL), './~w?~s', [ShortPath, SearchSpec]), !.
+
+request2URL(Request, URL) :-
+    not(memberchk(search(_), Request)),
+    memberchk(path(Path), Request),
+    concat_atom(PathList, '/', Path),
+    append(_, [ShortPath], PathList),
+    format(atom(URL), './~w', [ShortPath]), !.
+
+request2URL(Request, URL) :-
+    not(memberchk(search(_), Request)),
+    memberchk(path('/'), Request),
+    format(atom(URL), './'), !.
 
