@@ -82,7 +82,11 @@ doc_main(DocPage, Request) -->
             Name
         ]),
         div([id(doc_main)],[
-            Content
+            Content,
+            hr([]),
+            ul([],[
+                \doc_index
+            ])
         ])
     ]).
 

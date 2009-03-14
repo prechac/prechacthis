@@ -7,6 +7,7 @@
     width: 350px;
     height: 100%;
     text-align: left;
+    overflow: auto;
 }
 #mainPage_doc {
     position: absolute;
