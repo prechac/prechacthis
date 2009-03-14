@@ -170,7 +170,7 @@ doc_section(noobjects, [
 
 doc_section(wildcards, [ 
     name('wildcards'),
-    url('./list?persons=3&objects=9&period=4&max=4&passesmin=2&passesmax=4&contain=_p2+_+3+and+_p1&results=42&mode=advanced'),
+    url('./list?persons=3&objects=9&period=4&max=4&passesmin=2&passesmax=4&contain=_p+_+3+and+_s+_p1&results=42&mode=advanced'),
     content(
         'some text is going to come soonish ;-)'
     )
@@ -186,7 +186,7 @@ doc_section(multiplexes, [
 
 doc_section(multiplexes2, [ 
     name('multiplexes with wildcards'),
-    url('./list?persons=2&objects=4&period=4&max=4&passesmin=1&passesmax=-1&contain=[_+_]&results=42&mode=advanced'),
+    url('./list?persons=2&objects=4&period=4&max=4&passesmin=1&passesmax=-1&contain=[_+_p]&results=42&mode=advanced'),
     content(
         'some text is going to come soonish ;-)'
     )

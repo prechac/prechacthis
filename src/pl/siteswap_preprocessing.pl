@@ -176,7 +176,7 @@ float_to_shortpass([Throw|Rest],[ShortPass|RestShort]) :-
 shortpass_to_pass(ShortPass,_,_,_,ShortPass) :- var(ShortPass),!.
 shortpass_to_pass(Self, _, _, _, p(Self, 0, Self)) :- integer(Self).
 shortpass_to_pass(p(Self, Zero, _), _, _, _, p(Self, Zero, Self)) :- 
-	%nonvar(Zero),
+	nonvar(Zero),
 	Zero = 0,
 	integer(Self).
 shortpass_to_pass(p(ShortThrow), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)) :-
@@ -197,7 +197,8 @@ shortpass_to_pass(p(ShortThrow, Index, Origen), Length, Jugglers, MaxHeight, p(T
 	float_to_shortpass(Throw, ShortThrowShortend). 
 shortpass_to_pass(p(Var), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)) :-
 	var(Var),
-	shortpass_to_pass(p(Var, Index), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)).
+	shortpass_to_pass(p(Var, Index), Length, Jugglers, MaxHeight, p(Throw, Index, Origen)), 
+    Index > 0.
 shortpass_to_pass(p(Var, Zero), _, _, MaxHeight, p(Self, Zero, Self)) :-
 	var(Var),
 	Zero = 0,
