@@ -68,12 +68,12 @@ infoPage_html_page(Pattern, Persons, SwapList, BackURL, Request) :-
 	html_set_options([
 			dialect(html), 
 			doctype('HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"'),
-			content_type('text/html; charset=UTF-8')
+            content_type('text/html; charset=UTF-8')
 	]),
 	reply_html_page(
 		[
 			title('PrechacThis - Pattern Information'),
-			meta(['http-equiv'('Content-Type'), content('text/html;charset=utf-8')]),
+            meta(['http-equiv'('Content-Type'), content('text/html;charset=utf-8')]),
 			link([type('text/css'), rel('stylesheet'), href('./css/common.css')]),
 			link([type('text/css'), rel('stylesheet'), href('./css/info_page.css')]),
 			link([rel('shortcut icon'), href('./images/favicon.png')]),
@@ -217,8 +217,8 @@ infoPage_PrechacThis_links(Pattern, UpDown, NumberOfJugglers, SwapList, BackURL)
 				&(nbsp)
 			]),
 			\infoPage_PrechacThis_link_calc(PosList, Pattern, UpDown, NumberOfJugglers, SwapList, BackURL),
-			td([],[
-				&(nbsp)
+			td([class(info_lable)],[
+                \infoPage_add_sub_throw(Pattern, NumberOfJugglers, SwapList, BackURL, UpDown)
 			])
 		])
 	]).
@@ -257,6 +257,39 @@ arrowRightLeft(left) -->
 	html(img([src('./images/left_arrow.png'), alt('left'), border(0)])).
 	
 
+infoPage_add_sub_throw(Pattern, NumberOfJugglers, SwapList, BackURL, down) -->
+	{
+		amountOfPasses(Pattern, 0), 
+        noMultiplex(Pattern),
+        landingSites(Pattern, LandingSites, real),
+        min_list(LandingSites, Min),
+        length(Pattern, Length),
+        Max is Min + Length - 1,
+        numlist(Min, Max, Permutation),
+        permutation(LandingSites, Permutation), !,
+        originalNumberOfClubs(Pattern, Clubs),
+        append(Pattern, [p(Clubs, 0, Clubs)], PatternPlus)
+	},
+	html([
+        \html_href(PatternPlus, NumberOfJugglers, SwapList, BackURL, [class(small), title('add Throw')], 'add'),
+        \infoPage_sub_throw(Pattern, Clubs, NumberOfJugglers, SwapList, BackURL)
+    ]).
+infoPage_add_sub_throw(_Pattern, _NumberOfJugglers, _SwapList, _BackURL, _UpDown) -->
+    html([
+        &(nbsp)
+    ]).
+
+infoPage_sub_throw(Pattern, Clubs, NumberOfJugglers, SwapList, BackURL) -->
+    {
+        append(PatternMinus, [p(Clubs, 0, Clubs)], Pattern)
+    },
+    html([
+        &(nbsp), '|', &(nbsp),
+        \html_href(PatternMinus, NumberOfJugglers, SwapList, BackURL, [class(small), title('subtract Throw')], 'sub')
+    ]).
+infoPage_sub_throw(_Pattern, _Clubs, _NumberOfJugglers, _SwapList, _BackURL) -->
+	[].
+    
 
 %%% --- pattern info --- %%%
 
@@ -746,18 +779,18 @@ infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
 				\html_option('off', JoePass_Download, 'show')
 			]),
 			&(nbsp),
+			select([name(nametype), size(1)],[
+				\html_option('joe', JoePass_File, 'joe.pass'),
+				\html_option('numbers', JoePass_File, FileNamePass)
+			]),
+			&(nbsp),
 			select([name(style), size(1)],[
+				\html_option('none', JoePass_Style, &(nbsp)),
 				\html_option('normal', JoePass_Style, 'face to face'),
 				\html_option('shortdistance', JoePass_Style, 'short distance'),
 				\html_option('sidebyside', JoePass_Style, 'side by side'),
 				\html_option('backtoback', JoePass_Style, 'back to back'),
-				\html_option('dropbackline', JoePass_Style, 'drop back line'),
-				\html_option('none', JoePass_Style, &(nbsp))
-			]),
-			&(nbsp),
-			select([name(nametype), size(1)],[
-				\html_option('joe', JoePass_File, 'joe.pass'),
-				\html_option('numbers', JoePass_File, FileNamePass)
+				\html_option('dropbackline', JoePass_Style, 'drop back line')
 			]),
 			&(nbsp),
 			select([name(distance), size(1)],[

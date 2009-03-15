@@ -3,6 +3,7 @@
 		swapThrows/4,
 		distanceOfThrows/3,
 		averageNumberOfClubs/2,
+		originalNumberOfClubs/2,
 		listOfThrows/2,
 		listOfThrows0/2,
 		throw2list/2,
@@ -10,10 +11,13 @@
 		possibleLandingSites/2,
 		possibleLandingSites1/2,
 		landingSite/4,
+		landingSite/5,
 		landingSite1/4,
+		landingSite1/5,
 		landingSites/2,
 		landingSites/3,
 		landingSites1/2,
+		landingSites1/3,
 		uniqueLandingSites/1,
 		height/2,
 		maxHeight/2,
@@ -142,6 +146,20 @@ pattern2Lists([Throw|Pattern], [List|PatternOfLists]) :-
 	throw2list(Throw, List),
 	pattern2Lists(Pattern, PatternOfLists).
 
+originalNumberOfClubs(Pattern, Clubs) :-
+    length(Pattern, Period),
+    flatten(Pattern, PatternFlat),
+    listOfOrigen(PatternFlat, Orig),
+    sumlist(Orig, SumOrig),
+    Clubs is SumOrig rdiv Period.
+
+listOfOrigen([], []) :- !.
+listOfOrigen([Var|Pattern], [0|Rest]) :-
+	var(Var), !,
+	listOfOrigen(Pattern, Rest).
+listOfOrigen([p(_Throw,_Index,Origen)|Pattern], [Origen|Rest]) :-
+	listOfOrigen(Pattern, Rest).
+
 
 %%% List of Point in Time
 
@@ -208,61 +226,76 @@ possibleLandingSites1(Pattern, LandingSites1, Position1) :-
 	Position is Position1 - 1,
 	possibleLandingSites(Pattern, LandingSites, Position),
 	add(LandingSites, 1, LandingSites1).
-	
-	
-	
 
-landingSite(_, Throw, _, _) :-
+
+landingSite(Site, Throw, Length, LandingSite) :-
+    landingSite(Site, Throw, Length, LandingSite, mod).
+
+landingSite(_, Throw, _, _, _) :-
 	var(Throw), !,
 	fail.
-landingSite(Site, Throw, Length, LandingSite) :- %self
+landingSite(Site, Throw, Length, LandingSite, mod) :- %self
    number(Throw),!,
    LandingSite is (Site + Throw) mod Length.
-landingSite(Site, p(_,_,Origen), Length, LandingSite) :- %pass
-	landingSite(Site, Origen, Length, LandingSite).
-landingSite(Site, Multiplex, Length, LandingSite) :- %multiplex
+landingSite(Site, Throw, _Length, LandingSite, real) :- %self
+   number(Throw),!,
+   LandingSite is (Site + Throw).
+landingSite(Site, p(_,_,Origen), Length, LandingSite, Type) :- %pass
+	landingSite(Site, Origen, Length, LandingSite, Type).
+landingSite(Site, Multiplex, Length, LandingSite, Type) :- %multiplex
 	is_list(Multiplex), !,
-	landingSiteMultiplex(Site, Multiplex, Length, LandingSite).
+	landingSiteMultiplex(Site, Multiplex, Length, LandingSite, Type).
 
-landingSiteMultiplex(_, [], _, []) :- !.
-landingSiteMultiplex(Site, [Head|Multiplex], Period, [_Landing|LandingSites]) :-
+landingSiteMultiplex(_, [], _, [], _Type) :- !.
+landingSiteMultiplex(Site, [Head|Multiplex], Period, [_Landing|LandingSites], Type) :-
 	var(Head), !,
-	landingSiteMultiplex(Site, Multiplex, Period, LandingSites).
-landingSiteMultiplex(Site, [Head|Multiplex], Period, [Landing|LandingSites]) :-
-	landingSite(Site, Head, Period, Landing),
-	landingSiteMultiplex(Site, Multiplex, Period, LandingSites).
+	landingSiteMultiplex(Site, Multiplex, Period, LandingSites, Type).
+landingSiteMultiplex(Site, [Head|Multiplex], Period, [Landing|LandingSites], Type) :-
+	landingSite(Site, Head, Period, Landing, Type),
+	landingSiteMultiplex(Site, Multiplex, Period, LandingSites, Type).
 
-landingSite1(Site1, Throw, Length, LandingSite1) :-
+landingSite1(Site, Throw, Length, LandingSite) :-
+    landingSite1(Site, Throw, Length, LandingSite, mod).
+
+landingSite1(Site1, Throw, Length, LandingSite1, Type) :-
 	Site0 is Site1 - 1,
-	landingSite(Site0, Throw, Length, LandingSite0),
+	landingSite(Site0, Throw, Length, LandingSite0, Type),
 	LandingSite1 is LandingSite0 + 1.	
 	
+
 landingSites(Pattern, LandingSites) :-
+    landingSites(Pattern, LandingSites, mod).
+
+landingSites(Pattern, LandingSites, Type) :-
 	length(Pattern, Period),
-	landingSites(Pattern, Period, LandingSites).
+	landingSites(Pattern, Period, LandingSites, Type).
 	
-landingSites([], _, []) :- !.
-landingSites([Throw|Pattern], Period, [_Site|LandingSites]) :-
+landingSites([], _, [], _Type) :- !.
+landingSites([Throw|Pattern], Period, [_Site|LandingSites], Type) :-
 	var(Throw),!,
-	landingSites(Pattern, Period, LandingSites).
-landingSites([Throw|Pattern], Period, [Site|LandingSites]) :-
+	landingSites(Pattern, Period, LandingSites, Type).
+landingSites([Throw|Pattern], Period, [Site|LandingSites], Type) :-
 	length(Pattern, Length),
 	Position is Period - Length - 1,
-	landingSite(Position, Throw, Period, Site),
-	landingSites(Pattern, Period, LandingSites).
+	landingSite(Position, Throw, Period, Site, Type),
+	landingSites(Pattern, Period, LandingSites, Type).
 	
+
+landingSites1(Pattern, LandingSites) :- 
+    landingSites1(Pattern, LandingSites, mod).
 	
-landingSites1(Pattern, LandingSites) :-
+landingSites1(Pattern, LandingSites, Type) :-
 	length(Pattern, Period),
-	landingSites1(Pattern, Period, LandingSites).
-landingSites1(Pattern, Period, LandingSites1) :- 
-	landingSites(Pattern, Period, LandingSites),
+	landingSites1(Pattern, Period, LandingSites, Type).
+landingSites1(Pattern, Period, LandingSites1, Type) :- 
+	landingSites(Pattern, Period, LandingSites, Type),
 	add(LandingSites, 1, LandingSites1).
-	
+
 
 uniqueLandingSites(Pattern) :-
 	landingSites1(Pattern, Sites),
 	allMembersUnique(Sites).
+
 
 
 %%% --- heigts ---

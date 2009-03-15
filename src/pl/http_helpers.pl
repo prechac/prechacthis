@@ -59,10 +59,16 @@ html_numbered_option(Value, Selected) -->
 
 html_numbered_options(Min, Max, Selected) -->
 	{
+        Min =< Max,
 		numlist(Min, Max, List)
 	},
 	html_numbered_option(List, Selected).
-	
+html_numbered_options(Min, Max, _Selected) -->
+    {
+        Min > Max
+    },
+    [].
+
 
 html_option(Value, Selected, Text) -->
 	{

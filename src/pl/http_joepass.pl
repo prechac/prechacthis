@@ -159,27 +159,32 @@ jp_header(PatternShort, NumberOfJugglers) :-
 	format('#sx\n\n').
 
 jp_positions(NumberOfJugglers, Style, Distance) :-
+    NumberOfJugglers > 1,
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('! juggler positions\n'),
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	forall(between(1, NumberOfJugglers, Juggler), jp_printJugglerPosition(Juggler, NumberOfJugglers, Style, Distance)), !,
 	format('\n'), !.
-jp_positions(_NumberOfJugglers, sidebyside, _Distance) :-
+jp_positions(NumberOfJugglers, sidebyside, _Distance) :-
+    NumberOfJugglers > 1,
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('! juggler positions\n'),
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('#sidetoside\n\n'), !.
-jp_positions(_NumberOfJugglers, backtoback, _Distance) :- 
+jp_positions(NumberOfJugglers, backtoback, _Distance) :- 
+    NumberOfJugglers > 1,
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('! juggler positions\n'),
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('#backToBack\n\n'), !.
-jp_positions(_NumberOfJugglers, line, _Distance) :- 
+jp_positions(NumberOfJugglers, line, _Distance) :- 
+    NumberOfJugglers > 1,
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('! juggler positions\n'),
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('#line\n\n'), !.
-jp_positions(_NumberOfJugglers, dropbackline, _Distance) :- 
+jp_positions(NumberOfJugglers, dropbackline, _Distance) :- 
+    NumberOfJugglers > 1,
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	format('! juggler positions\n'),
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
@@ -187,22 +192,53 @@ jp_positions(_NumberOfJugglers, dropbackline, _Distance) :-
 jp_positions(_NumberOfJugglers, _Niente, _Distance) :- !.
 
 jp_printJugglerPosition(Juggler, NumberOfJugglers, normal, Distance) :-
-    PostitionInCircle is ((Juggler - 1) * Distance) mod NumberOfJugglers,
-    X is 2 * pi * ((1/4) - PostitionInCircle/NumberOfJugglers),
-	Radius1 is 150 / (2 * sin(pi/NumberOfJugglers)),
-    Radius2 is 250,
+    PositionInCircle is ((Juggler - 1) * Distance) mod NumberOfJugglers,
+    X is 2 * pi * PositionInCircle/NumberOfJugglers - (NumberOfJugglers mod 2) * pi/2,
+	Radius1 is 130 / (2 * sin(pi/NumberOfJugglers)),
+    Radius2 is 200,
     Radius is max(Radius1, Radius2),
 	U is round(Radius * cos(X)),
 	V is round(Radius * sin(X)),
-    format('#jugglerPosition ~w (~w,0,~w)(0,0,0) ! ~w\n', [Juggler, U, V, PostitionInCircle]).
+    format('#jugglerPosition ~w (~w,0,~w)(0,0,0) ! ~w\n', [Juggler, U, V, PositionInCircle]).
 
 jp_printJugglerPosition(Juggler, NumberOfJugglers, shortdistance, Distance) :-
-    PostitionInCircle is ((Juggler - 1) * Distance) mod NumberOfJugglers,
-    X is 2 * pi * ((1/4) - PostitionInCircle/NumberOfJugglers),
+    PositionInCircle is ((Juggler - 1) * Distance) mod NumberOfJugglers,
+    X is 2 * pi * PositionInCircle/NumberOfJugglers - (NumberOfJugglers mod 2) * pi/2,
 	Radius is 150 / (2 * sin(pi/NumberOfJugglers)),
 	U is round(Radius * cos(X)),
 	V is round(Radius * sin(X)),
 	format('#jugglerPosition ~w (~w,0,~w)(0,0,0)\n', [Juggler,U,V]).
+
+jp_printJugglerPosition(Juggler, NumberOfJugglers, sidebyside, Distance) :-
+    PositionInCircle is ((Juggler - 1) * Distance) mod NumberOfJugglers,
+    X is 110 * ( PositionInCircle - (NumberOfJugglers-1)/2 ),
+	format('#jugglerPosition ~w (~w,0,0)(~w,0,1)\n', [Juggler, X, X]).
+
+jp_printJugglerPosition(Juggler, NumberOfJugglers, backtoback, Distance) :-
+    PositionInCircle is ((Juggler - 1) * Distance) mod NumberOfJugglers,
+    X is 2 * pi * PositionInCircle/NumberOfJugglers - (NumberOfJugglers mod 2) * pi/2,
+	Radius is 50 / (2 * sin(pi/NumberOfJugglers)),
+	U is round(Radius * cos(X)),
+	V is round(Radius * sin(X)),
+    RU is 2*U,
+    RV is 2*V,
+	format('#jugglerPosition ~w (~w,0,~w)(~w,0,~w)\n', [Juggler,U,V,RU,RV]).
+
+
+jp_printJugglerPosition(Juggler, NumberOfJugglers, dropbackline, _Distance) :-
+    Juggler is 1,
+    PositionInCircle is 0,
+    X is 150 * ( PositionInCircle - (NumberOfJugglers-1)/2 ) - 50,
+    RX is X+1,
+	format('#jugglerPosition ~w (~w,0,0)(~w,0,0)\n', [Juggler, X, RX]).
+jp_printJugglerPosition(Juggler, NumberOfJugglers, dropbackline, Distance) :-
+    PositionInCircle is ((Juggler - 1) * Distance) mod NumberOfJugglers,
+    X is 150 * ( PositionInCircle - (NumberOfJugglers-1)/2 ) + 50,
+    RX is X-1,
+	format('#jugglerPosition ~w (~w,0,0)(~w,0,0)\n', [Juggler, X, RX]).
+
+
+
 
 
 jp_colors(ActionList, Pattern, NumberOfJugglers, OrbitColors) :-
