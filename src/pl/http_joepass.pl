@@ -165,30 +165,6 @@ jp_positions(NumberOfJugglers, Style, Distance) :-
 	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
 	forall(between(1, NumberOfJugglers, Juggler), jp_printJugglerPosition(Juggler, NumberOfJugglers, Style, Distance)), !,
 	format('\n'), !.
-jp_positions(NumberOfJugglers, sidebyside, _Distance) :-
-    NumberOfJugglers > 1,
-	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
-	format('! juggler positions\n'),
-	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
-	format('#sidetoside\n\n'), !.
-jp_positions(NumberOfJugglers, backtoback, _Distance) :- 
-    NumberOfJugglers > 1,
-	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
-	format('! juggler positions\n'),
-	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
-	format('#backToBack\n\n'), !.
-jp_positions(NumberOfJugglers, line, _Distance) :- 
-    NumberOfJugglers > 1,
-	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
-	format('! juggler positions\n'),
-	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
-	format('#line\n\n'), !.
-jp_positions(NumberOfJugglers, dropbackline, _Distance) :- 
-    NumberOfJugglers > 1,
-	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
-	format('! juggler positions\n'),
-	format('!+++++++++++++++++++++++++++++++++++++++++++\n'),
-	format('#dropbackLine\n\n'), !.
 jp_positions(_NumberOfJugglers, _Niente, _Distance) :- !.
 
 jp_printJugglerPosition(Juggler, NumberOfJugglers, normal, Distance) :-
@@ -237,6 +213,13 @@ jp_printJugglerPosition(Juggler, NumberOfJugglers, dropbackline, Distance) :-
     RX is X-1,
 	format('#jugglerPosition ~w (~w,0,0)(~w,0,0)\n', [Juggler, X, RX]).
 
+
+jp_printJugglerPosition(Juggler, NumberOfJugglers, 'wye', Distance) :-
+    NumberOfJugglers is 4,
+    PositionInCircle is ((Juggler - 1) * Distance) mod NumberOfJugglers,
+    Positions = ['(0,0,0)(1,0,0)', '(250,0,-150)(-250,0,0)', '(-250,0,0)(0,0,0)', '(250,0,150)(-250,0,0)'],
+    nth0(PositionInCircle, Positions, P),
+	format('#jugglerPosition ~w ~w\n', [Juggler,P]).
 
 
 

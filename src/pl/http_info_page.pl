@@ -753,6 +753,14 @@ infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
 		get_cookie(joepass_style, Request, JoePass_Style),
 		get_cookie(joepass_file, Request, JoePass_File),
         JoePass_DistanceMax is Persons - 1,
+        findall(
+            Distance, 
+            (
+                between(1, JoePass_DistanceMax, Distance),
+                leastCommonMultipleIsProduct(Distance, Persons)
+            ),
+            JoePass_DistanceList
+        ),
 		float_to_shortpass(Pattern, PatternShort),
 		jp_filename(PatternShort, FileName),
 		atom_concat(FileName, '.pass', FileNamePass),
@@ -790,17 +798,26 @@ infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
 				\html_option('shortdistance', JoePass_Style, 'short distance'),
 				\html_option('sidebyside', JoePass_Style, 'side by side'),
 				\html_option('backtoback', JoePass_Style, 'back to back'),
-				\html_option('dropbackline', JoePass_Style, 'drop back line')
+				\html_option('dropbackline', JoePass_Style, 'drop back line'),
+                \infoPage_joepass_Style(Persons, 'wye', JoePass_Style, 'Y')
 			]),
 			&(nbsp),
 			select([name(distance), size(1)],[
-                \html_numbered_options(1, JoePass_DistanceMax, 1)
+                \html_numbered_option(JoePass_DistanceList, 1)
 			]),
 			&(nbsp),
 			input([type(submit), value('go')])
 		])
 	]).
 
+infoPage_joepass_Style(Persons, Style, JoePass_Style, Text) -->
+    {
+        Styles = [[4,'wye']],
+        memberchk([Persons, Style], Styles)
+    },
+    html_option(Style, JoePass_Style, Text), !.
+infoPage_joepass_Style(_Persons, _Style, _JoePass_Style, _Text) -->
+    [].
 
 
 %%% --- hidden js info --- %%%
