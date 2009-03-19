@@ -175,7 +175,7 @@ jp_printJugglerPosition(Juggler, NumberOfJugglers, normal, Distance) :-
     Radius is max(Radius1, Radius2),
 	U is round(Radius * cos(X)),
 	V is round(Radius * sin(X)),
-    format('#jugglerPosition ~w (~w,0,~w)(0,0,0) ! ~w\n', [Juggler, U, V, PositionInCircle]).
+    format('#jugglerPosition ~w (~w,0,~w)(0,0,0)\n', [Juggler, U, V, PositionInCircle]).
 
 jp_printJugglerPosition(Juggler, NumberOfJugglers, shortdistance, Distance) :-
     PositionInCircle is ((Juggler - 1) * Distance) mod NumberOfJugglers,
