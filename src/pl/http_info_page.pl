@@ -1,7 +1,7 @@
 :- module(http_info_page, 
     [
         info_page/1,
-        infoPage_html_page/6,
+        infoPage_html_page/5,
         arrowRightLeft/3,
         arrowUpDown/3,
         html_href/8,
@@ -41,7 +41,6 @@ info_page(Request) :-
             newswap(            ReqNewSwap,         [default('[]')]             ),
             back(               ReqBack,            [default('')]               ),
             hreftype(           ReqHrefType,        [default('html')]           ),
-            joepass_download(   JoePassDownload,    [default('off')]            ),
             ajax(               Ajax,               [default('off')]            )
         ]
     ),
@@ -58,14 +57,14 @@ info_page(Request) :-
 
     (Ajax = 'on' ->
         infoPage_html_page_just_content(Pattern, Persons, SwapList, BackURL, Request);
-        infoPage_html_page(Pattern, Persons, SwapList, BackURL, JoePassDownload, Request)
+        infoPage_html_page(Pattern, Persons, SwapList, BackURL, Request)
     ).
 
 infoPage_html_page_just_content(Pattern, Persons, SwapList, BackURL, Request) :-
     phrase(infoPage_info(Pattern, Persons, SwapList, BackURL, Request), HTML),
     print_html(HTML).
 
-infoPage_html_page(Pattern, Persons, SwapList, BackURL, JoePassDownload, Request) :-
+infoPage_html_page(Pattern, Persons, SwapList, BackURL, Request) :-
     html_set_options([
             dialect(html), 
             doctype('HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"'),
@@ -75,11 +74,11 @@ infoPage_html_page(Pattern, Persons, SwapList, BackURL, JoePassDownload, Request
         [
             title('PrechacThis - Pattern Information'),
             meta(['http-equiv'('Content-Type'), content('text/html;charset=utf-8')]),
-            \infoPage_joepass_forwarding(JoePassDownload, Pattern, Persons, SwapList, Request),
             link([type('text/css'), rel('stylesheet'), href('./css/common.css')]),
             link([type('text/css'), rel('stylesheet'), href('./css/info_page.css')]),
             link([rel('shortcut icon'), href('./images/favicon.png')]),
             \js_script('./js/ajax.js'),
+            %\js_script('./js/joepass.js'),
             \js_script('./js/prototype/prototype.js'),
             \js_script('./js/scriptaculous/scriptaculous.js')
         ],
@@ -96,7 +95,8 @@ infoPage_html_page(Pattern, Persons, SwapList, BackURL, JoePassDownload, Request
                 ])
             ]),
             \infoPage_foot(BackURL),
-            script([src('./js/swap.js'), type('text/javascript')], [])
+            script([src('./js/swap.js'), type('text/javascript')], []),
+            script([src('./js/joepass.js'), type('text/javascript')], [])
         ]
     ).
 
@@ -163,31 +163,31 @@ infoPage_foot(BackURL) -->
 
 
 infoPage_pattern(Pattern, NumberOfJugglers, SwapList, BackURL) -->
-html([
-    table([class(info_bigSwap_table), align(center)],[
-        \infoPage_PrechacThis_links(Pattern, up, NumberOfJugglers, SwapList, BackURL),
-        \infoPage_bigSwap_and_rotations(Pattern, NumberOfJugglers, SwapList, BackURL),
-        \infoPage_PrechacThis_links(Pattern, down, NumberOfJugglers, SwapList, BackURL)
-    ])
-]).
+    html([
+        table([class(info_bigSwap_table), align(center)],[
+            \infoPage_PrechacThis_links(Pattern, up, NumberOfJugglers, SwapList, BackURL),
+            \infoPage_bigSwap_and_rotations(Pattern, NumberOfJugglers, SwapList, BackURL),
+            \infoPage_PrechacThis_links(Pattern, down, NumberOfJugglers, SwapList, BackURL)
+        ])
+    ]).
 
 
 infoPage_bigSwap_and_rotations(Pattern, NumberOfJugglers, SwapList, BackURL) -->
-{
-    rotate_left(Pattern, PatternRotatedLeft),
-    rotate_right(Pattern, PatternRotatedRight)
-},
-html(
-    tr([],[
-        td([class(info_left_arrow)],[
-            \html_href(PatternRotatedLeft, NumberOfJugglers, SwapList, BackURL, [title('rotate left')], \arrowRightLeft(left))
-        ]),
-        \infoPage_big_swap(Pattern, NumberOfJugglers),
-        td([class(info_right_arrow)],[
-            \html_href(PatternRotatedRight, NumberOfJugglers, SwapList, BackURL, [title('rotate right')], \arrowRightLeft(right))
+    {
+        rotate_left(Pattern, PatternRotatedLeft),
+        rotate_right(Pattern, PatternRotatedRight)
+    },
+    html(
+        tr([],[
+            td([class(info_left_arrow)],[
+                \html_href(PatternRotatedLeft, NumberOfJugglers, SwapList, BackURL, [title('rotate left')], \arrowRightLeft(left))
+            ]),
+            \infoPage_big_swap(Pattern, NumberOfJugglers),
+            td([class(info_right_arrow)],[
+                \html_href(PatternRotatedRight, NumberOfJugglers, SwapList, BackURL, [title('rotate right')], \arrowRightLeft(right))
+            ])
         ])
-    ])
-).
+    ).
 
 
 infoPage_big_swap(Pattern, NumberOfJugglers) -->
@@ -467,7 +467,7 @@ infoPage_orbit_select_color(NumberOfClubs, Orbit) -->
         findall([Number, Name], jp_Color([number(Number), name(Name)]), SelectList)
     },
     html(
-        select([name(SelectName), size(1)],[
+        select([name(SelectName), size(1), onchange('downloadJoePass()')],[
             \infoPage_orbit_select_color_option(Orbit, SelectList)
         ])
     ).
@@ -754,6 +754,7 @@ infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
         get_cookie(joepass_download, Request, JoePass_Download),
         get_cookie(joepass_style, Request, JoePass_Style),
         get_cookie(joepass_file, Request, JoePass_File),
+        get_cookie(joepass_allways_download, Request, JoePass_Allways_Download, 'off'),
         JoePass_DistanceMax is Persons - 1,
         findall(
             Distance, 
@@ -766,7 +767,7 @@ infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
         float_to_shortpass(Pattern, PatternShort),
         jp_filename(PatternShort, FileName),
         atom_concat(FileName, '.pass', FileNamePass),
-        
+
         atom2Pattern(PatternAtom, Pattern), 
         atom2SwapList(SwapListAtom, SwapList),
         www_form_encode(PatternAtom, PatternEnc),
@@ -780,35 +781,74 @@ infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
             input([type(hidden), name(persons), value(PersonsEnc)]),
             input([type(hidden), name(filename), value(FileNameEnc)]),
             input([type(hidden), name(swap), value(SwapListEnc)]),
-            a([href('http://www.koelnvention.de/software'), target('_blank')],['JoePass!']),
-            &(nbsp),
-            'file:',
-            &(nbsp),
-            select([name(download), size(1)],[
-                \html_option('on', JoePass_Download, 'download'),
-                \html_option('off', JoePass_Download, 'show')
-            ]),
-            &(nbsp),
-            select([name(nametype), size(1)],[
-                \html_option('joe', JoePass_File, 'joe.pass'),
-                \html_option('numbers', JoePass_File, FileNamePass)
-            ]),
-            &(nbsp),
-            select([name(style), size(1)],[
-                \html_option('none', JoePass_Style, &(nbsp)),
-                \html_option('normal', JoePass_Style, 'face to face'),
-                \html_option('shortdistance', JoePass_Style, 'short distance'),
-                \html_option('sidebyside', JoePass_Style, 'side by side'),
-                \html_option('backtoback', JoePass_Style, 'back to back'),
-                \html_option('dropbackline', JoePass_Style, 'drop back line'),
-                \infoPage_joepass_Style(Persons, 'wye', JoePass_Style, 'Y')
-            ]),
-            &(nbsp),
-            select([name(distance), size(1)],[
-                \html_numbered_option(JoePass_DistanceList, 1)
-            ]),
-            &(nbsp),
-            input([type(submit), value('go')])
+            table([class(form_table), align(center), cellpadding(0)],[
+                tr([],[
+                    td([class(lable)],[
+                        a([href('http://www.koelnvention.de/software'), target('_blank')],['JoePass!']),
+                        &(nbsp),
+                        'file:'
+                    ]),
+                    td([class(input)],[
+                        select([name(download), size(1)],[
+                            \html_option('on', JoePass_Download, 'download'),
+                            \html_option('off', JoePass_Download, 'show')
+                        ])
+                    ])
+                ]),
+                tr([],[
+                    td([class(lable)],[
+                        'file name:'
+                    ]),
+                    td([class(input)],[
+                        select([name(nametype), size(1)],[
+                            \html_option('joe', JoePass_File, 'joe.pass'),
+                            \html_option('numbers', JoePass_File, FileNamePass)
+                        ])
+                    ])
+                ]),
+                tr([],[
+                    td([class(lable)],[
+                        'style:'
+                    ]),
+                    td([class(input)],[
+                        select([name(style), size(1), onchange('downloadJoePass()')],[
+                            \html_option('none', JoePass_Style, &(nbsp)),
+                            \html_option('normal', JoePass_Style, 'face to face'),
+                            \html_option('shortdistance', JoePass_Style, 'short distance'),
+                            \html_option('sidebyside', JoePass_Style, 'side by side'),
+                            \html_option('backtoback', JoePass_Style, 'back to back'),
+                            \html_option('dropbackline', JoePass_Style, 'drop back line'),
+                            \infoPage_joepass_Style(Persons, 'wye', JoePass_Style, 'Y')
+                        ])
+                    ])
+                ]),
+                tr([],[
+                    td([class(lable)],[
+                        'passing distance:'
+                    ]),
+                    td([class(input)],[
+                        select([name(distance), size(1), onchange('downloadJoePass()')],[
+                            \html_numbered_option(JoePass_DistanceList, 1)
+                        ])
+                    ])
+                ]),
+                tr([],[
+                    td([class(lable)],[
+                        'download on a change:'
+                    ]),
+                    td([class(input)],[
+                        \html_checkbox('on', allways, JoePass_Allways_Download)
+                    ])
+                ]),
+                tr([],[
+                    td([class(lable)],[
+                        &(nbsp)
+                    ]),
+                    td([class(input)],[
+                        input([type(submit), value('submit')])
+                    ])
+                ])
+            ])
         ])
     ]).
 
@@ -823,8 +863,9 @@ infoPage_joepass_Style(_Persons, _Style, _JoePass_Style, _Text) -->
 
 
 
-infoPage_joepass_forwarding(on, Pattern, Persons, SwapList, Request) -->
+infoPage_joepass_forwarding(Pattern, Persons, SwapList, Request) -->
     {
+        get_cookie(joepass_allways_download, Request, on),
         get_cookie(joepass_style, Request, Style),
         atom2Pattern(PatternAtom, Pattern),
         atom2SwapList(SwapListAtom, SwapList),
@@ -835,7 +876,7 @@ infoPage_joepass_forwarding(on, Pattern, Persons, SwapList, Request) -->
     html([
         meta(['http-equiv'(refresh), content('0; URL='+Href)])
     ]).
-infoPage_joepass_forwarding(_Off, _Pattern, _Persons, _SwapList, _Request) -->
+infoPage_joepass_forwarding(_Pattern, _Persons, _SwapList, _Request) -->
     [].
 
 %%% --- hidden js info --- %%%

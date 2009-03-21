@@ -143,7 +143,7 @@ mainPage_html_page(
 	memberchk(search(BackURLSearchList), Request),
 	parse_url_search(BackURLSearch, BackURLSearchList),
 	format(atom(BackURL), '.~w?~s&infopage=false', [MainPagePath, BackURLSearch]),
-	infoPage_html_page(Pattern, ReqPersons, [], BackURL, 'off', Request), !.
+	infoPage_html_page(Pattern, ReqPersons, [], BackURL, Request), !.
 	
 
 mainPage_html_page(
