@@ -124,6 +124,11 @@ td.info_title {
 	text-align: right !important;
 }
 
+#info_multihanded {
+	padding: 0 2ex 0 2ex;
+	margin: 4ex 0 4ex 0;
+	white-space: nowrap;
+}
 
 .info_orbits {
 	text-align: center;

@@ -90,7 +90,7 @@ joepass_page(Request) :-
     ],
     
     jp_clean_orbit_colors(OrbitColors, OrbitColorsCleaned),
-%   OrbitColorsCleanedz = [[0,0], [1,1]],
+%   OrbitColorsCleaned = [[0,0], [1,1]],
     
     www_form_encode(PatternAtom, ReqPattern),
     Persons = ReqPersons,

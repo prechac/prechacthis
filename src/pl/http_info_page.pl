@@ -119,6 +119,7 @@ infoPage_info(PatternWithShortPasses, NumberOfJugglers, SwapList, BackURL, Reque
     },
     infoPage_pattern(Pattern, NumberOfJugglers, SwapList, BackURL),
     infoPage_pattern_info(Pattern, PointsInTime, ActionList, NumberOfJugglers, SwapList, BackURL),
+    infoPage_multihanded_notation(Pattern, NumberOfJugglers),
     html([
         form([id(joepass_form), action('./joe.pass'), method(post)],[
             \infoPage_orbit_info(Pattern, NumberOfJugglers),
@@ -365,6 +366,26 @@ infoPage_jugglers_point_in_time(ThrowingJuggler, [_Point|PointsInTime], ActionLi
     ),
     infoPage_jugglers_point_in_time(ThrowingJuggler, PointsInTime, ActionList, NumberOfJugglers, Period).
 
+
+
+
+%%% --- multihanded notation --- %%%
+
+
+infoPage_multihanded_notation(Pattern, NumberOfJugglers) -->
+    {
+        multihanded_notation(Pattern, NumberOfJugglers, Multihanded),
+        concat_atom(Multihanded, ' ', MultihandedAtom)
+    },
+    html([
+        div([id(info_multihanded)],[
+            'multihanded: ',
+            span([class(info_throw)],[
+                MultihandedAtom
+            ])
+        ])
+    ]).
+infoPage_multihanded_notation(_Pattern, _NumberOfJugglers) --> [].
 
 
 
@@ -822,19 +843,10 @@ infoPage_joepass_link(Pattern, Persons, SwapList, Request) -->
                         ])
                     ])
                 ]),
+                \infoPage_joepass_link_distance(JoePass_DistanceList),
                 tr([],[
                     td([class(lable)],[
-                        'passing distance:'
-                    ]),
-                    td([class(input)],[
-                        select([name(distance), size(1), onchange('downloadJoePass()')],[
-                            \html_numbered_option(JoePass_DistanceList, 1)
-                        ])
-                    ])
-                ]),
-                tr([],[
-                    td([class(lable)],[
-                        'download on a change:'
+                        'download on change:'
                     ]),
                     td([class(input)],[
                         \html_checkbox('on', allways, JoePass_Allways_Download)
@@ -861,6 +873,25 @@ infoPage_joepass_Style(Persons, Style, JoePass_Style, Text) -->
 infoPage_joepass_Style(_Persons, _Style, _JoePass_Style, _Text) -->
     [].
 
+
+infoPage_joepass_link_distance(DistanceList) -->
+    {
+        length(DistanceList, Length), 
+        Length > 1
+    },
+    html([
+        tr([],[
+            td([class(lable)],[
+                'passing distance:'
+            ]),
+            td([class(input)],[
+                select([name(distance), size(1), onchange('downloadJoePass()')],[
+                    \html_numbered_option(DistanceList, 1)
+                ])
+            ])
+        ])
+    ]).
+infoPage_joepass_link_distance(_DistanceList) --> [].
 
 
 infoPage_joepass_forwarding(Pattern, Persons, SwapList, Request) -->
