@@ -35,6 +35,7 @@
 		oneToN/2,
 		realSubtract/3,
 		removeOnce/3,
+        removeAll/3,
 		listOfNumber/2,
 		listOfNumber/3,
 		listOf/2,
@@ -65,7 +66,10 @@
 		a2Atom_list/2,
 		a2String/2,
 		integer_gen/2,
-		integer_gen/3
+		integer_gen/3,
+        lcm/3,
+        gcd/3,
+        leastCommonMultipleIsProduct/2
 	]
 ).
 
@@ -415,6 +419,13 @@ removeOnce([Head|List], Head, List) :- !.
 removeOnce([Head|Tail], Element, [Head|List]) :- 
 	removeOnce(Tail, Element, List), !.
 	
+
+removeAll([], _Head, []) :- !.
+removeAll([Head|List], Head, NewList) :-
+    removeAll(List, Head, NewList), !.
+removeAll([XHead|List], Head, [XHead|NewList]) :-
+    removeAll(List, Head, NewList), !.
+
 listOfNumber(Number, Length, List) :- listOf(Number, Length, List).
 listOfNumber(Number, List) :- listOf(Number, List).
 	
@@ -787,4 +798,25 @@ integer_gen(Min, Number, Options) :-
 	Number is Befor + 1.
 	
 
-	
+
+/* gcd(X,Y,Z) is true if Z is the greatest common divisor of X and Y.      */
+gcd(X, X, X) :- 
+    X > 0.
+gcd(X, Y, G) :- 
+    X > Y, 
+    plus(Y,X1,X),
+    gcd(X1,Y,G).
+gcd(X, Y, G):- 
+    Y > X,
+    plus(X,Y1,Y),
+    gcd(X,Y1,G).
+
+
+lcm(X,Y,LCM) :-
+    gcd(X,Y,GCD),
+    LCM is abs(X*Y)/GCD.
+
+
+leastCommonMultipleIsProduct(X, Y) :-
+    P is X * Y,
+    lcm(X,Y,P).

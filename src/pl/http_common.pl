@@ -36,7 +36,7 @@ html_debug(Request) -->
 				debug(ReqDebug, [default(off)])
 			]
 		),
-		ReqDebug = on, !
+        ReqDebug = on, !
 	},
 	html(div([align(left)],[\html_write_request(Request)])).
 html_debug(_Request) -->

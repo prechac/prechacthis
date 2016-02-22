@@ -6,6 +6,7 @@ function loadContent(link){
 	    $('content').update(transport.responseText);
 		createDragAndDrop();
 		writeLinkHere();
+        downloadJoePass();
 	  }
 	});
 }

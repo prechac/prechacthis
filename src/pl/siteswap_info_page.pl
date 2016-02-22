@@ -6,7 +6,8 @@
 		applyNewSwaps/3,
 		all_points_in_time/3,
 		siteswap_position/5,
-		club_siteswap_positions/5
+		club_siteswap_positions/5,
+        multihanded_notation/3
 	]
 ).
 
@@ -280,5 +281,39 @@ club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, 
 club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, [_Throw|Multiplex], [LandingTime|LandingTimes], [CJuggler|CatchingJugglers], [Orbit|Orbits], ThrownTo, [[CJuggler, LandingTime, Orbit]|NewThrownTo], NewClubCount, [[Juggler, SiteswapPosition, Orbit]|NewSiteswapPositions]) :-
 	club_siteswap_positions_MultiplexHelper(PointInTime, Juggler, SiteswapPosition, Multiplex, LandingTimes, CatchingJugglers, Orbits, ThrownTo, NewThrownTo, NextNewClubCount, NewSiteswapPositions), 
 	NewClubCount is NextNewClubCount + 1.
-	
-	
+
+
+multihanded_notation(Pattern, NumberOfJugglers, Multihanded) :-
+    length(Pattern, Length),
+    leastCommonMultipleIsProduct(NumberOfJugglers, Length),
+    multihanded_notation_calculate(Pattern, NumberOfJugglers, MultihandedLocal),
+    multihanded_notation_local2global(MultihandedLocal, NumberOfJugglers, Multihanded).
+
+multihanded_notation_calculate([], _NumberOfJugglers, []) :- !.
+multihanded_notation_calculate([p(Throw, _, _)| Pattern], NumberOfJugglers, [MultiThrow| Multihanded]) :-
+    MultiThrow is round(Throw * NumberOfJugglers),
+    %multihanded_notation_number2throw(MultiNumber, MultiThrow),
+    multihanded_notation_calculate(Pattern, NumberOfJugglers, Multihanded).
+
+multihanded_notation_number2throw(Number, Number) :-
+    Number < 10, !.
+multihanded_notation_number2throw(Number, Throw) :-
+    Pos is Number - 10,
+    Throws = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
+    nth0(Pos, Throws, Throw).
+
+multihanded_notation_local2global(Local, NumberOfJugglers, Global) :-
+    length(Local, Length),
+    length(Global, Length),
+    multihanded_notation_local2global(Local, NumberOfJugglers, Length, Global).
+multihanded_notation_local2global([], _NumberOfJugglers, _Length, _Global) :- !.
+multihanded_notation_local2global([Throw|Local], NumberOfJugglers, Length, Global) :-
+    length(Local, RestLength),
+    Pos is Length - RestLength - 1,
+    GlobalPos is (Pos * NumberOfJugglers) mod Length,
+    nth0(GlobalPos, Global, Throw), 
+    multihanded_notation_local2global(Local, NumberOfJugglers, Length, Global).
+
+
+
+
