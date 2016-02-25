@@ -1,0 +1,9 @@
+version: "2"
+
+services:
+  prechac:
+    build: .
+    ports:
+      - "4211:80"
+    volumes:
+      - ../../src:/var/www/html
