@@ -60,7 +60,6 @@ if ($_GET){
 					  . "-L5M " // local stack size to 5 MB
 					  . "-G12M " // global stack size to 12 MB
 					  . "-T5M " // trail stack size to 5 MB
-					  . "-A2M " // argutment stack size to 2 MB
 			          . "-f " . dirname($_SERVER["SCRIPT_FILENAME"]) . "/pl/siteswap.pl "
 			          . "-g \"allSiteswaps("
 			          . $_GET["persons"] . ", "
