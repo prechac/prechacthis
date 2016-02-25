@@ -1,0 +1,12 @@
+[Unit]
+Description=prechacthis container
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+ExecStart=/usr/local/bin/docker-compose -f /opt/prechacthis/docker-compose.yml up
+ExecStop=/usr/local/bin/docker-compose -f /opt/prechacthis/docker-compose.yml stop
+
+[Install]
+WantedBy=docker.target
