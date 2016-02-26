@@ -246,7 +246,7 @@ echo "<form action='./index.php' method='get'>
   </tr>
   <tr>
    <td class='lable'>&nbsp;</td>
-   <td class='input'><a href='http://sourceforge.net/projects/prechacthis'>project site at sourceforge.net</a></td>
+   <td class='input'><a href='https://github.com/prechac/prechacthis'>project site at github.com/prechac/prechacthis</a></td>
   </tr>
   <tr>
    <td class='lable'>&nbsp;</td>
