@@ -1,4 +1,0 @@
-# robots.txt for http://www.prechacthis.org
-User-agent: *
-Disallow: /pl/
-Disallow: /doc/sections/

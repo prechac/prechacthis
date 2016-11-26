@@ -1,5 +1,0 @@
-AuthType Basic
-AuthName "no entry" 
-AuthUserFile /no/entry
-require user noentry
-
