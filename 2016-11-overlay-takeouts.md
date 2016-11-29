@@ -1,9 +1,28 @@
 # Overlay Takeouts
 
 ## Abstract
-__In this post we propose a new way of finding *passing takeout patterns* that allow for a great a variety of rhythms _both_ for the passing part _and_ for the manipulation part. Specifically, our technique gives us a great distribution over right and left hands. These true ambidextrous patterns are much in contrast to most takeouts juggled over the past decade. The broad recipe is to _overlay_ a passing and a mini pattern. We explain the general approach in detail, and provide two examples of quite promising rhythms.__
-
+__When jugglers come up with new club passing patterns, they seem to pick from one of the following approaches: (1) juggle more clubs, (2) introducing new ways  throwing passes and or selfs, (3) vary the number of jugglers, (4) creating routes for the passers that they go while passing, (5) introduce sequences of fixed interactions between passers and a middle-person and finally (6) creating sequences of throws by means of a theoretical approach like prechaque (or TODO ref). In this dense field of ways to find new passing patterns we identified a promising gap between (4), (5) and (6). We aim at leveraging prechaque theory for new interaction and route sequences in order to accomplish a truely new way of passing. First experiments already show the great variety of sequences, both for the passing part and for the middle-person part, specifically giving a great distribution over right and left hands.__
+## Introduction and Basic Idea
+- _prolonged version of abstract adding more references and going into more historic detail (i.e. wally-walk and such)_
+- _problem statement (taken from abstract) maybe research questions (if that's not too much)_
+- _one sentence solution introduction_
+- _paper walk (section 1.... )_
+## Motivating Example
+- _start with a boring standard take out pattern (round-about) pointing out the missing ways to get to something more interesting_
+- _problems: more persons: so what, more clubs: has beend done, other routes: entertainging only up to a certain point and so on_
+- _motivating example: delightfull_
+- _explain trick, show what's opening up here_
+## Generating Overlay Takeouts
+- _introduce the idea based on the example_
+- _(1) create a prechac pattern, (2) create another siteswap that shares a non-interfering sequence (is that somehow defined?), (3) prechaque the shared part and juggle both at once, (4) add some walking sequence to it_
+## Case Study and Evaluation: Mission Impossible
+- _What where we aiming for?_
+- _Requirements: more complex than delightfull, not too demanding for participants (throws, catches, number of clubs, "familiar" elements), left right handed_
+- _First approach: 1 2 3 4 2.5p and 0 1 2 1.5p overlayd to: 1 2 3 1.5p 2.5p
 ## Related Work
+- _see following stuff that flo startet with_ 
+- _add differentiation and more placement like structure_
+- _emphasize what makes our approach newer_
 Some references
 
 * [Take That Out](https://vimeo.com/28502455)
@@ -20,6 +39,18 @@ Mostly 3 club cascade with [substitution, intercept and carry](http://ezine.jugg
 Arbitrary Prechac Siteswap Patterns with period 3 to 7 clubs and period 2 to 6
 
 Our idea was to rejoin these two line of development i.e. have runaround, but relax some restrictions and do some fun period 5 stuff with 4, 2p and 1 in it - there is more to life than single selves and single passes!
+## Discussion, Threats to Validity 
+- _Summary what we did, what we "solved"_
+- _Marvel on how much we enjoyed our pattern_
+- _Point out that it is not easy to actually get from a combination of patterns on paper to a real juggled pattern_
+- _The small sample of patterns realized is not valid to claim that you can come up with patterns quickly and just have fun with them juggling them_
+- _We have no general theory for the runaround part_
+- _Nevertheless we believe in the necessity and strong creative potential of our approach, because we actually had a very good time ..._
+## Conclusion and Future Work
+- _We identified a gap_
+- _Following the idea of combining take-outs and prechaque, we came up with a new pattern generating technique_
+- _Two step approach: (1) creating overlay prechaques, (2) dealing with runaround pecularities
+- _Open discussion: is there a more general way of also creating the runaround part? Up to now we just "dealt with it" by try and error_
 
 ## Generating Overlay Takeouts
 Let's first look at a simplistic proof of concept. This should explain the procedure while keeping the clubs low and number easy to deal with
@@ -91,5 +122,3 @@ We modestly ( ;-) ) call this variation Mission Impossible, not because it was d
 <iframe width="100%" height="450" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/70927998&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></iframe>
 
 Once you have the pattern solid you can move on the Impossible Round about.
-
-## Future Work
