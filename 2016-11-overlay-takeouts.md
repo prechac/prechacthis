@@ -1,24 +1,38 @@
 # Overlay Takeouts
 
 ## Abstract
-__When jugglers come up with new club passing patterns, they seem to pick from one of the following approaches: (1) juggle more clubs, (2) introducing new ways  throwing passes and or selfs, (3) vary the number of jugglers, (4) creating routes for the passers that they go while passing, (5) introduce sequences of fixed interactions between passers and a middle-person and finally (6) creating sequences of throws by means of a theoretical approach like prechaque (or TODO ref). In this dense field of ways to find new passing patterns we identified a promising gap between (4), (5) and (6). We aim at leveraging prechaque theory for new interaction and route sequences in order to accomplish a truely new way of passing. First experiments already show the great variety of sequences, both for the passing part and for the middle-person part, specifically giving a great distribution over right and left hands.__
+__When jugglers come up with new club passing patterns, they seem to pick from one of the following approaches: (1) juggle more clubs, (2) introducing new ways  throwing passes and or selfs, (3) vary the number of jugglers, (4) creating routes for the passers that they go while passing, (5) introduce sequences of fixed interactions between passers and a middle-person and finally (6) creating sequences of throws by means of a theoretical approach like prechac (or TODO ref). In this dense field of ways to find new passing patterns we identified a promising gap between (4), (5) and (6). We aim at leveraging prechac theory for new interaction and route sequences in order to accomplish a truely new way of passing. First experiments already show the great variety of sequences, both for the passing part and for the middle-person part, specifically giving a great distribution over right and left hands.__
+
 ## Introduction and Basic Idea
 - _prolonged version of abstract adding more references and going into more historic detail (i.e. wally-walk and such)_
 - _problem statement (taken from abstract) maybe research questions (if that's not too much)_
 - _one sentence solution introduction_
 - _paper walk (section 1.... )_
+
+We always liked club passing a lot, but what got us really hooked were a special group of patterns, back then known to us as "take outs". We assume the reason for the excitement was the fact, that at this time (late 1990's) these kind of patterns had been explored only to a small extent. In addition it was easy to come up with new combinations that felt different every time or gave us the impression to have entered a new "level" (starting from the existing wally-walk (citation needed) followed by the roundabout, kennedy and not to forget the so called "ass" (cite jugglerspark video)). TODO make some reference to "take that out", "get the shoe" and "pro drop". 
+
+After a decade of "take outs" we felt, that we were missing something, the excitement has left and new variations seemed to be still the same old stuff with a new decoration. Meanwhile a new theory of generating passing patterns entered the juggling scene (actually also dating back to 1999) and got us newly excited with similar promises and actual results. Together with many other jugglers we explored prechac notation based pattern generation and came up with new and exciting patterns (see "under prechac" video). 
+
+A couple of years later we are now still finding new and uniqe feeling patterns but start to get to a point of saturation. Looking for new points to start off, we took a more systematic approach this time, analyzing existing techniques and trying to find gaps, combinable theory and other ways to come up with truely new passing. As pointed out in the abstract, there is already a field of techniques which jugglers can rely on when comming up with new patterns. 
+
+Consequently we choose from what we already werer familiar with and tried to combine it: take out (specifically roundabout) patterns and the prechac technique of generating patterns. In this way we tried to overcome the "boring" same old four types of doing a take out (citation) and replacing it with a simple prechac-generated pattern. At the same time we replace the overly present four-count based patterns with more exciting prechac patterns (preferably with right and left handed passes) as the passers base-pattern. 
+
+In the next section we will introduce such a new pattern as an example to give a quick start to the general idea. The section is followed by an in-depth explanation of the approach. By exploring a further example in our case study, with more of the required features, we will try to bring across the advantages that we intended to get out of this new technique. The following related work section will point out other work in the field in more detail. In our discussion section we try to discuss our results from working one year on the case study and how we think that we reached what we wanted and what still remains unsolved. In the final section we give a short summary and conclude with future work.
 ## Motivating Example
 - _start with a boring standard take out pattern (round-about) pointing out the missing ways to get to something more interesting_
 - _problems: more persons: so what, more clubs: has beend done, other routes: entertainging only up to a certain point and so on_
 - _motivating example: delightfull_
 - _explain trick, show what's opening up here_
+
 ## Generating Overlay Takeouts
 - _introduce the idea based on the example_
-- _(1) create a prechac pattern, (2) create another siteswap that shares a non-interfering sequence (is that somehow defined?), (3) prechaque the shared part and juggle both at once, (4) add some walking sequence to it_
+- _(1) create a prechac pattern, (2) create another siteswap that shares a non-interfering sequence (is that somehow defined?), (3) prechac the shared part and juggle both at once, (4) add some walking sequence to it_
+
 ## Case Study and Evaluation: Mission Impossible
 - _What where we aiming for?_
 - _Requirements: more complex than delightfull, not too demanding for participants (throws, catches, number of clubs, "familiar" elements), left right handed_
 - _First approach: 1 2 3 4 2.5p and 0 1 2 1.5p overlayd to: 1 2 3 1.5p 2.5p
+
 ## Related Work
 - _see following stuff that flo startet with_ 
 - _add differentiation and more placement like structure_
@@ -39,6 +53,7 @@ Mostly 3 club cascade with [substitution, intercept and carry](http://ezine.jugg
 Arbitrary Prechac Siteswap Patterns with period 3 to 7 clubs and period 2 to 6
 
 Our idea was to rejoin these two line of development i.e. have runaround, but relax some restrictions and do some fun period 5 stuff with 4, 2p and 1 in it - there is more to life than single selves and single passes!
+
 ## Discussion, Threats to Validity 
 - _Summary what we did, what we "solved"_
 - _Marvel on how much we enjoyed our pattern_
@@ -46,10 +61,11 @@ Our idea was to rejoin these two line of development i.e. have runaround, but re
 - _The small sample of patterns realized is not valid to claim that you can come up with patterns quickly and just have fun with them juggling them_
 - _We have no general theory for the runaround part_
 - _Nevertheless we believe in the necessity and strong creative potential of our approach, because we actually had a very good time ..._
+
 ## Conclusion and Future Work
 - _We identified a gap_
-- _Following the idea of combining take-outs and prechaque, we came up with a new pattern generating technique_
-- _Two step approach: (1) creating overlay prechaques, (2) dealing with runaround pecularities
+- _Following the idea of combining take-outs and prechac, we came up with a new pattern generating technique_
+- _Two step approach: (1) creating overlay prechacs, (2) dealing with runaround pecularities
 - _Open discussion: is there a more general way of also creating the runaround part? Up to now we just "dealt with it" by try and error_
 
 ## Generating Overlay Takeouts
