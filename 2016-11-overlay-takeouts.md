@@ -37,16 +37,17 @@ One well established takeout pattern is the so called [roundabout](https://www.g
 To add a manipulation pattern, let's start with the basic two club solo shower: 3 1 3 1. Prechac's theory tells us that we can take a one self 3 from both the passing pattern and the solo pattern and transform it into a 1p. So from the manipulator's _M_ perspective, _M_ is just passing 
 [3 1 1p 1]("http://prechacthis.org/info.php?pattern=[p(3,0,3),p(1,0,1),p(1,1,3),p(1,0,1)]&persons=2&swap=[]&back=persons%3D2%26amp%3Bobjects%3D3%26amp%3Blengths%3D4%26amp%3Bmax%3D3%26amp%3Bpassesmin%3D1%26amp%3Bpassesmax%3D1%26amp%3Bjugglerdoes%3D1p") with _A_. There are different ways to set this up, let's assume side by side with the 1p going inside to outside:
 
-![3 1 1p 1](3p11p1.png)
+![3 1 1p 1](311p1.png)
 
 When we overlay these two patterns, _B_ just hangs on to the passing pattern as above. But _A_ is doing _both at once_, i.e. 3p 3 3 1 1p:
 
 ![3p 3 1 1p](3p311p.png)
 
 To summarize the jobs:
-    - _A_: 3p 3 1 1p
-    - _B_: 3p 3 1 3
-    - _M_: 3 1 1p 1
+
+* _A_: 3p 3 1 1p
+* _B_: 3p 3 1 3
+* _M_: 3 1 1p 1
 
 A good way to get the pattern started is to let _A_ have two clubs in the right start with the right in 3p 3 1 1p, zipping the 1 into a wrong end catch. _B_ and _M_ can react intuitively.
 
@@ -73,9 +74,9 @@ TODO Videolink runaround delightful
 
 Now that we established the general approach, consider a pattern that incorporates more of the elements that aimed for in the first place:
 
-    - It should left-right-handed, hence period 5.
-    - There should be a 1 1.5p, i.e. a "smash-in" preceded by a grip-correcting 1
-    - Not too difficult for the passers, i.e. 5 clubs, just one low pass.
+* It should left-right-handed, hence period 5.
+* There should be a 1 1.5p, i.e. a "smash-in" preceded by a grip-correcting 1
+* Not too difficult for the passers, i.e. 5 clubs, just one low pass.
 
 This is what [PrechacThis offers us](http://prechacthis.org/index.php?persons=2&objects=5&lengths=5&max=4&passesmin=1&passesmax=1&jugglerdoes=&exclude=&clubdoes=1+4+or+2+4&react=&results=42).
 
