@@ -5,8 +5,8 @@ After=docker.service
 
 [Service]
 Restart=always
-ExecStart=/usr/local/bin/docker-compose -f /opt/prechacthis/distrib/docker/docker-compose.yml up
-ExecStop=/usr/local/bin/docker-compose -f /opt/prechacthis/distrib/docker/docker-compose.yml stop
+ExecStart=/usr/bin/docker compose -f /opt/prechacthis/distrib/docker/docker-compose.yml up
+ExecStop=/usr/bin/docker compose -f /opt/prechacthis/distrib/docker/docker-compose.yml down
 
 [Install]
-WantedBy=docker.target
+WantedBy=docker.service

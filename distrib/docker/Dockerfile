@@ -1,8 +1,8 @@
-FROM debian:jessie
+FROM debian:stable
 
 RUN set -x \
     && apt-get update --quiet \
-    && apt-get install --yes --no-install-recommends swi-prolog apache2 libapache2-mod-php5 \
+    && apt-get install --yes --no-install-recommends swi-prolog apache2 libapache2-mod-php \
     && apt-get clean
 
 RUN rm /var/www/html/index.html
